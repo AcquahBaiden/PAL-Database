@@ -1,0 +1,11 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body{
+  background-color: #E7EEEC;
+  height: 100%;
+  font-family: 'Padauk', sans-serif;
+  font-size: medium;
+}
+.card{
+  margin: 5px;
+}
