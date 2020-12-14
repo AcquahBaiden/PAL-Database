@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Summary } from '../interfaces/summary.interface';
-import { PALService } from '../pal.service'
+import { PALService } from '../pal.service';
+
 
 
 @Component({
@@ -10,14 +10,13 @@ import { PALService } from '../pal.service'
   styleUrls: ['./summary.component.css']
 })
 export class SummaryComponent implements OnInit {
-
-  summaries!: Summary[];
-
-  constructor(private palservice: PALService) { }
+  Summary: any;
+  isFetching: boolean = true;
+  constructor(private palservice: PALService) {  }
 
   ngOnInit(): void {
-    this.summaries = this.palservice.getSummaries();
-
+    this.Summary = this.palservice.getDBSummaries();
+    this.isFetching = false;
   }
 
 }

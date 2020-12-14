@@ -12,7 +12,7 @@ export class AddChildComponent implements OnInit {
   @ViewChild('f') addChildForm!: NgForm;
   newForm = new FormControl;
   submitted:boolean = false;
-  newChild!: Child;
+  newChild: Child={firstName:'', lastName:''};
   constructor(private childrenService: ChildrenService) { }
 
   ngOnInit(): void {
@@ -21,6 +21,7 @@ export class AddChildComponent implements OnInit {
   onSaveChild(form: NgForm){
     console.log(this.addChildForm);
     this.submitted = true;
+    console.log(this.addChildForm.value.firstName);
     this.newChild.firstName = this.addChildForm.value.firstName;
     this.newChild.lastName = this.addChildForm.value.lastName;
     this.newChild.residence = this.addChildForm.value.residence;
@@ -30,7 +31,6 @@ export class AddChildComponent implements OnInit {
     this.newChild.parentName = this.addChildForm.value.parentName;
     this.newChild.parentTel = this.addChildForm.value.parentTel;
     console.log(this.newChild);
-    this.childrenService.addChild(this.newChild);
     this.childrenService.saveToFirebase(this.newChild);
     this.addChildForm.reset();
   }

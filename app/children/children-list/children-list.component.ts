@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { Child } from 'src/app/interfaces/child.interface';
 import { ChildrenService } from '../children.service';
+import { PALService } from 'src/app/pal.service';
 
 @Component({
   selector: 'app-children-list',
@@ -9,13 +10,19 @@ import { ChildrenService } from '../children.service';
   styleUrls: ['./children-list.component.css']
 })
 export class ChildrenListComponent implements OnInit {
-  // fetchedChildren: Child[] = [{firstName: 'Collin', lastName: 'Kapernick', img: 'https://via.placeholder.com/150'},
-  // {firstName: 'Dave', lastName: 'Greensman', img:'https://via.placeholder.com/150'}];
-  fetchedChildren!: Child[];
-  constructor(private childrenService: ChildrenService) { }
+  fetchedChildren!:  Child[];
+  isFetching:boolean = true;
+
+  dbchildren:any;
+  constructor(private childrenService: ChildrenService,
+    private palservice: PALService) {}
+
 
   ngOnInit(): void {
-   this.fetchedChildren =  this.childrenService.getChildrenData()
+    this.isFetching = true;
+  // this.fetchedChildren =  this.childrenService.getChildrenData();
+  this.dbchildren =  this.palservice.getDbChildren();
+  this.isFetching = false;
   }
 
 }

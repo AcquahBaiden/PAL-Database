@@ -1,10 +1,10 @@
-<div class="card" style="margin: 5px;">
+<div class="card" style="margin: 5px;" *ngFor="let child of selectedChild | async">
   <div class="card-body">
 
     <h4 class="card-title">PAL CHILD PROFILE</h4>
     <p>Selected is : {{ childId }}</p>
-    <h5 class="card-subtitle mb-2">{{ selectedChild.firstName}} {{ selectedChild.lastName }}</h5>
-    <img src="{{ selectedChild.img }}" class="card-img-top rounded" alt="...">
+    <h5 class="card-subtitle mb-2">{{child.firstName }} {{ child.lastName }}</h5>
+    <img src="{{ child }}" class="card-img-top rounded" alt="...">
     <p class="card-text">
       Lorem ipsum dolor sit amet consectetur adipisicing elit.
     </p>

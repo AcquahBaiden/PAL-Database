@@ -7,17 +7,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ChildrenComponent implements OnInit {
 
-
-
-
   constructor() { }
 
   ngOnInit(): void {
   }
 
-  onChildIdSelected(EventReceived:any){
-    console.log('Recieved = ', EventReceived);
-    console.log('Answer = ', EventReceived);
-  }
+  // onChildIdSelected(EventReceived:any){
+  //   console.log('Recieved = ', EventReceived);
+  //   console.log('Answer = ', EventReceived);
+  // }
 
 }

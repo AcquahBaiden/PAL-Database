@@ -13,4 +13,5 @@ export interface Child{
   school?:string;
   parentName?:string;
   parentTel?:string;
+  id?:string;
 }
