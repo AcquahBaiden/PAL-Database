@@ -1,4 +1,5 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { AngularFireStorage } from '@angular/fire/storage';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription, Observable } from 'rxjs';
 
@@ -12,31 +13,35 @@ import { ChildrenService } from '../children.service';
   styleUrls: ['./child-details.component.css']
 })
 export class ChildDetailsComponent implements OnInit, OnDestroy {
-  isChildSelected: boolean = false;
-  selectedChild!: Observable<Child[] | Child>;
-  childId:string = '';
+  // isChildSelected: boolean = true;
+
+  selectedChild: Observable<Child[] | Iterable<Child> | (Iterable<Child> & Child[]) | (Child[] & Iterable<Child>)>;
+  childId:string = 'nothing';
   childChangeSubscription!: Subscription;
+   profileUrl: Observable<string | null>;
 
   constructor(private route: ActivatedRoute,
     private childrenService: ChildrenService,
-    private palservice: PALService) { }
+    private palservice: PALService,
+    private storage: AngularFireStorage) { }
 
 
-  ngOnInit(){
-    this.isChildSelected= true;
-    // console.log(this.childId);
+    ngOnInit(){
+    console.log('Emited');
     this.childChangeSubscription = this.childChangeSubscription= this.route.params
       .subscribe(params=>{
       this.childId = params['id'];
-      // console.log('the fetched id is', this.childId);
       this.selectedChild = this.palservice.getChild(this.childId);
+      // this.isChildSelected = true;
+      // console.log('starting at', this.isChildSelected);
     })
+  }
 
-
+  onDeleteChild(){
+    this.childrenService.deleteChild(this.childId);
   }
 
   ngOnDestroy(): void {
-    // console.log('leaving');
     this.childChangeSubscription.unsubscribe();
   }
 

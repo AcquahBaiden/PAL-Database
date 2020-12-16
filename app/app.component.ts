@@ -15,8 +15,6 @@ export class AppComponent {
   title = 'PAL-DB';
   formIsLogin = true;
   errorMessage= '';
-  // email: string;
-  // password: string;
   isLoginError:boolean=false;
   loginIsActive: boolean = true;
   @ViewChild('loginForm') loginForm!: NgForm;

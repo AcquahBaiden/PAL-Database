@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr *ngFor="let child of dbchildren |async ; let i=index">
-        <td><img src="{{ child.img }}" class="img-thumbnail"
+        <td><img [src]="profileUrl | async" class="img-thumbnail"
           alt="">
         </td>
         <td>{{ child.firstName }}</td>

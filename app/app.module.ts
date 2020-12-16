@@ -4,9 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
 import { environment } from '../environments/environment';
-
-
-
+import { AngularFireStorageModule } from '@angular/fire/storage';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -41,6 +39,7 @@ import { ChildrenService } from './children/children.service';
     FormsModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAnalyticsModule,
+    AngularFireStorageModule
   ],
   providers: [ChildrenService],
   bootstrap: [AppComponent]

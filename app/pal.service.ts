@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase} from '@angular/fire/database';
+import { AngularFireStorage } from '@angular/fire/storage';
+import { Observable } from 'rxjs';
 import { map } from '../../node_modules/rxjs/operators';
+
+
 import { Child } from './interfaces/child.interface';
 
 @Injectable({
@@ -12,16 +16,13 @@ export class PALService{
     firstName: 'Name',
     lastName: 'Name'
   };
-  selectedChild: Child = {firstName: 'firstName', lastName: 'lastName'};
-  constructor(private db: AngularFireDatabase) {}
+
+  constructor(private db: AngularFireDatabase, private storage: AngularFireStorage) {}
 
   getDBSummaries(){
     return this.db.list('Summary').valueChanges();
   }
-  // getDbChildren(){
-  //   return this.db.list('Children').valueChanges();
-  //   // return this.Children;
-  // }
+
   getDbChildren(){
     return this.db.object('Children').valueChanges()
     .pipe(
@@ -48,6 +49,13 @@ getChild(id: string){
         return ChildData;
       })
     );
+}
+
+getProfileUrl(ref: any){
+  const profileImgRef = this.storage.ref('Children/'+ref);
+  // this.profileUrl =  ref.getDownloadURL();
+  console.log('ref ===', ref);
+  return console.log('retrieved url ====', profileImgRef.getDownloadURL());
 }
 
 }

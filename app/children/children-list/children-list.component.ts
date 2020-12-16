@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Child } from 'src/app/interfaces/child.interface';
 import { ChildrenService } from '../children.service';
 import { PALService } from 'src/app/pal.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-children-list',
@@ -12,6 +13,7 @@ import { PALService } from 'src/app/pal.service';
 export class ChildrenListComponent implements OnInit {
   fetchedChildren!:  Child[];
   isFetching:boolean = true;
+  profileUrl!: Observable<any>;
 
   dbchildren:any;
   constructor(private childrenService: ChildrenService,
@@ -23,6 +25,7 @@ export class ChildrenListComponent implements OnInit {
   // this.fetchedChildren =  this.childrenService.getChildrenData();
   this.dbchildren =  this.palservice.getDbChildren();
   this.isFetching = false;
+  this.profileUrl = this.childrenService.getProfileUrl('EmmanuelBaiden');
   }
 
 }

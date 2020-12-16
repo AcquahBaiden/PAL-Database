@@ -1,20 +1,24 @@
-<div class="card" style="margin: 5px;" *ngFor="let child of selectedChild | async">
-  <div class="card-body">
 
-    <h4 class="card-title">PAL CHILD PROFILE</h4>
-    <p>Selected is : {{ childId }}</p>
-    <h5 class="card-subtitle mb-2">{{child.firstName }} {{ child.lastName }}</h5>
-    <img src="{{ child }}" class="card-img-top rounded" alt="...">
-    <p class="card-text">
-      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-    </p>
-    <h6 class="card-subtitle-muted">Programs</h6>
+  <div class="card" style="margin: 5px;" *ngFor="let child of selectedChild | async">
+    <div class="card-body">
 
-  </div>
-  <ul class="list-group list-group-flush">
-    <li class="list-group-item">Cras justo odio</li>
-    <li class="list-group-item">Dapibus ac facilisis in</li>
-    <li class="list-group-item">Vestibulum at eros</li>
-  </ul>
- </div>
+      <h4 class="card-title">PAL CHILD PROFILE</h4>
+      <p>Selected is : {{ childId }}</p>
+      <h5 class="card-subtitle mb-2">{{child.firstName }} {{ child.lastName }}</h5>
+
+      <img [src]="'children/EmmanuelBaiden' | getDownloadURL" class="card-img-top rounded" alt="...">
+      <p class="card-text">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+      </p>
+      <h6 class="card-subtitle-muted">Programs</h6>
+
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">Cras justo odio</li>
+      <li class="list-group-item">Dapibus ac facilisis in</li>
+      <li class="list-group-item">Vestibulum at eros</li>
+    </ul>
+    <button (click)="onDeleteChild()" class="btn btn-danger">Delete this profile</button>
+   </div>
+
 
