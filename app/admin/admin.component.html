@@ -1,0 +1,25 @@
+
+<div class="card">
+  <div class="container" style="margin-left: vw;margin-right: 1vw;"  *ngIf="!isFetching">
+    <div class="input-group mb-3" style="margin-top: 1vw;">
+      <input type="text" class="form-control" placeholder="search"
+      aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">User email</th>
+        </tr>
+      </thead>
+      <tbody>
+          <app-access-control *ngFor="let userAccess of userAccessList | async" [userAccessData] = "userAccess"></app-access-control>
+      </tbody>
+
+    </table>
+    </div>
+  </div>
+  <p *ngIf="isFetching">
+    Loading.....
+  </p>
+

@@ -17,12 +17,12 @@
     </thead>
     <tbody>
       <tr *ngFor="let child of dbchildren |async ; let i=index">
-        <td><img [src]="profileUrl | async" class="img-thumbnail"
+        <td><img [src]="profileUrl | async" class="img-thumbnail rounded-circle"
           alt="">
         </td>
         <td>{{ child.firstName }}</td>
         <td>{{ child.lastName }}</td>
-        <td><button class="btn btn-success" [routerLink]="[child.id]" >Details</button></td>
+        <td><button class="btn btn-success" [routerLink]="[child.id]" (click)=onIdSelection()>Details</button></td>
         <td><button class="btn btn-primary">Edit</button></td>
       </tr>
     </tbody>

@@ -3,9 +3,9 @@
     <div class="col">
       <app-children-list></app-children-list>
     </div>
-    <div class="col">
-      <!-- <app-child-details></app-child-details> -->
-        <router-outlet>
+    <div class="col" >
+      <!-- <app-child-details *ngIf="isIdSelected"></app-child-details> -->
+        <router-outlet *ngIf="isIdSelected" (idSelected)="idHasBeenSelected($event)">
         </router-outlet>
     </div>
   </div>

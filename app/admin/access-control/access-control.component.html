@@ -1,0 +1,21 @@
+<!-- <p>access-control works!</p>
+<p>{{ userAccessData | json }} </p>
+<p>Children: {{ userAccessData.children }}</p>
+<p>Volunteers: {{ userAccessData.volunteers }}</p>
+<p>Admin: {{ userAccessData.admin }}</p> -->
+
+<tr>
+  <td> {{ userAccessData.email }}</td>
+  <td *ngIf="userAccessData.children">Children <button class="btn btn-danger" (click)="toggleChildrenAccess()">Remove access</button></td>
+  <td *ngIf="!userAccessData.children">Children <button class="btn btn-success" (click)="toggleChildrenAccess()">Grant access</button></td>
+  <td *ngIf="userAccessData.volunteers">Volunteers <button class="btn btn-danger" (click)="toggleVolunteersAccess()">Remove access</button></td>
+  <td *ngIf="!userAccessData.volunteers">Volunteers <button class="btn btn-success" (click)="toggleVolunteersAccess()">Grant access</button></td>
+</tr>
+
+
+
+
+
+
+
+

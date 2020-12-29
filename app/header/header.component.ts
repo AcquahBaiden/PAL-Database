@@ -15,5 +15,8 @@ export class HeaderComponent implements OnInit {
   onAddChild(){
     this.router.navigate(['add-child']);
   }
+  onAddVolunteer(){
+    this.router.navigate(['add-volunteer']);
+  }
 
 }

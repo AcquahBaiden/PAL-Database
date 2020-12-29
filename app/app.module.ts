@@ -18,6 +18,13 @@ import { ChildDetailsComponent } from './children/child-details/child-details.co
 import { SideBarComponent } from './side-bar/side-bar.component';
 import { AddChildComponent } from './children/add-child/add-child.component';
 import { ChildrenService } from './children/children.service';
+import { AdminComponent } from './admin/admin.component';
+import { AccessControlComponent } from './admin/access-control/access-control.component';
+import { VolunteersComponent } from './volunteers/volunteers.component';
+import { AddVolunteerComponent } from './volunteers/add-volunteer/add-volunteer.component';
+import { VolunteerEditComponent } from './volunteers/volunteer-edit/volunteer-edit.component';
+import { VolunteerListComponent } from './volunteers/volunteer-list/volunteer-list.component';
+import { VolunteerDetailsComponent } from './volunteers/volunteer-details/volunteer-details.component';
 
 
 @NgModule({
@@ -30,7 +37,14 @@ import { ChildrenService } from './children/children.service';
     ChildEditComponent,
     ChildDetailsComponent,
     SideBarComponent,
-    AddChildComponent
+    AddChildComponent,
+    AdminComponent,
+    AccessControlComponent,
+    VolunteersComponent,
+    AddVolunteerComponent,
+    VolunteerEditComponent,
+    VolunteerListComponent,
+    VolunteerDetailsComponent
   ],
   imports: [
     BrowserModule,

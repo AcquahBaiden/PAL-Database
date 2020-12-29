@@ -44,8 +44,7 @@ getChild(id: string){
     .pipe(
       map((responseData:any)=>{
         const ChildData:Child[] = [];
-        ChildData.push(responseData)
-        console.log('Child wit id', ChildData);
+        ChildData.push(responseData);
         return ChildData;
       })
     );

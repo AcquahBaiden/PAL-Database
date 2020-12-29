@@ -1,0 +1,99 @@
+<div class="card" style="width: 100%;">
+  <div class="card-title">Add new volunteer to database</div>
+<div class="card-body">
+  <form (ngSubmit)="onSaveChild(v)" #v="ngForm">
+    <div class="form-group row">
+      <label for="firstName" class="col col-form-label">First name</label>
+      <div class="col">
+        <input type="text" class="form-control"
+        ngModel name="firstName"
+        required
+        #firstName="ngModel">
+        <span class="help-block" *ngIf="!firstName.valid && firstName.touched">
+          <p>Please enter a valid first name</p>
+        </span>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="lastName" class="col col-form-label">Last name</label>
+      <div class="col">
+        <input type="text" class="form-control"
+        ngModel name="lastName"
+        required
+        #lastName="ngModel">
+        <span class="help-block" *ngIf="!lastName.valid && lastName.touched">
+          <p>Please enter a valid last name</p>
+        </span>
+      </div>
+
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">Residence</label>
+      <div class="col">
+        <textarea class="form-control"
+        ngModel name = "residence"
+        ></textarea>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">Level</label>
+      <div class="col">
+        <input type="text" class="form-control"
+        ngModel name="level"
+        >
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">School</label>
+      <div class="col">
+        <textarea class="form-control"
+        ngModel name="school"
+        ></textarea>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">Program</label>
+      <div class="col">
+        <textarea class="form-control"
+        ngModel name="program"
+        ></textarea>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">Telephone</label>
+      <div class="col">
+        <input type="text" class="form-control"
+        ngModel name="telephone"
+        >
+      </div>
+    </div>
+    <div class="form-group row" *ngIf="v.valid">
+      <label for="imgUpload" class="col col-form-label">Upload profile image</label>
+      <div class="col">
+        <input type="file" class="form-control-file" (change)="onuploadProfileImg($event)">
+      </div>
+    </div>
+    <div *ngIf="isUploading">
+      Uploading.....{{ imgUploadPercent | async | number : '1.0-2'}}%
+    </div>
+    <div *ngIf="retrieving">
+      Previewing image...
+    </div>
+    <!-- <img [src]="'avatar-placeholder-293x300.png' | getDownloadURL" /> -->
+    <!-- <a [href]="imgDownloadURL | async">{{ imgDownloadURL | async }}</a> -->
+    <img [src]="imgDownloadURL | async" alt="" style="max-height: 300px; max-width: 300px; border-radius: 50%;">
+
+    <button type="submit" class="btn btn-primary btn-lg btn-block"
+    [disabled]="(!v.valid || isUploading)">Save</button>
+  </form>
+  <div class="row" *ngIf="submitted">
+    <div class="col-xs-12">
+      Your data
+      <!-- <p>First Name: {{ newChild.firstName }} </p>
+      <p>Last Name: {{ newChild.lastName }}</p> -->
+      {{ newVolunteer | json}}
+    </div>
+  </div>
+
+</div>
+</div>

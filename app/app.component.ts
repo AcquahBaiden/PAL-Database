@@ -26,6 +26,7 @@ export class AppComponent {
   }
   logout() {
     this.auth.signOut();
+    this.isLoginError = false;
   }
   signIn(form: NgForm){
     this.auth.signInWithEmailAndPassword(this.loginForm.value.email, this.loginForm.value.password)

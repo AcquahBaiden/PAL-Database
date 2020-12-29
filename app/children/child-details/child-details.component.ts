@@ -27,14 +27,15 @@ export class ChildDetailsComponent implements OnInit, OnDestroy {
 
 
     ngOnInit(){
-    console.log('Emited');
-    this.childChangeSubscription = this.childChangeSubscription= this.route.params
+    this.childChangeSubscription = this.route.params
       .subscribe(params=>{
       this.childId = params['id'];
+      console.log('the params value', this.childId);
       this.selectedChild = this.palservice.getChild(this.childId);
       // this.isChildSelected = true;
       // console.log('starting at', this.isChildSelected);
     })
+
   }
 
   onDeleteChild(){

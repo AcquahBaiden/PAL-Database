@@ -6,11 +6,14 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./children.component.css']
 })
 export class ChildrenComponent implements OnInit {
-  something = true
+  isIdSelected = true;
   constructor() { }
 
   ngOnInit(): void {
   }
 
-
+  idHasBeenSelected(event){
+    console.log('Final changed', this.isIdSelected);
+    this.isIdSelected = true;
+  }
 }
