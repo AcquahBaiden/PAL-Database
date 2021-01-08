@@ -1,7 +1,7 @@
 
-<div class="container" style="min-height: 100%;" *ngIf="auth.user | async as user; else login">
+<div class="container-fluid" style="min-height: 100%;" *ngIf="authService.auth.user | async as user; else login">
 
-  <button (click)="logout()">Logout</button>
+  <button (click)="onLogout()">Logout</button>
   <div class="container" style="width: 100%">
     <div class="row">
       <app-header></app-header>
@@ -25,17 +25,17 @@
   <div class="card" style="max-width: 450px; margin: auto; margin-top: 40px;">
     <ul class="nav nav-tabs">
       <li class="nav-item">
-        <a class="nav-link" [class.active]="loginIsActive" (click)="toggleLogInView('login')">Login</a>
+        <a class="nav-link" [class.active]="formIsLogin" (click)="toggleLogInView('login')">Login</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="!loginIsActive" (click)="toggleLogInView('signIn')">Sign Up</a>
+        <a class="nav-link" [class.active]="!formIsLogin" (click)="toggleLogInView('signIn')">Sign Up</a>
       </li>
     </ul>
     <div class="card-body">
       <div class="alert alert-danger" role="alert" *ngIf="isLoginError">
         {{errorMessage}}
       </div>
-      <form (ngSubmit)="signIn(loginForm)"  #loginForm="ngForm" *ngIf="formIsLogin">
+      <form (ngSubmit)="onSignIn()"  #loginForm="ngForm" *ngIf="formIsLogin">
         <h3 class="card-title">Log in</h3>
         <div class="form-group">
           <label for="exampleInputEmail1">Email address</label>
@@ -55,9 +55,9 @@
           #password="ngModel">
         </div>
         <button type="submit" class="btn btn-primary" [disabled]="!loginForm.valid">Log in</button>
-        <!-- <button (click)="login()">Login with Google</button> -->
+        <!-- <button (click)="onLoginWithPopUp()">Login with Google</button> -->
       </form>
-      <form (ngSubmit)="signUp(signUpForm)"  #signUpForm="ngForm" *ngIf="!formIsLogin">
+      <form (ngSubmit)="onSignUp()"  #signUpForm="ngForm" *ngIf="!formIsLogin">
         <h3 class="card-title">Sign up</h3>
         <div class="form-group">
           <label for="exampleInputEmail1">Email address</label>
@@ -74,19 +74,14 @@
           ngModel
           name="signupPassword"
           #signupPassword="ngModel"
-          required>
+          required
+          minlength="6">
         </div>
-        <!-- <div class="form-group">
-          <label for="exampleInputPassword1">Confirm Password</label>
-          <input type="password" class="form-control"
-          ngModel
-          name="signupPasswordConfirm"
-          #signupPasswordConfirm="ngModel">
-        </div> -->
         <button type="submit" class="btn btn-primary" [disabled]="!signUpForm.valid">Sign Up</button>
         <!-- <button (click)="login()">Login with Google</button> -->
       </form>
     </div>
   </div>
 </ng-template>
+
 

@@ -36,8 +36,8 @@ export class VolunteersService {
   uploadFile(event: any, fileName:string) {
     console.log('on the other side');
     const file = event.target.files[0];
-    const fileRef = this.storage.ref('children/'+fileName);
-    const task = this.storage.upload('children/'+fileName, file);
+    const fileRef = this.storage.ref('volunteers/'+fileName);
+    const task = this.storage.upload('volunteers/'+fileName, file);
     this.uploadPercent = task.percentageChanges();
     task.snapshotChanges().pipe(
       finalize(() => this.downloadURL = fileRef.getDownloadURL() )
@@ -46,7 +46,7 @@ export class VolunteersService {
   }
 
   deleteVolunteer(id: string){
-    const volRef = this.db.list('Vlounteers/'+id);
+    const volRef = this.db.list('Volunteers/'+id);
     volRef.remove();
 
   }

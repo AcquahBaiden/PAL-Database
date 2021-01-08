@@ -31,7 +31,7 @@ export class ChildDetailsComponent implements OnInit, OnDestroy {
       .subscribe(params=>{
       this.childId = params['id'];
       console.log('the params value', this.childId);
-      this.selectedChild = this.palservice.getChild(this.childId);
+      this.selectedChild = this.childrenService.getChild(this.childId);
       // this.isChildSelected = true;
       // console.log('starting at', this.isChildSelected);
     })

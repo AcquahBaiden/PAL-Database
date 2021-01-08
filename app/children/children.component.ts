@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../auth/auth.service';
+import { PALService } from '../pal.service';
 
 @Component({
   selector: 'app-children',
@@ -6,14 +8,16 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./children.component.css']
 })
 export class ChildrenComponent implements OnInit {
-  isIdSelected = true;
-  constructor() { }
+  accesses:any;
+  constructor(private authService: AuthService) { }
 
   ngOnInit(): void {
+  this.authService.auth.onAuthStateChanged(user=>{
+    if(user){
+      this.accesses = this.authService.getUserAccessFromDatabase(user.uid);
+    }
+  })
   }
 
-  idHasBeenSelected(event){
-    console.log('Final changed', this.isIdSelected);
-    this.isIdSelected = true;
-  }
+
 }

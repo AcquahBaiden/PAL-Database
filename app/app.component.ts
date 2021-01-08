@@ -1,7 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { FormControl, NgForm } from '@angular/forms';
-import  firebase  from 'firebase/app'
+import { NgForm } from '@angular/forms';
+import { AuthService } from './auth/auth.service';
 
 
 
@@ -11,7 +10,7 @@ import  firebase  from 'firebase/app'
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  constructor( public auth: AngularFireAuth){}
+  constructor(public authService: AuthService){}
   title = 'PAL-DB';
   formIsLogin = true;
   errorMessage= '';
@@ -19,17 +18,18 @@ export class AppComponent {
   loginIsActive: boolean = true;
   @ViewChild('loginForm') loginForm!: NgForm;
   @ViewChild('signUpForm') signUpForm!: NgForm;
-  newForm= new FormControl;
+  userId: string = null;
 
-  login() {
-    this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  onLoginWithPopUp() {
+    this.authService.loginWithPopUp();
   }
-  logout() {
-    this.auth.signOut();
+  onLogout() {
+    this.authService.logout();
     this.isLoginError = false;
   }
-  signIn(form: NgForm){
-    this.auth.signInWithEmailAndPassword(this.loginForm.value.email, this.loginForm.value.password)
+
+  onSignIn(){
+    this.authService.signIn(this.loginForm.value.email, this.loginForm.value.password)
     .catch((error) =>{ console.log('eror code is', error.code);
     this.isLoginError = true;
       switch(error.code){
@@ -39,20 +39,18 @@ export class AppComponent {
         case 'auth/wrong-password':
           this.errorMessage = 'Incorrect password. Please try again!';
       }
-    });
+    })
   }
 
   toggleLogInView(view: string){
-    if(view == 'login'){
+    if(view === 'login'){
       this.formIsLogin = true;
-      this.loginIsActive = true
-    }else{
-      this.formIsLogin = false;
-      this.loginIsActive = false;
+      return
     }
+      this.formIsLogin = false;
   }
 
-  signUp(form: NgForm){
-    this.auth.createUserWithEmailAndPassword(this.signUpForm.value.signupEmail, this.signUpForm.value.signupPassword)
+  onSignUp(){
+    this.authService.signUp(this.signUpForm.value.email, this.signUpForm.value.password)
   }
 }

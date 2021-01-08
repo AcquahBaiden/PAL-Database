@@ -47,14 +47,8 @@ export class AddChildComponent implements OnInit {
     }else{
       this.childrenService.saveToFirebase(this.newChild);
     }
-    // this.childrenService.saveToFirebase(this.newChild);
 
     this.addChildForm.reset();
-  }
-
-
-  saveImgPath(event:any, fileName: string){
-    this.imagePath = fileName.concat('.'.concat(event.target.files[0].name.split('.').pop()));
   }
 
 
@@ -64,7 +58,7 @@ export class AddChildComponent implements OnInit {
     console.log(event, fileName);
     this.childrenService.uploadFile(event, fileName);
     this.imgUploadPercent = this.childrenService.uploadPercent;
-    this.saveImgPath(event, fileName);
+    this.imagePath = fileName
     setTimeout(()=>{
       console.log('assigning now');
       this.imgDownloadURL = this.childrenService.downloadURL;

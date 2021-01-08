@@ -1,12 +1,20 @@
-<div class="container-fluid">
-  <div class="row">
-    <div class="col">
-      <app-children-list></app-children-list>
-    </div>
-    <div class="col" >
-      <!-- <app-child-details *ngIf="isIdSelected"></app-child-details> -->
-        <router-outlet *ngIf="isIdSelected" (idSelected)="idHasBeenSelected($event)">
-        </router-outlet>
-    </div>
+
+<div *ngFor="let access of accesses | async">
+<div class="row" *ngIf="access.category === 'children' && access.access">
+  <div class="col-xs-12">
+    <app-children-list></app-children-list>
+  </div>
+  <div class="col-xs-12">
+    <router-outlet>
+    </router-outlet>
+  </div>
+
+</div>
+<div *ngIf="access.category === 'children' && !access.access">
+  <div class="card" style="padding: 20px;">
+    <p>You do not have access to this section. Contact admin to grant you access</p>
   </div>
 </div>
+</div>
+
+

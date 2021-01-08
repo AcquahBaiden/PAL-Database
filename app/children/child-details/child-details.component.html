@@ -6,7 +6,7 @@
       <p>Selected is : {{ childId }}</p>
       <h5 class="card-subtitle mb-2">{{child.firstName }} {{ child.lastName }}</h5>
 
-      <img [src]="'children/EmmanuelBaiden' | getDownloadURL" class="card-img-top rounded" alt="...">
+      <img [src]="'children/'+child.img | getDownloadURL" class="card-img-top rounded-large" alt="...">
       <p class="card-text">
         Lorem ipsum dolor sit amet consectetur adipisicing elit.
       </p>

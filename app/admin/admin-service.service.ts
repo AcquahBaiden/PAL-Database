@@ -26,14 +26,13 @@ export class AdminServiceService {
 
   updateAccessToChildren(id:string, value: boolean){
     const ref = 'Access/'.concat(id);
-    console.log(ref, value);
-    console.log(ref, !value);
     this.db.list(ref).set('children', !value);
+    this.db.list(ref+'/Children/').set('access', !value);
   }
   updateAccessToVolunteers(id:string, value: boolean){
     const ref = 'Access/'.concat(id);
-    console.log(ref, value);
-    console.log(ref, !value);
     this.db.list(ref).set('volunteers', !value);
+    this.db.list(ref+'/Volunteers/').set('access', !value);
+
   }
 }

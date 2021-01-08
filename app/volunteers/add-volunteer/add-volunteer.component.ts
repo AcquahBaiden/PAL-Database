@@ -19,7 +19,7 @@ export class AddVolunteerComponent implements OnInit {
   imgUploadPercent: Observable<number>;
   imgDownloadURL:Observable<string>;
   isUploading = false;
-  imagePath: string ='';
+  imagePath: string = null;
   retrieving: boolean = false;
 
   constructor(private volunteersService: VolunteersService) { }
@@ -38,22 +38,15 @@ export class AddVolunteerComponent implements OnInit {
     this.newVolunteer.program = this.addVolunteerForm.value.program;
     this.newVolunteer.level = this.addVolunteerForm.value.level;
 
-    if(this.imagePath!=''){
+    if(this.imagePath){
       this.newVolunteer.img = this.imagePath;
       console.log(this.newVolunteer);
       this.volunteersService.saveToFirebase(this.newVolunteer);
-      this.imagePath = '';
+      // this.imagePath = '';
     }else{
       this.volunteersService.saveToFirebase(this.newVolunteer);
     }
-    // this.volunteersService.saveToFirebase(this.newChild);
-
     this.addVolunteerForm.reset();
-  }
-
-
-  saveImgPath(event:any, fileName: string){
-    this.imagePath = fileName.concat('.'.concat(event.target.files[0].name.split('.').pop()));
   }
 
 
@@ -63,7 +56,7 @@ export class AddVolunteerComponent implements OnInit {
     console.log(event, fileName);
     this.volunteersService.uploadFile(event, fileName);
     this.imgUploadPercent = this.volunteersService.uploadPercent;
-    this.saveImgPath(event, fileName);
+    this.imagePath = fileName;
     setTimeout(()=>{
       console.log('assigning now');
       this.imgDownloadURL = this.volunteersService.downloadURL;

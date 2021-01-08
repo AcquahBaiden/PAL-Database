@@ -3,10 +3,12 @@ import { Routes, RouterModule } from '@angular/router';
 import { AccessControlComponent } from './admin/access-control/access-control.component';
 
 import { AdminComponent } from './admin/admin.component';
+import { ChildrenGuard } from './auth/children.guard';
 import { AddChildComponent } from './children/add-child/add-child.component';
 import { ChildDetailsComponent } from './children/child-details/child-details.component';
 import { ChildEditComponent } from './children/child-edit/child-edit.component';
 import { ChildrenComponent } from './children/children.component';
+import { NoAccessComponent } from './no-access/no-access.component';
 import { SummaryComponent } from './summary/summary.component';
 import { AddVolunteerComponent } from './volunteers/add-volunteer/add-volunteer.component';
 import { VolunteerDetailsComponent } from './volunteers/volunteer-details/volunteer-details.component';
@@ -17,11 +19,11 @@ const routes: Routes = [
   {path: '', redirectTo: '/summary', pathMatch: 'full'},
   {path: 'summary', component: SummaryComponent},
   {path: 'add-child', component: AddChildComponent},
+  {path: 'noAccess', component: NoAccessComponent},
   {path: 'admin', component: AdminComponent, children:[
     {path: '', component: AccessControlComponent}
   ]},
   {path: 'children', component: ChildrenComponent, children:[
-    {path:'', component: ChildrenComponent},
     {path:':id', component: ChildDetailsComponent},
     {path:':id/edit',component: ChildEditComponent},
   ]},

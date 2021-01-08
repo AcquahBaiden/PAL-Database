@@ -7,8 +7,12 @@
       <h4 class="card-title">PAL CHILD PROFILE</h4>
       <p>Selected is : {{ volunteerId }}</p>
       <h5 class="card-subtitle mb-2">{{volunteer.firstName }} {{ volunteer.lastName }}</h5>
-
-      <img [src]="'children/EmmanuelBaiden' | getDownloadURL" class="card-img-top rounded" alt="...">
+      <div *ngIf="volunteer.img">
+        <img [src]="'volunteers/'+volunteer.img | getDownloadURL" class="card-img-top rounded-large" alt="">
+      </div>
+      <div *ngIf="!volunteer.img">
+        <img src="https://via.placeholder.com/150" class="card-img-top rounded-large" alt="">
+      </div>
       <p class="card-text">
         Lorem ipsum dolor sit amet consectetur adipisicing elit.
       </p>

@@ -9,3 +9,18 @@ html, body{
 .card{
   margin: 5px;
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.rounded-circle{
+  max-width: 3rem;
+  max-height: 3rem;
+}
+
+.rounded-large{
+  /* border-radius: 50%!important; */
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+}

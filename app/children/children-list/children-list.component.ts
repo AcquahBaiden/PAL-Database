@@ -14,19 +14,17 @@ export class ChildrenListComponent implements OnInit {
   fetchedChildren!:  Child[];
   isFetching:boolean = true;
   profileUrl!: Observable<any>;
+  profileUrl1!: Observable<any>;
   @Output() idSelected : EventEmitter<any> = new EventEmitter();
 
-  dbchildren:any;
-  constructor(private childrenService: ChildrenService,
-    private palservice: PALService) {}
+  dbchildren:Observable<Child[]>;
+  constructor(private childrenService: ChildrenService) {}
 
 
   ngOnInit(): void {
     this.isFetching = true;
-  // this.fetchedChildren =  this.childrenService.getChildrenData();
-  this.dbchildren =  this.palservice.getDbChildren();
+  this.dbchildren =  this.childrenService.getDbChildren();
   this.isFetching = false;
-  this.profileUrl = this.childrenService.getProfileUrl('EmmanuelBaiden');
   }
 
   onIdSelection(){

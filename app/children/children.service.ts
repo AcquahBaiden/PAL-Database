@@ -3,16 +3,36 @@ import { Child } from '../interfaces/child.interface';
 import { AngularFireDatabase } from '../../../node_modules/@angular/fire/database';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize, map } from 'rxjs/operators';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ChildrenService {
+export class ChildrenService{
   public uploadPercent: Observable<number>;
   public downloadURL!: Observable<string>;
 
-  constructor(private db: AngularFireDatabase, private storage: AngularFireStorage) { }
+
+  constructor(private db: AngularFireDatabase, private storage: AngularFireStorage, private authService: AuthService) { }
+
+
+
+  getDbChildren(){
+    return this.db.object<Child[]>('Children').valueChanges()
+    .pipe(
+      map((responseData:any)=>{
+        const ChildrenData:Child[] = [];
+        for(const key in responseData){
+          if(responseData.hasOwnProperty(key)){
+            ChildrenData.push({...responseData[key], id: key})
+          }
+        }
+        return ChildrenData;
+      })
+    );
+
+  }
 
   saveToFirebase(data: Child){
     const itemsRef = this.db.list('Children');
@@ -20,7 +40,6 @@ export class ChildrenService {
   }
 
   uploadFile(event: any, fileName:string) {
-    console.log('on the other side');
     const file = event.target.files[0];
     const fileRef = this.storage.ref('children/'+fileName);
     const task = this.storage.upload('children/'+fileName, file);
@@ -31,19 +50,20 @@ export class ChildrenService {
   .subscribe()
   }
 
-  deleteChild(id:string){
-    const childRef = this.db.list('Children/'+id);
-    console.log('to be deleted is', childRef);
-    childRef.remove();
+  getChild(id: string){
+    return this.db.object('Children/'+id).valueChanges()
+      .pipe(
+        map((responseData:any)=>{
+          const ChildData:Child[] = [];
+          ChildData.push(responseData);
+          return ChildData;
+        })
+      );
   }
 
-
-  getProfileUrl(ref:string ){
-    const profileImgRef = this.storage.ref('children/'.concat(ref));
-    // this.profileUrl =  ref.getDownloadURL();
-    console.log('ref ===', profileImgRef);
-    console.log('retrieved url ====', profileImgRef.getDownloadURL());
-    return profileImgRef.getDownloadURL();
+  deleteChild(id:string){
+    const childRef = this.db.list('Children/'+id);
+    childRef.remove();
   }
 
 }

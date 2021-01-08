@@ -17,7 +17,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let volunteer of Volunteers |async">
-          <td><img [src]="profileUrl | async" class="img-thumbnail rounded-circle"
+          <td><img [src]="'volunteers/'+volunteer.img | getDownloadURL" class="img-thumbnail rounded-circle"
             alt="">
           </td>
           <td>{{ volunteer.firstName }}</td>
