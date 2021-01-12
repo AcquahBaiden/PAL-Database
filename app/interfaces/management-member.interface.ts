@@ -1,7 +1,8 @@
-export interface Child{
+export interface ManagementMember{
   firstName: string;
   lastName: string;
   residence?:string;
+  email?:string;
   address?: [{
     Line1: string;
     Line2: string;
@@ -10,9 +11,6 @@ export interface Child{
   description?: string;
   telephone?: number;
   img?:string;
-  class?:string;
-  school?:string;
-  parentName?:string;
-  parentTel?:string;
   id?:string;
+  position: string;
 }

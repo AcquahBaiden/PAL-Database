@@ -37,6 +37,14 @@ export class ChildrenService{
   saveToFirebase(data: Child){
     const itemsRef = this.db.list('Children');
     itemsRef.push(data);
+    this.db.object('Summary/children/number').query.ref
+      .transaction(number=>{
+        if(number===null){
+          return number = 1
+        }else{
+          return number + 1;
+        }
+      })
   }
 
   uploadFile(event: any, fileName:string) {
@@ -64,6 +72,14 @@ export class ChildrenService{
   deleteChild(id:string){
     const childRef = this.db.list('Children/'+id);
     childRef.remove();
+    this.db.object('Summary/children/number').query.ref
+      .transaction(number=>{
+        if(number===null){
+          return number = 0
+        }else{
+          return number - 1;
+        }
+      })
   }
 
 }

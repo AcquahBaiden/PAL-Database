@@ -12,11 +12,17 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
   }
+
   onAddChild(){
     this.router.navigate(['add-child']);
   }
+
   onAddVolunteer(){
     this.router.navigate(['add-volunteer']);
+  }
+
+  onAddManagement(){
+    this.router.navigate(['add-management-member']);
   }
 
 }

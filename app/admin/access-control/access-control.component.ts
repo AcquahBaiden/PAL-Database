@@ -19,4 +19,7 @@ export class AccessControlComponent implements OnInit {
   toggleVolunteersAccess(){
     this.adminService.updateAccessToVolunteers(this.userAccessData.id,this.userAccessData.volunteers);
   }
+  toggleManagementAccess(){
+    this.adminService.updateAccessToManagement(this.userAccessData.id,this.userAccessData.management);
+  }
 }

@@ -1,24 +1,25 @@
 
-  <div class="card" style="margin: 5px;" *ngFor="let child of selectedChild | async">
+  <div class="card" *ngFor="let child of selectedChild | async">
     <div class="card-body">
-
       <h4 class="card-title">PAL CHILD PROFILE</h4>
-      <p>Selected is : {{ childId }}</p>
       <h5 class="card-subtitle mb-2">{{child.firstName }} {{ child.lastName }}</h5>
-
-      <img [src]="'children/'+child.img | getDownloadURL" class="card-img-top rounded-large" alt="...">
+      <div *ngIf="child.img">
+        <img [src]="'children/'+child.img | getDownloadURL" class="card-img-top rounded-large" alt="...">
+      </div>
+      <div *ngIf="!child.img">
+        <img src="https://via.placeholder.com/150" class="card-img-top rounded-large" alt="">
+      </div>
       <p class="card-text">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+      <strong> Notes/Desciption:</strong> {{ child.description }}
       </p>
-      <h6 class="card-subtitle-muted">Programs</h6>
+      <h6 class="card-subtitle-muted">Member of Programs</h6>
 
     </div>
     <ul class="list-group list-group-flush">
-      <li class="list-group-item">Cras justo odio</li>
-      <li class="list-group-item">Dapibus ac facilisis in</li>
-      <li class="list-group-item">Vestibulum at eros</li>
+      <li class="list-group-item">Program 1</li>
+      <li class="list-group-item">Program 2</li>
+      <li class="list-group-item">Program 3</li>
     </ul>
     <button (click)="onDeleteChild()" class="btn btn-danger">Delete this profile</button>
    </div>
-
 

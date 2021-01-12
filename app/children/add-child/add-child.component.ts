@@ -38,6 +38,7 @@ export class AddChildComponent implements OnInit {
     this.newChild.school = this.addChildForm.value.school;
     this.newChild.parentName = this.addChildForm.value.parentName;
     this.newChild.parentTel = this.addChildForm.value.parentTel;
+    this.newChild.description = this.addChildForm.value.description;
 
     if(this.imagePath!=''){
       this.newChild.img = this.imagePath;

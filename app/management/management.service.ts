@@ -3,36 +3,37 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { Observable } from 'rxjs/internal/Observable';
 import { finalize, map } from 'rxjs/operators';
-import { Volunteer } from '../interfaces/volunteer.interface';
+import { ManagementMember } from '../interfaces/management-member.interface';
 
 @Injectable({
   providedIn: 'root'
 })
-export class VolunteersService {
+export class ManagementService {
   public uploadPercent: Observable<number>;
   public downloadURL!: Observable<string>;
   constructor(private db: AngularFireDatabase, private storage: AngularFireStorage) { }
 
-  getVolunteersData(){
-    return this.db.object('Volunteers').valueChanges();
+
+  getMamangementData(){
+    return this.db.object('Management').valueChanges();
   }
 
-  getVolunteer(id:string){
-    const ref = 'Volunteers/'.concat(id);
-    return this.db.object(ref).valueChanges()
+  getMember(id:string){
+    const ref = 'Management/'.concat(id);
+    return this.db.object<ManagementMember>(ref).valueChanges()
       .pipe(
         map((responseData:any)=>{
-          const volunteerData:Volunteer[]=[];
-          volunteerData.push(responseData);
-          return volunteerData;
+          const MemberData:ManagementMember[]=[];
+          MemberData.push(responseData);
+          return MemberData;
         })
       );
   }
 
-  saveToFirebase(data: Volunteer){
-    const itemsRef = this.db.list('Volunteers');
+  saveToFirebase(data: ManagementMember){
+    const itemsRef = this.db.list('Management');
     itemsRef.push(data);
-    this.db.object('Summary/volunteers/number').query.ref
+    this.db.object('Summary/management/number').query.ref
       .transaction(number=>{
         if(number===null){
           return number = 1
@@ -45,8 +46,8 @@ export class VolunteersService {
   uploadFile(event: any, fileName:string) {
     console.log('on the other side');
     const file = event.target.files[0];
-    const fileRef = this.storage.ref('volunteers/'+fileName);
-    const task = this.storage.upload('volunteers/'+fileName, file);
+    const fileRef = this.storage.ref('management/'+fileName);
+    const task = this.storage.upload('management/'+fileName, file);
     this.uploadPercent = task.percentageChanges();
     task.snapshotChanges().pipe(
       finalize(() => this.downloadURL = fileRef.getDownloadURL() )
@@ -54,10 +55,10 @@ export class VolunteersService {
   .subscribe()
   }
 
-  deleteVolunteer(id: string){
-    const volRef = this.db.list('Volunteers/'+id);
+  deleteMember(id: string){
+    const volRef = this.db.list('Management/'+id);
     volRef.remove();
-    this.db.object('Summary/volunteers/number').query.ref
+    this.db.object('Summary/management/number').query.ref
       .transaction(number=>{
         if(number===null){
           return number = 0

@@ -35,4 +35,10 @@ export class AdminServiceService {
     this.db.list(ref+'/Volunteers/').set('access', !value);
 
   }
+  updateAccessToManagement(id:string, value: boolean){
+    const ref = 'Access/'.concat(id);
+    this.db.list(ref).set('management', !value);
+    this.db.list(ref+'/Management/').set('access', !value);
+
+  }
 }

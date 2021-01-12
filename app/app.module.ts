@@ -33,6 +33,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 // import { MatButtonModule } from '@angular/material/button';
 import { LayoutModule } from '@angular/cdk/layout';
 import { NoAccessComponent } from './no-access/no-access.component';
+import { ManagementComponent } from './management/management.component';
+import { AddManagementMemberComponent } from './management/add-management-member/add-management-member.component';
+import { ManagementMemberDetailsComponent } from './management/management-member-details/management-member-details.component';
+import { ManagementMemberEditComponent } from './management/management-member-edit/management-member-edit.component';
+import { ManagementListComponent } from './management/management-list/management-list.component';
 
 
 @NgModule({
@@ -53,7 +58,12 @@ import { NoAccessComponent } from './no-access/no-access.component';
     VolunteerEditComponent,
     VolunteerListComponent,
     VolunteerDetailsComponent,
-    NoAccessComponent
+    NoAccessComponent,
+    ManagementComponent,
+    AddManagementMemberComponent,
+    ManagementMemberDetailsComponent,
+    ManagementMemberEditComponent,
+    ManagementListComponent
   ],
   imports: [
     BrowserModule,

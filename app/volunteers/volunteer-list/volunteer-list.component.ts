@@ -10,12 +10,12 @@ import { VolunteersService } from '../volunteers.service';
   styleUrls: ['./volunteer-list.component.css']
 })
 export class VolunteerListComponent implements OnInit {
-  fetchedChildren!:  Volunteer[];
+  // fetchedChildren!:  Volunteer[];
   isFetching:boolean = true;
-  profileUrl!: Observable<any>;
+  // profileUrl!: Observable<any>;
   @Output() idSelected : EventEmitter<any> = new EventEmitter();
-
   Volunteers:any;
+
   constructor(private volunteersService: VolunteersService) {}
 
 
