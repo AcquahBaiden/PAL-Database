@@ -1,11 +1,12 @@
-<tr>
-  <td> {{ userAccessData.email }}</td>
-  <td *ngIf="userAccessData.children">Children <button class="btn btn-danger" (click)="toggleChildrenAccess()">Remove access</button></td>
-  <td *ngIf="!userAccessData.children">Children <button class="btn btn-success" (click)="toggleChildrenAccess()">Grant access</button></td>
-  <td *ngIf="userAccessData.volunteers">Volunteers <button class="btn btn-danger" (click)="toggleVolunteersAccess()">Remove access</button></td>
-  <td *ngIf="!userAccessData.volunteers">Volunteers <button class="btn btn-success" (click)="toggleVolunteersAccess()">Grant access</button></td>
-  <td *ngIf="userAccessData.management">Management <button class="btn btn-danger" (click)="toggleManagementAccess()">Remove access</button></td>
-  <td *ngIf="!userAccessData.management">Management <button class="btn btn-success" (click)="toggleManagementAccess()">Grant access</button></td>
+<tr style="display: flex; flex-wrap: wrap;">
+  <td > {{ userAccessData.email }}</td>
+  <td *ngIf="!userAccessData.basic">New User <button class="btn btn-primary" (click)="toggleUserBasicAccess()">Verify user</button></td>
+  <td *ngIf="userAccessData.children && userAccessData.basic">Children <button class="btn btn-danger" (click)="toggleChildrenAccess()">Remove access</button></td>
+  <td *ngIf="!userAccessData.children && userAccessData.basic">Children <button class="btn btn-success" (click)="toggleChildrenAccess()">Grant access</button></td>
+  <td *ngIf="userAccessData.volunteers && userAccessData.basic">Volunteers <button class="btn btn-danger" (click)="toggleVolunteersAccess()">Remove access</button></td>
+  <td *ngIf="!userAccessData.volunteers && userAccessData.basic">Volunteers <button class="btn btn-success" (click)="toggleVolunteersAccess()">Grant access</button></td>
+  <td *ngIf="userAccessData.management && userAccessData.basic">Management <button class="btn btn-danger" (click)="toggleManagementAccess()">Remove access</button></td>
+  <td *ngIf="!userAccessData.management && userAccessData.basic">Management <button class="btn btn-success" (click)="toggleManagementAccess()">Grant access</button></td>
 </tr>
 
 

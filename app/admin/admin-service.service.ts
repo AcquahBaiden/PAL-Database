@@ -41,4 +41,10 @@ export class AdminServiceService {
     this.db.list(ref+'/Management/').set('access', !value);
 
   }
+
+  updateBasicAccess(id:string, value:boolean){
+    const ref = 'Access/'.concat(id);
+    this.db.list(ref).set('basic', !value);
+    this.db.list(ref+'/Basic/').set('access', !value);
+  }
 }

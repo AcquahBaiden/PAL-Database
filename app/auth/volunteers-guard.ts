@@ -4,7 +4,7 @@ import { Observable } from "rxjs/internal/Observable";
 import { AuthService } from "./auth.service";
 
 @Injectable({ providedIn: "root" })
-export class ChildrenGuard implements CanActivate{
+export class VolunteersGuard implements CanActivate{
   userAccess = null;
   constructor(
     private router: Router,
@@ -14,7 +14,7 @@ export class ChildrenGuard implements CanActivate{
 
   canActivate():Observable<boolean|UrlTree>|Promise<boolean|UrlTree>|boolean|UrlTree {
     return this.authService.getUserAccessFromDatabase().then((data)=>{
-      if(data.val().children){
+      if(data.val().volunteers){
         return true;
       }else{
         return this.router.createUrlTree(['/noAccess']);
@@ -22,6 +22,4 @@ export class ChildrenGuard implements CanActivate{
     });
 
   }
-
-
 }

@@ -15,4 +15,6 @@ export interface Child{
   parentName?:string;
   parentTel?:string;
   id?:string;
+  interests?:string | string[];
+  programs?:{program:string, year: string}[];
 }

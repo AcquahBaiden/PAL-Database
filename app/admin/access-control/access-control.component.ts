@@ -13,6 +13,9 @@ export class AccessControlComponent implements OnInit {
 
   ngOnInit(): void {
   }
+  toggleUserBasicAccess(){
+    this.adminService.updateBasicAccess(this.userAccessData.id,this.userAccessData.basic);
+  }
   toggleChildrenAccess(){
     this.adminService.updateAccessToChildren(this.userAccessData.id,this.userAccessData.children);
   }

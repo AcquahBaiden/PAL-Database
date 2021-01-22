@@ -1,24 +1,61 @@
 
-  <div class="card" *ngFor="let child of selectedChild | async">
+  <div class="card" *ngIf="selectedChild">
     <div class="card-body">
       <h4 class="card-title">PAL CHILD PROFILE</h4>
-      <h5 class="card-subtitle mb-2">{{child.firstName }} {{ child.lastName }}</h5>
-      <div *ngIf="child.img">
-        <img [src]="'children/'+child.img | getDownloadURL" class="card-img-top rounded-large" alt="...">
+      <h5 class="card-subtitle mb-2">{{selectedChild.firstName }} {{ selectedChild.lastName }}</h5>
+      <div *ngIf="selectedChild.img">
+        <img [src]="'children/'+selectedChild.img | getDownloadURL" class="card-img-top rounded-large" alt="...">
       </div>
-      <div *ngIf="!child.img">
+      <div *ngIf="!selectedChild.img">
         <img src="https://via.placeholder.com/150" class="card-img-top rounded-large" alt="">
       </div>
+      <form>
+        <fieldset disabled>
+          <div class="form-group">
+            <label>Residence</label>
+              <input type="text" readonly class="form-control" value="{{selectedChild.residence}}">
+          </div>
+          <div class="form-group">
+            <label>Class/Form</label>
+              <input type="text" readonly class="form-control" value="{{selectedChild.class}}">
+          </div>
+          <div class="form-group">
+            <label>School</label>
+              <input type="text" readonly class="form-control" value="{{selectedChild.school}}">
+          </div>
+          <div class="form-group">
+            <label>Telephone</label>
+              <input type="text" readonly class="form-control" value="{{selectedChild.telephone}}">
+          </div>
+          <div class="form-group">
+            <label>Parent(s) Name</label>
+              <input type="text" readonly class="form-control" value="{{selectedChild.parentName}}">
+          </div>
+          <div class="form-group">
+            <label>Parent(s) Telephone</label>
+              <input type="text" readonly class="form-control" value="{{selectedChild.parentTel}}">
+          </div>
+          <div class="form-group">
+            <label>Child's interest</label>
+            <select class="form-control" id="exampleFormControlSelect1" *ngFor="let interest of selectedChild.interests">
+              <option style="list-style: none;">{{interest}}</option>
+            </select>
+          </div>
+          <div class="form-grou">
+            <label>Notes/Description</label>
+            <textarea class="form-control" rows="4">{{ selectedChild.description }}</textarea>
+          </div>
+        </fieldset>
+      </form>
+
       <p class="card-text">
-      <strong> Notes/Desciption:</strong> {{ child.description }}
+      <strong> Notes/Desciption:</strong>
       </p>
       <h6 class="card-subtitle-muted">Member of Programs</h6>
 
     </div>
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item">Program 1</li>
-      <li class="list-group-item">Program 2</li>
-      <li class="list-group-item">Program 3</li>
+    <ul class="list-group list-group-flush" *ngFor="let program of selectedChild.programs" style="margin-bottom: 40px;">
+      <li class="list-group-item">{{program.program}} {{program.year}}</li>
     </ul>
     <button (click)="onDeleteChild()" class="btn btn-danger">Delete this profile</button>
    </div>

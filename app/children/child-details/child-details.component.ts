@@ -12,7 +12,7 @@ import { ChildrenService } from '../children.service';
 })
 export class ChildDetailsComponent implements OnInit, OnDestroy {
 
-  selectedChild: Observable<Child[] | Iterable<Child> | (Iterable<Child> & Child[]) | (Child[] & Iterable<Child>)>;
+  selectedChild: Child;
   childId:string = 'nothing';
   childChangeSubscription!: Subscription;
    profileUrl: Observable<string | null>;
@@ -25,7 +25,10 @@ export class ChildDetailsComponent implements OnInit, OnDestroy {
     this.childChangeSubscription = this.route.params
       .subscribe(params=>{
       this.childId = params['id'];
-      this.selectedChild = this.childrenService.getChild(this.childId);
+      this.childrenService.getChild(this.childId).subscribe((child)=>{
+        this.selectedChild = child;
+      }
+      );
     })
 
   }

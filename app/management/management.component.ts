@@ -9,13 +9,13 @@ import { AuthService } from '../auth/auth.service';
 export class ManagementComponent implements OnInit {
 
   constructor(private authService: AuthService) { }
-  accesses:any;
+  // accesses:any;
   ngOnInit(): void {
-    this.authService.auth.onAuthStateChanged(user=>{
-      if(user){
-        this.accesses = this.authService.getUserAccessFromDatabase(user.uid);
-      }
-    })
+    // this.authService.auth.onAuthStateChanged(user=>{
+    //   if(user){
+    //     this.accesses = this.authService.getUserAccessFromDatabase(user.uid);
+    //   }
+    // })
   }
 
 }

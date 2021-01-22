@@ -2,20 +2,17 @@ import { Component, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { AuthService } from './auth/auth.service';
 
-
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
+
 export class AppComponent {
   constructor(public authService: AuthService){}
-  title = 'PAL-DB';
   formIsLogin = true;
   errorMessage= '';
   isLoginError:boolean=false;
-  loginIsActive: boolean = true;
   @ViewChild('loginForm') loginForm!: NgForm;
   @ViewChild('signUpForm') signUpForm!: NgForm;
   userId: string = null;
@@ -29,8 +26,8 @@ export class AppComponent {
   }
 
   onSignIn(){
-    this.authService.signIn(this.loginForm.value.email, this.loginForm.value.password)
-    .catch((error) =>{ console.log('eror code is', error.code);
+    this.authService.signIn(this.loginForm.value.email, this.loginForm.value.password).then((user)=>this.authService.AuthUserId = user.user.uid)
+    .catch((error) =>{
     this.isLoginError = true;
       switch(error.code){
         case 'auth/user-not-found':
@@ -38,6 +35,12 @@ export class AppComponent {
           break;
         case 'auth/wrong-password':
           this.errorMessage = 'Incorrect password. Please try again!';
+          break;
+        case 'auth/network-request-failed':
+          this.errorMessage = 'A network error occured. Please check your internet and try again';
+          break;
+        default:
+          this.errorMessage = 'Something went wrong. Please try again later';
       }
     })
   }
@@ -50,7 +53,22 @@ export class AppComponent {
       this.formIsLogin = false;
   }
 
-  onSignUp(){
-    this.authService.signUp(this.signUpForm.value.email, this.signUpForm.value.password)
+  onSignUp(form:NgForm){
+    this.authService.userIsNewSignup = true;
+    this.authService.signUp(this.signUpForm.value.signupEmail, this.signUpForm.value.signupPassword).then((user)=>{
+      this.authService.setUpAccessData(user)
+    }).catch((error)=>{
+      this.isLoginError = true;
+      switch(error.code){
+        case 'auth/network-request-failed':
+          this.errorMessage = 'A network error occured. Please check your internet and try again';
+          break;
+        case 'auth/email-already-in-use':
+          this.errorMessage = 'The email is already in use by another account';
+          break;
+        default:
+          this.errorMessage = 'Something went wrong. Please try again later';
+      }
+    });
   }
 }

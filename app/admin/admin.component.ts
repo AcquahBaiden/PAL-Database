@@ -12,14 +12,14 @@ export class AdminComponent implements OnInit {
   constructor(private adminService: AdminServiceService, private authService: AuthService) { }
   isFetching:boolean = true
   usersAccessList:any;
-  accesses:any;
+  // accesses:any;
 
   ngOnInit(): void {
-    this.authService.auth.onAuthStateChanged(user=>{
-      if(user){
-        this.accesses = this.authService.getUserAccessFromDatabase(user.uid);
-      }
-    })
+    // this.authService.auth.onAuthStateChanged(user=>{
+    //   if(user){
+    //     this.accesses = this.authService.getUserAccessFromDatabase(user.uid);
+    //   }
+    // })
    this.usersAccessList = this.adminService.getUsersAccessInfo();
    this.isFetching = false;
   }

@@ -38,6 +38,7 @@ import { AddManagementMemberComponent } from './management/add-management-member
 import { ManagementMemberDetailsComponent } from './management/management-member-details/management-member-details.component';
 import { ManagementMemberEditComponent } from './management/management-member-edit/management-member-edit.component';
 import { ManagementListComponent } from './management/management-list/management-list.component';
+import { FilterPipe } from './children/filter.pipe';
 
 
 @NgModule({
@@ -63,7 +64,8 @@ import { ManagementListComponent } from './management/management-list/management
     AddManagementMemberComponent,
     ManagementMemberDetailsComponent,
     ManagementMemberEditComponent,
-    ManagementListComponent
+    ManagementListComponent,
+    FilterPipe
   ],
   imports: [
     BrowserModule,

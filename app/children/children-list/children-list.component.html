@@ -1,8 +1,8 @@
 <div class="card">
 <div class="container" style="margin-left: vw;margin-right: 1vw;"  *ngIf="!isFetching">
   <div class="input-group mb-3" style="margin-top: 1vw;">
-    <input type="text" class="form-control" placeholder="search"
-    aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+    <input type="text" class="form-control" placeholder="Search by first name"
+    aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" [(ngModel)]="searchText">
   </div>
 
   <table class="table">
@@ -16,14 +16,14 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let child of dbchildren |async ; let i=index">
+      <tr *ngFor="let child of dbchildren  |async | appFilter: searchText; let i=index">
         <td><img [src]="'children/'+child.img | getDownloadURL" class="img-thumbnail rounded-circle"
           alt="">
         </td>
         <td>{{ child.firstName }}</td>
         <td>{{ child.lastName }}</td>
-        <td><button class="btn btn-success" [routerLink]="[child.id]" (click)=onIdSelection()>Details</button></td>
-        <td><button class="btn btn-primary">Edit</button></td>
+        <td><button class="btn btn-success" [routerLink]="[child.id]" >Details</button></td>
+        <td><button class="btn btn-primary" [routerLink]="[child.id+'/edit']">Edit</button></td>
       </tr>
     </tbody>
 

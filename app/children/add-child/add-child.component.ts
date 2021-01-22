@@ -14,13 +14,14 @@ export class AddChildComponent implements OnInit {
 
   @ViewChild('f') addChildForm!: NgForm;
   newForm = new FormControl;
-  submitted:boolean = false;
   newChild: Child={firstName:'', lastName:''};
   imgUploadPercent: Observable<number>;
   imgDownloadURL:Observable<string>;
   isUploading = false;
   imagePath: string ='';
   retrieving: boolean = false;
+  interests:string[]=[];
+  programs:{program:string, year: string}[]=[];
 
   constructor(private childrenService: ChildrenService) { }
 
@@ -28,7 +29,6 @@ export class AddChildComponent implements OnInit {
   }
 
   onSaveChild(form: NgForm){
-    this.submitted = true;
 
     this.newChild.firstName = this.addChildForm.value.firstName;
     this.newChild.lastName = this.addChildForm.value.lastName;
@@ -39,6 +39,8 @@ export class AddChildComponent implements OnInit {
     this.newChild.parentName = this.addChildForm.value.parentName;
     this.newChild.parentTel = this.addChildForm.value.parentTel;
     this.newChild.description = this.addChildForm.value.description;
+    this.newChild.interests = this.interests;
+    this.newChild.programs = this.programs;
 
     if(this.imagePath!=''){
       this.newChild.img = this.imagePath;
@@ -52,6 +54,17 @@ export class AddChildComponent implements OnInit {
     this.addChildForm.reset();
   }
 
+  onAddInterest(form:any){
+    console.log(form);
+    this.interests.push(form.value);
+  }
+
+  onAddProgram(programName:any, programYear:any){
+    console.log(programName.value, programYear.value);
+    this.programs.push({'program':programName.value,'year':programYear.value});
+    console.log(this.programs);
+  }
+
 
   onuploadProfileImg(event: any){
     this.isUploading = true;
@@ -61,7 +74,6 @@ export class AddChildComponent implements OnInit {
     this.imgUploadPercent = this.childrenService.uploadPercent;
     this.imagePath = fileName
     setTimeout(()=>{
-      console.log('assigning now');
       this.imgDownloadURL = this.childrenService.downloadURL;
       this.isUploading = false;
       this.retrieving = true;

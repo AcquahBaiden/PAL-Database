@@ -1,9 +1,9 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { Child } from 'src/app/interfaces/child.interface';
 import { ChildrenService } from '../children.service';
-import { PALService } from 'src/app/pal.service';
 import { Observable } from 'rxjs';
+import { FilterPipe } from '../filter.pipe';
 
 @Component({
   selector: 'app-children-list',
@@ -13,9 +13,17 @@ import { Observable } from 'rxjs';
 export class ChildrenListComponent implements OnInit {
   fetchedChildren!:  Child[];
   isFetching:boolean = true;
-  profileUrl!: Observable<any>;
-  profileUrl1!: Observable<any>;
-  @Output() idSelected : EventEmitter<any> = new EventEmitter();
+  searchText = '';
+  characters = [
+    'Ant-Man',
+    'Aquaman',
+    'Asterix',
+    'The Atom',
+    'The Avengers',
+    'Batgirl',
+    'Batman',
+    'Batwoman'
+  ];
 
   dbchildren:Observable<Child[]>;
   constructor(private childrenService: ChildrenService) {}
@@ -28,8 +36,6 @@ export class ChildrenListComponent implements OnInit {
   }
 
   onIdSelection(){
-    console.log('About to emit');
-    this.idSelected.emit(null);
   }
 
 }

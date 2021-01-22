@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Child } from '../interfaces/child.interface';
+import { finalize, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+
 import { AngularFireDatabase } from '../../../node_modules/@angular/fire/database';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { Observable } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
+
+import { Child } from '../interfaces/child.interface';
 import { AuthService } from '../auth/auth.service';
+import { FilterPipe } from '../children/filter.pipe'
 
 @Injectable({
   providedIn: 'root'
@@ -61,12 +64,18 @@ export class ChildrenService{
   getChild(id: string){
     return this.db.object('Children/'+id).valueChanges()
       .pipe(
-        map((responseData:any)=>{
-          const ChildData:Child[] = [];
-          ChildData.push(responseData);
-          return ChildData;
+        map((responseData:Child)=>{
+          return responseData
         })
       );
+  }
+
+  updateChild(id:string, editedChild:Child){
+    this.db.list('Children/').update(id, editedChild);
+  }
+
+  updateChildProfile(id:string,fileName:string){
+    return this.db.list('Children/'+id).set('img',fileName).then(()=>{return true}).catch(error=>{console.log('Error uploading it')});
   }
 
   deleteChild(id:string){
