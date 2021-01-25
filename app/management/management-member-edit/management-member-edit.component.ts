@@ -22,6 +22,7 @@ export class ManagementMemberEditComponent implements OnInit, OnDestroy {
   member: ManagementMember;
   profileImg: string = null;
   imageLoaded: boolean = false;
+  dataLoaded = false;
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
@@ -39,6 +40,7 @@ export class ManagementMemberEditComponent implements OnInit, OnDestroy {
             position: member.position,
             description: member.description,
           });
+          this.dataLoaded = true;
           this.profileImg = this.member.img;
           this.profileImg === ""
             ? (this.imageLoaded = false)
@@ -71,5 +73,6 @@ export class ManagementMemberEditComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.editSubscription.unsubscribe();
     this.profileImg = null;
+    this.dataLoaded = false;
   }
 }

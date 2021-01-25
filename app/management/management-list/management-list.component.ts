@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/internal/Observable';
+import { Observable } from 'rxjs';
 
 import { ManagementService } from '../management.service';
 import { ManagementMember } from './../../interfaces/management-member.interface'

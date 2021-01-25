@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs/internal/Subscription';
+import { Subscription } from 'rxjs';
 import { ManagementMember } from 'src/app/interfaces/management-member.interface';
 import { ManagementService } from '../management.service';
 
@@ -13,7 +13,7 @@ export class ManagementMemberDetailsComponent implements OnInit, OnDestroy {
   memberId: string = null;
   memberSubscription!: Subscription;
   selectedMember: ManagementMember;
-  loadingMember = false;
+  dataLoaded = false;
   constructor(private route: ActivatedRoute,
     private managementService: ManagementService) { }
 
@@ -23,7 +23,7 @@ export class ManagementMemberDetailsComponent implements OnInit, OnDestroy {
         this.memberId = params['id'];
          this.managementService.getMember(this.memberId).subscribe(member=>{
           this.selectedMember = member;
-          this.loadingMember = true;
+          this.dataLoaded = true;
         });
       })
   }
@@ -34,6 +34,6 @@ export class ManagementMemberDetailsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(){
     this.memberSubscription.unsubscribe();
-    this.loadingMember =false;
+    this.dataLoaded =false;
   }
 }

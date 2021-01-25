@@ -1,7 +1,7 @@
-<div *ngIf="!loadingVolunteer">
+<div *ngIf="!dataLoaded" class="loader">
 
 </div>
-<div class="card" *ngIf="loadingVolunteer">
+<div class="card" *ngIf="dataLoaded">
     <div class="card-body">
       <h4 class="card-title">Volunteer Profile</h4>
       <h5 class="card-subtitle mb-2">{{selectedVolunteer.firstName }} {{ selectedVolunteer.lastName }}</h5>

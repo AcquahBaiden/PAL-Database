@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs/internal/Subscription';
+import { Subscription } from 'rxjs';
 
 import { Volunteer } from 'src/app/interfaces/volunteer.interface';
 import { VolunteersService } from '../volunteers.service';
@@ -20,10 +20,12 @@ export class VolunteerEditComponent implements OnInit, OnDestroy {
   imageLoaded:boolean = false;
   profileImg:string = null;
   editSubscription: Subscription;
+  dataLoaded=false;
 
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
+      this.dataLoaded = false;
       this.volIdToEdit = params["id"];
       this.editSubscription = this.volunteersService
         .getVolunteer(this.volIdToEdit)
@@ -39,6 +41,7 @@ export class VolunteerEditComponent implements OnInit, OnDestroy {
             school: volunteer.school,
             program: volunteer.program
           });
+          this.dataLoaded = true;
           this.profileImg = this.selectedVol.img;
          this.profileImg === ""
            ? (this.imageLoaded = false)
@@ -65,5 +68,6 @@ export class VolunteerEditComponent implements OnInit, OnDestroy {
   ngOnDestroy(){
     this.editSubscription.unsubscribe();
     this.profileImg = null;
+    this.dataLoaded = false
   }
 }

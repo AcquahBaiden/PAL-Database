@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/internal/Observable';
+import { Observable } from 'rxjs';
 
 import { Volunteer } from 'src/app/interfaces/volunteer.interface';
 import { VolunteersService } from '../volunteers.service';

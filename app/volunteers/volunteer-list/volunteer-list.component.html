@@ -16,7 +16,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let volunteer of Volunteers |async | appFilter: searchText">
+        <tr *ngFor="let volunteer of Volunteers |async | volunteersFilter: searchText">
           <td><img [src]="'volunteers/'+volunteer.img | getDownloadURL" class="img-thumbnail rounded-circle"
             alt="">
           </td>

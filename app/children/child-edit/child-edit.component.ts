@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs/internal/Subscription';
+import { Subscription } from 'rxjs';
 
 import { Child } from 'src/app/interfaces/child.interface';
 import { ChildrenService } from '../children.service';
@@ -23,28 +23,31 @@ export class ChildEditComponent implements OnInit, OnDestroy {
   imageLoaded:boolean = false;
 
   ngOnInit(): void {
-     this.editSubscription = this.route.params.subscribe((params) => {
-       this.childIdToEdit = params["id"];
-       this.childrenService.getChild(this.childIdToEdit).subscribe((child) => {
-         this.selectedChildtoEdit = child;
-         this.dataLoaded = true;
-         this.Form.setValue({
-           firstName: this.selectedChildtoEdit.firstName,
-           lastName: this.selectedChildtoEdit.lastName,
-           residence: this.selectedChildtoEdit.residence,
-           class: this.selectedChildtoEdit.class,
-           school: this.selectedChildtoEdit.school,
-           parentName: this.selectedChildtoEdit.parentName,
-           parentTel: this.selectedChildtoEdit.parentTel,
-           description: this.selectedChildtoEdit.description,
-           telephone: this.selectedChildtoEdit.telephone,
-         });
-         this.profileImg = this.selectedChildtoEdit.img;
-         this.profileImg === ""
-           ? (this.imageLoaded = false)
-           : (this.imageLoaded = true);
-       });
-     });
+    this.route.params.subscribe((params) => {
+      this.childIdToEdit = params["id"];
+      this.editSubscription = this.childrenService
+        .getChild(this.childIdToEdit)
+        .subscribe((child) => {
+          this.selectedChildtoEdit = child;
+          this.dataLoaded = true;
+          this.Form.setValue({
+            firstName: child.firstName,
+            lastName: child.lastName,
+            residence: child.residence,
+            class: child.class,
+            school: child.school,
+            parentName: child.parentName,
+            parentTel: child.parentTel,
+            description: child.description,
+            telephone: child.telephone,
+          });
+          this.dataLoaded = true;
+          this.profileImg = this.selectedChildtoEdit.img;
+          this.profileImg === ""
+            ? (this.imageLoaded = false)
+            : (this.imageLoaded = true);
+        });
+    });
 
   }
 
@@ -66,6 +69,7 @@ export class ChildEditComponent implements OnInit, OnDestroy {
   ngOnDestroy(){
     this.editSubscription.unsubscribe();
     this.profileImg = null;
+    this.dataLoaded = false;
   }
 
 }

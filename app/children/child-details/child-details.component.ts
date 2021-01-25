@@ -16,6 +16,7 @@ export class ChildDetailsComponent implements OnInit, OnDestroy {
   childId:string = 'nothing';
   childChangeSubscription!: Subscription;
    profileUrl: Observable<string | null>;
+   dataLoaded =false;
 
   constructor(private route: ActivatedRoute,
     private childrenService: ChildrenService) { }
@@ -27,6 +28,7 @@ export class ChildDetailsComponent implements OnInit, OnDestroy {
       this.childId = params['id'];
       this.childrenService.getChild(this.childId).subscribe((child)=>{
         this.selectedChild = child;
+        this.dataLoaded = true;
       }
       );
     })
@@ -39,6 +41,7 @@ export class ChildDetailsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.childChangeSubscription.unsubscribe();
+    this.dataLoaded =false;
   }
 
 }

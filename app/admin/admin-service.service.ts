@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/internal/operators/map';
+import { map } from 'rxjs/operators';
 
 import { AngularFireDatabase } from '../../../node_modules/@angular/fire/database';
 

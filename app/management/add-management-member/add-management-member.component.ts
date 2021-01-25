@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Observable } from 'rxjs/internal/Observable';
+import { Observable } from 'rxjs';
 import { ManagementMember } from 'src/app/interfaces/management-member.interface';
 import { ManagementService } from '../management.service';
 

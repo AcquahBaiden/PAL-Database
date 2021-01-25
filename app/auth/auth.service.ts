@@ -51,30 +51,16 @@ export class AuthService {
       return null;
     } else {
       return this.auth.authState.pipe(first()).toPromise();
-      // return this.auth.onAuthStateChanged((user) => {
-      //   if (user) {
-      //     this.AuthUserId = user.uid;
-      //     // return user.uid;
-      //     return true
-      //   }
-      //   return null;
-      // });
     }
   }
 
-//   isLoggedIn() {
-//     return this.auth.authState.pipe(first()).toPromise();
-//  }
 
-   async getUserAccessFromDatabase(userId?:string) {
-    // if(await this.isLoggedIn()){
+   async getUserAccessFromDatabase() {
     if(await this.getUserId()){
       return this.auth.currentUser.then((user) => {
-        console.log('inside authservice');
         return this.db.database.ref("Access/" + user.uid).once('value',()=>{})
       });
     }
-    console.log('didnt go inside');
     return null;
   }
 }

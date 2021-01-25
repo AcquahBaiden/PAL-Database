@@ -17,7 +17,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let member of Members |async">
+        <tr *ngFor="let member of Members |async | managersFilter: searchText; let i = index">
           <td><img [src]="'management/'+member.img | getDownloadURL" class="img-thumbnail rounded-circle"
             alt="">
           </td>

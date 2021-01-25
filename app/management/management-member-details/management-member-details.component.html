@@ -1,7 +1,7 @@
-<div *ngIf="!loadingMember">
+<div *ngIf="!dataLoaded" class="loader">
 
 </div>
-<div class="card" *ngIf="loadingMember">
+<div class="card" *ngIf="dataLoaded">
   <div class="card-body">
     <h4 class="card-title">Member profile</h4>
     <p>Position : {{ selectedMember.position }}</p>
