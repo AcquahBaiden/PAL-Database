@@ -45,10 +45,10 @@ export class AddChildComponent implements OnInit {
     if(this.imagePath!=''){
       this.newChild.img = this.imagePath;
       console.log(this.newChild);
-      this.childrenService.saveToFirebase(this.newChild);
+      this.childrenService.saveToDB(this.newChild);
       this.imagePath = '';
     }else{
-      this.childrenService.saveToFirebase(this.newChild);
+      this.childrenService.saveToDB(this.newChild);
     }
 
     this.addChildForm.reset();

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { map } from 'rxjs/internal/operators/map';
-import { ManagementService } from '../management.service';
+import { Observable } from 'rxjs/internal/Observable';
 
+import { ManagementService } from '../management.service';
 import { ManagementMember } from './../../interfaces/management-member.interface'
 
 @Component({
@@ -12,28 +12,19 @@ import { ManagementMember } from './../../interfaces/management-member.interface
 export class ManagementListComponent implements OnInit {
 
   isFetching: boolean = true;
-  Members:any;
+  Members:Observable<ManagementMember[]>;
+  searchText = '';
+
 
   constructor(private managementService: ManagementService) { }
 
   ngOnInit(): void {
     this.isFetching = true;
-    this.Members = this.managementService.getMamangementData()
-              .pipe(
-                map((responseData:any)=>{
-                  const MembersData: ManagementMember[]=[];
-                  for(const key in responseData){
-                    if(responseData.hasOwnProperty(key)){
-                      MembersData.push({...responseData[key], id: key})
-                    }
-                  }
-                  return MembersData
-                }
-              )
-              );
+    this.Members = this.managementService.getMamangementData();
     this.isFetching = false;
-
   }
+
+
 
 
 }

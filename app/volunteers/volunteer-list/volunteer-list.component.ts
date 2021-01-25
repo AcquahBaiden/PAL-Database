@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs/internal/Observable';
+
 import { Volunteer } from 'src/app/interfaces/volunteer.interface';
 import { VolunteersService } from '../volunteers.service';
 
@@ -10,8 +11,8 @@ import { VolunteersService } from '../volunteers.service';
 })
 export class VolunteerListComponent implements OnInit {
   isFetching:boolean = true;
-  // @Output() idSelected : EventEmitter<any> = new EventEmitter();
-  Volunteers:any;
+  Volunteers:Observable<Volunteer[]>;
+  searchText = '';
 
   constructor(private volunteersService: VolunteersService) {}
 
@@ -19,26 +20,7 @@ export class VolunteerListComponent implements OnInit {
   ngOnInit(): void {
     this.isFetching = true;
     this.Volunteers =  this.volunteersService.getVolunteersData()
-                .pipe(
-                  map((responseData:any)=>{
-                    const VolunteerData:Volunteer[] = [];
-                      for(const key in responseData){
-                        if(responseData.hasOwnProperty(key)){
-                          VolunteerData.push({...responseData[key], id: key})
-                        }
-                      }
-                      return VolunteerData;
-                  }
-
-                  )
-                );
       this.isFetching = false;
-      // this.profileUrl = this.volunteersService.getProfileUrl('EmmanuelBaiden');
-  }
-
-  onIdSelection(){
-    // console.log('About to emit');
-    // this.idSelected.emit(null);
   }
 
 }

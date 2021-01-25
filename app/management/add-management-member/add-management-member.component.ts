@@ -28,19 +28,12 @@ export class AddManagementMemberComponent implements OnInit {
   onSaveMember(form: NgForm){
     this.submitted = true;
 
-    this.newMember.firstName = this.addMamangementMemberForm.value.firstName;
-    this.newMember.lastName = this.addMamangementMemberForm.value.lastName;
-    this.newMember.residence = this.addMamangementMemberForm.value.residence;
-    this.newMember.telephone = this.addMamangementMemberForm.value.telephone;
-    this.newMember.position = this.addMamangementMemberForm.value.position;
-    this.newMember.description = this.addMamangementMemberForm.value.description;
-
     if(this.imagePath){
+      this.newMember = form.value;
       this.newMember.img = this.imagePath;
-      console.log(this.newMember);
       this.managementService.saveToFirebase(this.newMember);
     }else{
-      this.managementService.saveToFirebase(this.newMember);
+      this.managementService.saveToFirebase(form.value);
     }
     this.addMamangementMemberForm.reset();
   }
@@ -48,12 +41,10 @@ export class AddManagementMemberComponent implements OnInit {
   onuploadProfileImg(event: any){
     this.isUploading = true;
     const fileName = this.addMamangementMemberForm.value.firstName + this.addMamangementMemberForm.value.lastName;
-    console.log(event, fileName);
     this.managementService.uploadFile(event, fileName);
     this.imgUploadPercent = this.managementService.uploadPercent;
     this.imagePath = fileName;
     setTimeout(()=>{
-      console.log('assigning now');
       this.imgDownloadURL = this.managementService.downloadURL;
       this.isUploading = false;
       this.retrieving = true;

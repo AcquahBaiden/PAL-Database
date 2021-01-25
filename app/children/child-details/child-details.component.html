@@ -41,17 +41,13 @@
               <option style="list-style: none;">{{interest}}</option>
             </select>
           </div>
-          <div class="form-grou">
+          <div class="form-group">
             <label>Notes/Description</label>
             <textarea class="form-control" rows="4">{{ selectedChild.description }}</textarea>
           </div>
         </fieldset>
       </form>
-
-      <p class="card-text">
-      <strong> Notes/Desciption:</strong>
-      </p>
-      <h6 class="card-subtitle-muted">Member of Programs</h6>
+      <h6 class="card-subtitle-muted">Programs enrolled in</h6>
 
     </div>
     <ul class="list-group list-group-flush" *ngFor="let program of selectedChild.programs" style="margin-bottom: 40px;">

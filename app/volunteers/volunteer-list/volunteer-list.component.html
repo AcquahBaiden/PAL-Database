@@ -2,7 +2,7 @@
   <div class="container" style="margin-left: vw;margin-right: 1vw;"  *ngIf="!isFetching">
     <div class="input-group mb-3" style="margin-top: 1vw;">
       <input type="text" class="form-control" placeholder="search"
-      aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+      aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" [(ngModel)]="searchText">
     </div>
 
     <table class="table">
@@ -16,14 +16,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let volunteer of Volunteers |async">
+        <tr *ngFor="let volunteer of Volunteers |async | appFilter: searchText">
           <td><img [src]="'volunteers/'+volunteer.img | getDownloadURL" class="img-thumbnail rounded-circle"
             alt="">
           </td>
           <td>{{ volunteer.firstName }}</td>
           <td>{{ volunteer.lastName }}</td>
-          <td><button class="btn btn-success" [routerLink]="[volunteer.id]" (click)=onIdSelection()>Details</button></td>
-          <td><button class="btn btn-primary">Edit</button></td>
+          <td><button class="btn btn-success" [routerLink]="[volunteer.id]">Details</button></td>
+          <td><button class="btn btn-primary" [routerLink]="[volunteer.id+'/edit']">Edit</button></td>
         </tr>
       </tbody>
 

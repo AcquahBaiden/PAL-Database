@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
+
 import { Volunteer } from 'src/app/interfaces/volunteer.interface';
 import { VolunteersService } from '../volunteers.service';
 
@@ -11,10 +12,12 @@ import { VolunteersService } from '../volunteers.service';
   styleUrls: ['./volunteer-details.component.css']
 })
 export class VolunteerDetailsComponent implements OnInit, OnDestroy {
-  selectedVolunteer: Observable<Volunteer[] | Iterable<Volunteer> | (Iterable<Volunteer> & Volunteer[]) | (Volunteer[] & Iterable<Volunteer>)>;
+  selectedVolunteer: Volunteer;
   volunteerId:string = '';
   volunteerSubscriptionChanged!: Subscription;
   profileUrl: Observable<string|null>
+  detailsSubscription:Subscription;
+  loadingVolunteer=false;
 
   constructor(private route: ActivatedRoute,
     private volunteersService: VolunteersService,
@@ -24,7 +27,10 @@ export class VolunteerDetailsComponent implements OnInit, OnDestroy {
     this.volunteerSubscriptionChanged = this.route.params
       .subscribe(params=>{
         this.volunteerId = params['id'];
-        this.selectedVolunteer = this.volunteersService.getVolunteer(this.volunteerId);
+        this.volunteersService.getVolunteer(this.volunteerId).subscribe(volunteer=>{
+          this.selectedVolunteer = volunteer;
+          this.loadingVolunteer = true;
+        });
       })
   }
 
@@ -34,5 +40,6 @@ export class VolunteerDetailsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(){
     this.volunteerSubscriptionChanged.unsubscribe();
+    this.loadingVolunteer =false;
   }
 }

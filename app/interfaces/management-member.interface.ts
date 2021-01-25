@@ -12,5 +12,5 @@ export interface ManagementMember{
   telephone?: number;
   img?:string;
   id?:string;
-  position: string;
+  position?: string;
 }

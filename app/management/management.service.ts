@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
+import { finalize, map } from 'rxjs/operators';
+import { Observable } from 'rxjs/internal/Observable';
+
 import { AngularFireDatabase } from '@angular/fire/database';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { Observable } from 'rxjs/internal/Observable';
-import { finalize, map } from 'rxjs/operators';
 import { ManagementMember } from '../interfaces/management-member.interface';
 
 @Injectable({
@@ -15,17 +16,27 @@ export class ManagementService {
 
 
   getMamangementData(){
-    return this.db.object('Management').valueChanges();
+    return this.db.object('Management').valueChanges()
+    .pipe(
+      map((responseData:any)=>{
+        const MembersData: ManagementMember[]=[];
+        for(const key in responseData){
+          if(responseData.hasOwnProperty(key)){
+            MembersData.push({...responseData[key], id: key})
+          }
+        }
+        return MembersData
+      }
+    )
+    );;
   }
 
   getMember(id:string){
     const ref = 'Management/'.concat(id);
     return this.db.object<ManagementMember>(ref).valueChanges()
       .pipe(
-        map((responseData:any)=>{
-          const MemberData:ManagementMember[]=[];
-          MemberData.push(responseData);
-          return MemberData;
+        map((memeberData:ManagementMember)=>{
+          return memeberData;
         })
       );
   }
@@ -66,5 +77,13 @@ export class ManagementService {
           return number - 1;
         }
       })
+  }
+
+  updateManagementMember(id:string, editedMember: ManagementMember){
+    this.db.list('Management').update(id,editedMember);
+  }
+
+  updateMemberProfilePhoto(id:string,fileName:string){
+    return this.db.list('Management/'+id).set('img',fileName).then(()=>{return true}).catch(error=>{console.log('Error uploading it')});
   }
 }

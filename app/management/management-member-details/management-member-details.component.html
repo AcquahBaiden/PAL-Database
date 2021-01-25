@@ -1,28 +1,36 @@
-<div class="card" *ngFor="let member of selectedMember | async">
+<div *ngIf="!loadingMember">
 
-
+</div>
+<div class="card" *ngIf="loadingMember">
   <div class="card-body">
-
-    <h4 class="card-title">PAL Management Member PROFILE</h4>
-    <p>Position : {{ member.position }}</p>
-    <h5 class="card-subtitle mb-2">{{member.firstName }} {{ member.lastName }}</h5>
-    <div *ngIf="member.img" class="profile-img">
-      <img [src]="'management/'+member.img | getDownloadURL" class="card-img-top rounded-large" alt="">
+    <h4 class="card-title">Member profile</h4>
+    <p>Position : {{ selectedMember.position }}</p>
+    <h5 class="card-subtitle mb-2">{{selectedMember.firstName }} {{ selectedMember.lastName }}</h5>
+    <div *ngIf="selectedMember.img" class="profile-img">
+      <img [src]="'management/'+selectedMember.img | getDownloadURL" class="card-img-top rounded-large" alt="">
     </div>
-    <div *ngIf="!member.img" class="profile-img">
+    <div *ngIf="!selectedMember.img" class="profile-img">
       <img src="https://via.placeholder.com/150" class="card-img-top rounded-large" alt="">
     </div>
     <p class="card-text">
-      <strong> Notes/Desciption:</strong> {{ member.description }}
+      <strong> Notes/Desciption:</strong> {{ selectedMember.description }}
     </p>
-    <h6 class="card-subtitle-muted">Member of Programs</h6>
-
+    <div class="form-group">
+      <label>Position/Role</label>
+      <textarea class="form-control" readonly rows="3">{{ selectedMember.position }}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+        <input type="text" readonly class="form-control" value="{{selectedMember.email}}">
+    </div>
+    <div class="form-group">
+      <label>Telephone</label>
+        <input type="text" readonly class="form-control" value="{{selectedMember.telephone}}">
+    </div>
+    <div class="form-group">
+      <label>Residence</label>
+      <textarea class="form-control" readonly rows="3">{{ selectedMember.residence }}</textarea>
+    </div>
   </div>
-  <ul class="list-group list-group-flush">
-    <li class="list-group-item">Program 1</li>
-    <li class="list-group-item">Program 2</li>
-    <li class="list-group-item">Program 3</li>
-  </ul>
   <button (click)="onDeleteMember()" class="btn btn-danger">Delete this profile</button>
-
 </div>

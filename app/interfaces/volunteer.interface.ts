@@ -13,4 +13,5 @@ export interface Volunteer{
   level?:string;
   program?:string;
   id?:string;
+  email?:string;
 }

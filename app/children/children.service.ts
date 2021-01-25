@@ -37,7 +37,7 @@ export class ChildrenService{
 
   }
 
-  saveToFirebase(data: Child){
+  saveToDB(data: Child){
     const itemsRef = this.db.list('Children');
     itemsRef.push(data);
     this.db.object('Summary/children/number').query.ref

@@ -14,22 +14,33 @@ export class VolunteersService {
   constructor(private db: AngularFireDatabase, private storage: AngularFireStorage) { }
 
   getVolunteersData(){
-    return this.db.object('Volunteers').valueChanges();
+    return this.db.object('Volunteers').valueChanges()
+    .pipe(
+      map((responseData:any)=>{
+        const VolunteerData:Volunteer[] = [];
+          for(const key in responseData){
+            if(responseData.hasOwnProperty(key)){
+              VolunteerData.push({...responseData[key], id: key})
+            }
+          }
+          return VolunteerData;
+      }
+
+      )
+    );
   }
 
   getVolunteer(id:string){
     const ref = 'Volunteers/'.concat(id);
     return this.db.object(ref).valueChanges()
       .pipe(
-        map((responseData:any)=>{
-          const volunteerData:Volunteer[]=[];
-          volunteerData.push(responseData);
-          return volunteerData;
+        map((responseData:Volunteer)=>{
+          return responseData;
         })
       );
   }
 
-  saveToFirebase(data: Volunteer){
+  saveToDB(data: Volunteer){
     const itemsRef = this.db.list('Volunteers');
     itemsRef.push(data);
     this.db.object('Summary/volunteers/number').query.ref
@@ -43,7 +54,6 @@ export class VolunteersService {
   }
 
   uploadFile(event: any, fileName:string) {
-    console.log('on the other side');
     const file = event.target.files[0];
     const fileRef = this.storage.ref('volunteers/'+fileName);
     const task = this.storage.upload('volunteers/'+fileName, file);
@@ -66,4 +76,14 @@ export class VolunteersService {
         }
       })
   }
+
+  updateVolunteer(id:string, editedVolunteer:Volunteer){
+    this.db.list('Volunteers/').update(id, editedVolunteer);
+  }
+
+  updateVolunteerProfilePhoto(id:string,fileName:string){
+    return this.db.list('Volunteers/'+id).set('img',fileName).then(()=>{return true}).catch(error=>{console.log('Error uploading it')});
+  }
+
+
 }

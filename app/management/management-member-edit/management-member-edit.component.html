@@ -1,1 +1,89 @@
-<p>management-member-edit works!</p>
+<div class="card">
+  <div class="card-body">
+  <h4 class="card-title">Editing Volunteer</h4>
+  <form (ngSubmit)="onUpdateMember(editForm)" #editForm="ngForm">
+    <div *ngIf="imageLoaded">
+      <img [src]="'management/'+profileImg | getDownloadURL" class="card-img-top rounded-large" alt="...">
+    </div>
+    <div *ngIf="!imageLoaded">
+      <img src="https://via.placeholder.com/150" class="card-img-top rounded-large" alt="">
+    </div>
+    <div class="form-group row">
+      <label for="imgUpload" class="col col-form-label">Update profile image</label>
+      <div class="col">
+        <input type="file" class="form-control-file" (change)="onuploadProfileImg($event)">
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="firstName" class="col col-form-label">First name</label>
+      <div class="col">
+        <input type="text" class="form-control"
+        ngModel name="firstName"
+        required
+        #firstName="ngModel">
+        <span class="help-block" *ngIf="!firstName.valid && firstName.touched">
+          <p>Please enter a valid first name</p>
+        </span>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="lastName" class="col col-form-label">Last name</label>
+      <div class="col">
+        <input type="text" class="form-control"
+        ngModel name="lastName"
+        required
+        #lastName="ngModel">
+        <span class="help-block" *ngIf="!lastName.valid && lastName.touched">
+          <p>Please enter a valid last name</p>
+        </span>
+      </div>
+
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">Email</label>
+      <div class="col">
+        <input type="text" class="form-control"
+        ngModel name="email"
+        >
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">Position/Role</label>
+      <div class="col">
+        <input type="text" class="form-control"
+        ngModel name="position"
+        >
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">Telephone</label>
+      <div class="col">
+        <input type="text" class="form-control"
+        ngModel name="telephone"
+        >
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">Residence</label>
+      <div class="col">
+        <textarea class="form-control"
+        ngModel name = "residence"
+        ></textarea>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="" class="col col-form-label">Description/Notes</label>
+      <div class="col">
+        <textarea class="form-control"
+        ngModel name = "description"
+        ></textarea>
+      </div>
+    </div>
+    <div class="form-group row">
+      <button type="submit" class="btn btn-primary btn-block">Update Manager Data</button>
+    </div>
+  </form>
+
+</div>
+</div>
+

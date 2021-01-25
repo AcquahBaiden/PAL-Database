@@ -27,38 +27,29 @@ export class AddVolunteerComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  onSaveChild(form: NgForm){
+  onSaveVolunteer(form: NgForm){
     this.submitted = true;
 
-    this.newVolunteer.firstName = this.addVolunteerForm.value.firstName;
-    this.newVolunteer.lastName = this.addVolunteerForm.value.lastName;
-    this.newVolunteer.residence = this.addVolunteerForm.value.residence;
-    this.newVolunteer.telephone = this.addVolunteerForm.value.telephone;
-    this.newVolunteer.school = this.addVolunteerForm.value.school;
-    this.newVolunteer.program = this.addVolunteerForm.value.program;
-    this.newVolunteer.level = this.addVolunteerForm.value.level;
-
     if(this.imagePath){
+      this.newVolunteer = form.value;
       this.newVolunteer.img = this.imagePath;
       console.log(this.newVolunteer);
-      this.volunteersService.saveToFirebase(this.newVolunteer);
-      // this.imagePath = '';
+      this.volunteersService.saveToDB(this.newVolunteer);
     }else{
-      this.volunteersService.saveToFirebase(this.newVolunteer);
+      this.volunteersService.saveToDB(form.value);
     }
     this.addVolunteerForm.reset();
+
   }
 
 
   onuploadProfileImg(event: any){
     this.isUploading = true;
     const fileName = this.addVolunteerForm.value.firstName + this.addVolunteerForm.value.lastName;
-    console.log(event, fileName);
     this.volunteersService.uploadFile(event, fileName);
     this.imgUploadPercent = this.volunteersService.uploadPercent;
     this.imagePath = fileName;
     setTimeout(()=>{
-      console.log('assigning now');
       this.imgDownloadURL = this.volunteersService.downloadURL;
       this.isUploading = false;
       this.retrieving = true;

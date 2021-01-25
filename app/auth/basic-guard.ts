@@ -16,14 +16,14 @@ export class BasicGuard implements CanActivate{
     return this.authService.getUserAccessFromDatabase().then((data)=>{
       if(!data){
         console.log('Not data');
-        return this.router.createUrlTree(['/summary']);
+        return false
       }
       if(data.val().basic){
         return true;
       }else{
         return this.router.createUrlTree(['/noAccess']);
       }
-    });
+    })
 
   }
 
