@@ -44,7 +44,6 @@ export class AddChildComponent implements OnInit {
 
     if(this.imagePath!=''){
       this.newChild.img = this.imagePath;
-      console.log(this.newChild);
       this.childrenService.saveToDB(this.newChild);
       this.imagePath = '';
     }else{
@@ -55,21 +54,17 @@ export class AddChildComponent implements OnInit {
   }
 
   onAddInterest(form:any){
-    console.log(form);
     this.interests.push(form.value);
   }
 
   onAddProgram(programName:any, programYear:any){
-    console.log(programName.value, programYear.value);
     this.programs.push({'program':programName.value,'year':programYear.value});
-    console.log(this.programs);
   }
 
 
   onuploadProfileImg(event: any){
     this.isUploading = true;
     const fileName = this.addChildForm.value.firstName + this.addChildForm.value.lastName;
-    console.log(event, fileName);
     this.childrenService.uploadFile(event, fileName);
     this.imgUploadPercent = this.childrenService.uploadPercent;
     this.imagePath = fileName

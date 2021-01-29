@@ -1,5 +1,8 @@
 
-<div style="min-height: 100%;" *ngIf="authService.auth.user | async as user; else login">
+<div *ngIf="!dataLoaded" class="loader">
+
+</div>
+<div style="min-height: 95vh;" *ngIf="authService.auth.user | async as user; else login">
 
   <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
@@ -32,7 +35,7 @@
     </div>
   </div>
 </div>
-<ng-template class="container" #login>
+<ng-template class="container" #login  style="min-height: 98vh;">
   <div class="card" style="max-width: 450px; margin: auto; margin-top: 40px;">
     <ul class="nav nav-tabs">
       <li class="nav-item">
@@ -68,7 +71,7 @@
         <button type="submit" class="btn btn-primary" [disabled]="!loginForm.valid">Log in</button>
         <!-- <button (click)="onLoginWithPopUp()">Login with Google</button> -->
       </form>
-      <form (ngSubmit)="onSignUp(signUpForm)"  #signUpForm="ngForm" *ngIf="!formIsLogin">
+      <form (ngSubmit)="onSignUp()"  #signUpForm="ngForm" *ngIf="!formIsLogin">
         <h3 class="card-title">Sign up</h3>
         <div class="form-group">
           <label for="exampleInputEmail1">Email address</label>

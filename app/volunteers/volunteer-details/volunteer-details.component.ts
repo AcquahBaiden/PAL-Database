@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs';
 
@@ -20,7 +20,7 @@ export class VolunteerDetailsComponent implements OnInit, OnDestroy {
   dataLoaded=false;
 
   constructor(private route: ActivatedRoute,
-    private volunteersService: VolunteersService,
+    private volunteersService: VolunteersService, private router: Router
     ) { }
 
   ngOnInit(): void {
@@ -35,7 +35,12 @@ export class VolunteerDetailsComponent implements OnInit, OnDestroy {
   }
 
   onDeleteVolunteer(){
+    this.dataLoaded = false;
     this.volunteersService.deleteVolunteer(this.volunteerId);
+    setTimeout(()=>{
+      this.dataLoaded = true;
+      this.router.navigate(['volunteers']);
+    },1500)
   }
 
   ngOnDestroy(){

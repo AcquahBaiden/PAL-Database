@@ -51,7 +51,6 @@ export class VolunteerEditComponent implements OnInit, OnDestroy {
   }
 
   onUpdateVolunteer(form: NgForm){
-    console.log(form.value);
     this.volunteersService.updateVolunteer(this.volIdToEdit,form.value);
   }
 

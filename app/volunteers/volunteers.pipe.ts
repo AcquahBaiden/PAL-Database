@@ -10,7 +10,6 @@ export class VolunteersFilterPipe implements PipeTransform {
    * @returns {any[]}
    */
   transform(items: any[], searchText: string): any[] {
-    // console.log('filter set', items);
     if (!items) {
       return [];
     }

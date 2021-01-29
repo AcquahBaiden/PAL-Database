@@ -46,6 +46,17 @@ export class AuthService {
         .then(() => (this.userIsNewSignup = false));
   }
 
+  addNewUserCount(){
+    this.db.object('Summary/DatabaseUsers/number').query.ref
+    .transaction(number=>{
+      if(number===null){
+        return number = 1;
+      }else{
+        return number + 1;
+      }
+    })
+  }
+
   getUserId() {
     if (this.userIsNewSignup) {
       return null;
@@ -63,4 +74,5 @@ export class AuthService {
     }
     return null;
   }
+
 }

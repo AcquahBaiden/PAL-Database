@@ -15,7 +15,6 @@ export class BasicGuard implements CanActivate{
   canActivate():Observable<boolean|UrlTree>|Promise<boolean|UrlTree>|boolean|UrlTree {
     return this.authService.getUserAccessFromDatabase().then((data)=>{
       if(!data){
-        console.log('Not data');
         return false
       }
       if(data.val().basic){

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ManagementMember } from 'src/app/interfaces/management-member.interface';
 import { ManagementService } from '../management.service';
@@ -15,7 +15,7 @@ export class ManagementMemberDetailsComponent implements OnInit, OnDestroy {
   selectedMember: ManagementMember;
   dataLoaded = false;
   constructor(private route: ActivatedRoute,
-    private managementService: ManagementService) { }
+    private managementService: ManagementService,private router:Router) { }
 
   ngOnInit(): void {
     this.memberSubscription = this.route.params
@@ -29,7 +29,12 @@ export class ManagementMemberDetailsComponent implements OnInit, OnDestroy {
   }
 
   onDeleteMember(){
+    this.dataLoaded = false;
     this.managementService.deleteMember(this.memberId);
+    setTimeout(()=>{
+      this.dataLoaded = true;
+      this.router.navigate(['management']);
+    },1500)
   }
 
   ngOnDestroy(){

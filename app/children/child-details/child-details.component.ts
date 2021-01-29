@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, Observable } from 'rxjs';
 
 import { Child } from 'src/app/interfaces/child.interface';
@@ -19,7 +19,7 @@ export class ChildDetailsComponent implements OnInit, OnDestroy {
    dataLoaded =false;
 
   constructor(private route: ActivatedRoute,
-    private childrenService: ChildrenService) { }
+    private childrenService: ChildrenService, private router: Router) { }
 
 
     ngOnInit(){
@@ -36,7 +36,13 @@ export class ChildDetailsComponent implements OnInit, OnDestroy {
   }
 
   onDeleteChild(){
+    this.dataLoaded = false;
     this.childrenService.deleteChild(this.childId);
+    setTimeout(()=>{
+      this.dataLoaded = true;
+      this.router.navigate(['/children']);
+    },1500)
+
   }
 
   ngOnDestroy(): void {

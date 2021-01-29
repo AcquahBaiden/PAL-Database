@@ -19,6 +19,7 @@ import { NoAccessComponent } from './no-access/no-access.component';
 import { ChildrenModule } from './children/children.module';
 import { VolunteersModule } from './volunteers/volunteers.module';
 import { ManagementModule } from './management/management.module';
+import { AdminFilterPipe } from './admin/admin.pipe';
 
 
 @NgModule({
@@ -29,7 +30,8 @@ import { ManagementModule } from './management/management.module';
     SideBarComponent,
     AdminComponent,
     AccessControlComponent,
-    NoAccessComponent
+    NoAccessComponent,
+    AdminFilterPipe
   ],
   imports: [
     BrowserModule,

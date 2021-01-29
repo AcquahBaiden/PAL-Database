@@ -16,33 +16,51 @@ export class AppComponent {
   @ViewChild('loginForm') loginForm!: NgForm;
   @ViewChild('signUpForm') signUpForm!: NgForm;
   userId: string = null;
+  dataLoaded = true;
 
   onLoginWithPopUp() {
     this.authService.loginWithPopUp();
   }
   onLogout() {
-    this.authService.logout();
+    this.dataLoaded = false;
+    setTimeout(()=>{
+      this.authService.logout();
+    },1000)
+    this.dataLoaded = true;
     this.isLoginError = false;
   }
 
   onSignIn(){
-    this.authService.signIn(this.loginForm.value.email, this.loginForm.value.password).then((user)=>this.authService.AuthUserId = user.user.uid)
-    .catch((error) =>{
-    this.isLoginError = true;
-      switch(error.code){
-        case 'auth/user-not-found':
-          this.errorMessage = 'Email address not registered to an account. Please sign up';
-          break;
-        case 'auth/wrong-password':
-          this.errorMessage = 'Incorrect password. Please try again!';
-          break;
-        case 'auth/network-request-failed':
-          this.errorMessage = 'A network error occured. Please check your internet and try again';
-          break;
-        default:
-          this.errorMessage = 'Something went wrong. Please try again later';
-      }
-    })
+    setTimeout(() => {
+      this.dataLoaded = false;
+      this.authService
+        .signIn(this.loginForm.value.email, this.loginForm.value.password)
+        .then((user) => {
+          this.authService.AuthUserId = user.user.uid;
+          this.dataLoaded = true;
+        })
+        .catch((error) => {
+          this.dataLoaded = true;
+          this.isLoginError = true;
+          switch (error.code) {
+            case "auth/user-not-found":
+              this.errorMessage =
+                "Email address not registered to an account. Please sign up";
+              break;
+            case "auth/wrong-password":
+              this.errorMessage = "Incorrect password. Please try again!";
+              break;
+            case "auth/network-request-failed":
+              this.errorMessage =
+                "A network error occured. Please check your internet and try again";
+              break;
+            default:
+              this.errorMessage =
+                "Something went wrong. Please try again later";
+          }
+        });
+    }, 1000);
+
   }
 
   toggleLogInView(view: string){
@@ -53,10 +71,11 @@ export class AppComponent {
       this.formIsLogin = false;
   }
 
-  onSignUp(form:NgForm){
+  onSignUp(){
     this.authService.userIsNewSignup = true;
     this.authService.signUp(this.signUpForm.value.signupEmail, this.signUpForm.value.signupPassword).then((user)=>{
-      this.authService.setUpAccessData(user)
+      this.authService.setUpAccessData(user);
+      this.authService.addNewUserCount();
     }).catch((error)=>{
       this.isLoginError = true;
       switch(error.code){

@@ -33,7 +33,6 @@ export class AddVolunteerComponent implements OnInit {
     if(this.imagePath){
       this.newVolunteer = form.value;
       this.newVolunteer.img = this.imagePath;
-      console.log(this.newVolunteer);
       this.volunteersService.saveToDB(this.newVolunteer);
     }else{
       this.volunteersService.saveToDB(form.value);
