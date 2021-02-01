@@ -12,7 +12,6 @@ export class AuthService {
   ) {}
   AuthUserId: string = null;
   userIsNewSignup: boolean;
-  password:string='';
 
   loginWithPopUp() {
     this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
@@ -27,7 +26,6 @@ export class AuthService {
   }
 
   signUp(email: string, password: string) {
-    this.password = password;
     return this.auth.createUserWithEmailAndPassword(email, password);
   }
 
@@ -38,7 +36,6 @@ export class AuthService {
           'basic': false,
           'admin': false,
           'email': user.user.email,
-          'password': this.password,
           'volunteers': false,
           'children': false,
           'management':false,
