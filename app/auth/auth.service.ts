@@ -38,7 +38,6 @@ export class AuthService {
           'basic': false,
           'admin': false,
           'email': user.user.email,
-          'password': this.password,
           'volunteers': false,
           'children': false,
           'management':false,
