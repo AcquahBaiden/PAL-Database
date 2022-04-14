@@ -12,6 +12,7 @@
 # dependencies
 /node_modules
 /src/environments
+/functions/node_modules
 
 # firebase files and dependencies
 /.firebase
