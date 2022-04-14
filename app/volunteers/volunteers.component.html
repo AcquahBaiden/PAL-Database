@@ -1,0 +1,27 @@
+<!--
+<div *ngFor="let access of accesses | async">
+  <div class="row" *ngIf="access.category === 'volunteers' && access.access">
+    <div class="col-xs-12 col">
+      <app-volunteer-list></app-volunteer-list>
+    </div>
+    <div class="col-xs-12 col">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+  <div *ngIf="access.category === 'volunteers' && !access.access">
+    <div class="card" style="padding: 20px;">
+      <p>You do not have access to this section. Contact admin to grant you access</p>
+    </div>
+  </div>
+</div> -->
+
+<div>
+  <div class="row">
+    <div class="col-xs-12 col">
+      <app-volunteer-list></app-volunteer-list>
+    </div>
+    <div class="col-xs-12 col">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

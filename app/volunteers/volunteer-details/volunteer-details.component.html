@@ -1,0 +1,45 @@
+<div *ngIf="!dataLoaded" class="loader">
+
+</div>
+<div class="card" *ngIf="dataLoaded">
+    <div class="card-body">
+      <h4 class="card-title">Volunteer Profile</h4>
+      <h5 class="card-subtitle mb-2">{{selectedVolunteer.firstName }} {{ selectedVolunteer.lastName }}</h5>
+      <div *ngIf="selectedVolunteer.img">
+        <img [src]="'volunteers/'+selectedVolunteer.img | getDownloadURL" class="card-img-top rounded-large" alt="">
+      </div>
+      <div *ngIf="!selectedVolunteer.img">
+        <img src="https://via.placeholder.com/150" class="card-img-top rounded-large" alt="">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+          <input type="text" readonly class="form-control" value="{{selectedVolunteer.email}}">
+      </div>
+      <div class="form-group">
+        <label>Telephone</label>
+          <input type="text" readonly class="form-control" value="{{selectedVolunteer.telephone}}">
+      </div>
+      <div class="form-group">
+        <label>Residence</label>
+        <textarea class="form-control" readonly rows="3">{{ selectedVolunteer.residence }}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Level</label>
+          <input type="text" readonly class="form-control" value="{{selectedVolunteer.level}}">
+      </div>
+      <div class="form-group">
+        <label>School</label>
+        <textarea class="form-control" readonly rows="3">{{ selectedVolunteer.school }}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Program/Department</label>
+        <textarea class="form-control" readonly rows="3">{{ selectedVolunteer.program }}</textarea>
+      </div>
+
+    </div>
+    <button (click)="onDeleteVolunteer()" class="btn btn-danger">Delete this profile</button>
+
+  </div>
+
+
+

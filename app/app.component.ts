@@ -1,57 +1,93 @@
 import { Component, ViewChild } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { FormControl, NgForm } from '@angular/forms';
-import  firebase  from 'firebase/app'
-
-
+import { NgForm } from '@angular/forms';
+import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
+
 export class AppComponent {
-  constructor( public auth: AngularFireAuth){}
-  title = 'PAL-DB';
+  constructor(public authService: AuthService){}
   formIsLogin = true;
   errorMessage= '';
   isLoginError:boolean=false;
-  loginIsActive: boolean = true;
   @ViewChild('loginForm') loginForm!: NgForm;
   @ViewChild('signUpForm') signUpForm!: NgForm;
-  newForm= new FormControl;
+  userId: string = null;
+  dataLoaded = true;
 
-  login() {
-    this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  onLoginWithPopUp() {
+    this.authService.loginWithPopUp();
   }
-  logout() {
-    this.auth.signOut();
+  onLogout() {
+    this.dataLoaded = false;
+    setTimeout(()=>{
+      this.authService.logout();
+    },1000)
+    this.dataLoaded = true;
+    this.isLoginError = false;
   }
-  signIn(form: NgForm){
-    this.auth.signInWithEmailAndPassword(this.loginForm.value.email, this.loginForm.value.password)
-    .catch((error) =>{ console.log('eror code is', error.code);
-    this.isLoginError = true;
-      switch(error.code){
-        case 'auth/user-not-found':
-          this.errorMessage = 'Email address not registered to an account. Please sign up';
-          break;
-        case 'auth/wrong-password':
-          this.errorMessage = 'Incorrect password. Please try again!';
-      }
-    });
+
+  onSignIn(){
+    setTimeout(() => {
+      this.dataLoaded = false;
+      this.authService
+        .signIn(this.loginForm.value.email, this.loginForm.value.password)
+        .then((user) => {
+          this.authService.AuthUserId = user.user.uid;
+          this.dataLoaded = true;
+        })
+        .catch((error) => {
+          this.dataLoaded = true;
+          this.isLoginError = true;
+          switch (error.code) {
+            case "auth/user-not-found":
+              this.errorMessage =
+                "Email address not registered to an account. Please sign up";
+              break;
+            case "auth/wrong-password":
+              this.errorMessage = "Incorrect password. Please try again!";
+              break;
+            case "auth/network-request-failed":
+              this.errorMessage =
+                "A network error occured. Please check your internet and try again";
+              break;
+            default:
+              this.errorMessage =
+                "Something went wrong. Please try again later";
+          }
+        });
+    }, 1000);
+
   }
 
   toggleLogInView(view: string){
-    if(view == 'login'){
+    if(view === 'login'){
       this.formIsLogin = true;
-      this.loginIsActive = true
-    }else{
-      this.formIsLogin = false;
-      this.loginIsActive = false;
+      return
     }
+      this.formIsLogin = false;
   }
 
-  signUp(form: NgForm){
-    this.auth.createUserWithEmailAndPassword(this.signUpForm.value.signupEmail, this.signUpForm.value.signupPassword)
+  onSignUp(){
+    this.authService.userIsNewSignup = true;
+    this.authService.signUp(this.signUpForm.value.signupEmail, this.signUpForm.value.signupPassword).then((user)=>{
+      this.authService.setUpAccessData(user);
+      this.authService.addNewUserCount();
+    }).catch((error)=>{
+      this.isLoginError = true;
+      switch(error.code){
+        case 'auth/network-request-failed':
+          this.errorMessage = 'A network error occured. Please check your internet and try again';
+          break;
+        case 'auth/email-already-in-use':
+          this.errorMessage = 'The email is already in use by another account';
+          break;
+        default:
+          this.errorMessage = 'Something went wrong. Please try again later';
+      }
+    });
   }
 }

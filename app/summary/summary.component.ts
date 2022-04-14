@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { PALService } from '../pal.service';
 
@@ -12,11 +13,11 @@ import { PALService } from '../pal.service';
 export class SummaryComponent implements OnInit {
   Summary: any;
   isFetching: boolean = true;
+  summarySubscription: Subscription;
   constructor(private palservice: PALService) {  }
 
   ngOnInit(): void {
-    this.Summary = this.palservice.getDBSummaries();
-    this.isFetching = false;
+   this.Summary = this.palservice.getDBSummaries();
   }
 
 }

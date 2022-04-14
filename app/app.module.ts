@@ -11,13 +11,15 @@ import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HeaderComponent } from './header/header.component';
 import { SummaryComponent } from './summary/summary.component';
-import { ChildrenListComponent } from './children/children-list/children-list.component';
-import { ChildrenComponent } from './children/children.component';
-import { ChildEditComponent } from './children/child-edit/child-edit.component';
-import { ChildDetailsComponent } from './children/child-details/child-details.component';
 import { SideBarComponent } from './side-bar/side-bar.component';
-import { AddChildComponent } from './children/add-child/add-child.component';
-import { ChildrenService } from './children/children.service';
+import { AdminComponent } from './admin/admin.component';
+import { AccessControlComponent } from './admin/access-control/access-control.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoAccessComponent } from './no-access/no-access.component';
+import { ChildrenModule } from './children/children.module';
+import { VolunteersModule } from './volunteers/volunteers.module';
+import { ManagementModule } from './management/management.module';
+import { AdminFilterPipe } from './admin/admin.pipe';
 
 
 @NgModule({
@@ -25,12 +27,11 @@ import { ChildrenService } from './children/children.service';
     AppComponent,
     HeaderComponent,
     SummaryComponent,
-    ChildrenListComponent,
-    ChildrenComponent,
-    ChildEditComponent,
-    ChildDetailsComponent,
     SideBarComponent,
-    AddChildComponent
+    AdminComponent,
+    AccessControlComponent,
+    NoAccessComponent,
+    AdminFilterPipe
   ],
   imports: [
     BrowserModule,
@@ -39,9 +40,13 @@ import { ChildrenService } from './children/children.service';
     FormsModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAnalyticsModule,
-    AngularFireStorageModule
+    AngularFireStorageModule,
+    BrowserAnimationsModule,
+    ChildrenModule,
+    VolunteersModule,
+    ManagementModule
   ],
-  providers: [ChildrenService],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

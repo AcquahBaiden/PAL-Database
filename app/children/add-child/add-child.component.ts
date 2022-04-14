@@ -14,13 +14,14 @@ export class AddChildComponent implements OnInit {
 
   @ViewChild('f') addChildForm!: NgForm;
   newForm = new FormControl;
-  submitted:boolean = false;
   newChild: Child={firstName:'', lastName:''};
   imgUploadPercent: Observable<number>;
   imgDownloadURL:Observable<string>;
   isUploading = false;
   imagePath: string ='';
   retrieving: boolean = false;
+  interests:string[]=[];
+  programs:{program:string, year: string}[]=[];
 
   constructor(private childrenService: ChildrenService) { }
 
@@ -28,7 +29,6 @@ export class AddChildComponent implements OnInit {
   }
 
   onSaveChild(form: NgForm){
-    this.submitted = true;
 
     this.newChild.firstName = this.addChildForm.value.firstName;
     this.newChild.lastName = this.addChildForm.value.lastName;
@@ -38,35 +38,37 @@ export class AddChildComponent implements OnInit {
     this.newChild.school = this.addChildForm.value.school;
     this.newChild.parentName = this.addChildForm.value.parentName;
     this.newChild.parentTel = this.addChildForm.value.parentTel;
+    this.newChild.description = this.addChildForm.value.description;
+    this.newChild.interests = this.interests;
+    this.newChild.programs = this.programs;
 
     if(this.imagePath!=''){
       this.newChild.img = this.imagePath;
-      console.log(this.newChild);
-      this.childrenService.saveToFirebase(this.newChild);
+      this.childrenService.saveToDB(this.newChild);
       this.imagePath = '';
     }else{
-      this.childrenService.saveToFirebase(this.newChild);
+      this.childrenService.saveToDB(this.newChild);
     }
-    // this.childrenService.saveToFirebase(this.newChild);
 
     this.addChildForm.reset();
   }
 
+  onAddInterest(form:any){
+    this.interests.push(form.value);
+  }
 
-  saveImgPath(event:any, fileName: string){
-    this.imagePath = fileName.concat('.'.concat(event.target.files[0].name.split('.').pop()));
+  onAddProgram(programName:any, programYear:any){
+    this.programs.push({'program':programName.value,'year':programYear.value});
   }
 
 
   onuploadProfileImg(event: any){
     this.isUploading = true;
     const fileName = this.addChildForm.value.firstName + this.addChildForm.value.lastName;
-    console.log(event, fileName);
     this.childrenService.uploadFile(event, fileName);
     this.imgUploadPercent = this.childrenService.uploadPercent;
-    this.saveImgPath(event, fileName);
+    this.imagePath = fileName
     setTimeout(()=>{
-      console.log('assigning now');
       this.imgDownloadURL = this.childrenService.downloadURL;
       this.isUploading = false;
       this.retrieving = true;

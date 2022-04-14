@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { Child } from 'src/app/interfaces/child.interface';
 import { ChildrenService } from '../children.service';
-import { PALService } from 'src/app/pal.service';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-children-list',
@@ -11,21 +10,17 @@ import { Observable } from 'rxjs';
   styleUrls: ['./children-list.component.css']
 })
 export class ChildrenListComponent implements OnInit {
-  fetchedChildren!:  Child[];
   isFetching:boolean = true;
-  profileUrl!: Observable<any>;
+  searchText = '';
 
-  dbchildren:any;
-  constructor(private childrenService: ChildrenService,
-    private palservice: PALService) {}
+  dbchildren:Observable<Child[]>;
+  constructor(private childrenService: ChildrenService) {}
 
 
   ngOnInit(): void {
     this.isFetching = true;
-  // this.fetchedChildren =  this.childrenService.getChildrenData();
-  this.dbchildren =  this.palservice.getDbChildren();
+  this.dbchildren =  this.childrenService.getDbChildren();
   this.isFetching = false;
-  this.profileUrl = this.childrenService.getProfileUrl('EmmanuelBaiden');
   }
 
 }
