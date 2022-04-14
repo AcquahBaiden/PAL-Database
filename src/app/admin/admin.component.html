@@ -1,0 +1,76 @@
+<!--
+
+  <div *ngFor="let access of accesses | async">
+    <div *ngIf="access.category === 'admin' && access.access">
+      <div class="card">
+        <div class="container" style="margin-left: vw;margin-right: 1vw;"  *ngIf="!isFetching">
+          <div class="input-group mb-3" style="margin-top: 1vw;">
+            <input type="text" class="form-control" placeholder="search"
+            aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">User email</th>
+              </tr>
+            </thead>
+            <tbody>
+                <app-access-control *ngFor="let userAccess of usersAccessList | async" [userAccessData] = "userAccess"></app-access-control>
+            </tbody>
+
+          </table>
+          </div>
+        </div>
+        <p *ngIf="isFetching">
+          Loading.....
+        </p>
+    </div>
+    <div *ngIf="access.category === 'admin' && !access.access">
+      <div class="card" style="padding: 20px;">
+        <p>You do not have access to this section. Contact admin to grant you access</p>
+      </div>
+    </div>
+  </div> -->
+
+
+
+<div class="card">
+  <div class="container" style="margin-left: vw;margin-right: 1vw;"  *ngIf="!isFetching">
+    <div class="input-group mb-3" style="margin-top: 1vw;">
+      <input type="text" class="form-control" placeholder="search"
+      aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" [(ngModel)]="searchText">
+    </div>
+
+    <!-- <table class="table">
+      <thead>
+        <tr>
+          <th scope="col" style="width: 1rem;">#</th>
+          <th scope="col" style="">User email</th>
+          <th scope="col">Children</th>
+          <th scope="col">User email</th>
+        </tr>
+      </thead>
+      <tbody>
+
+      </tbody>
+
+    </table> -->
+    <div class="row">
+      <span style="width: 12rem;">
+        Email
+      </span>
+      <span class="heading" style="width: 7rem;"> Verify </span>
+      <span class="heading" style="width: 7rem;"> Children </span>
+      <span class="heading" style="width: 7rem;"> Volunteers </span>
+      <span class="heading" style="width: 7rem;"> Management </span>
+    </div>
+    <app-access-control *ngFor="let userAccess of usersAccessList | async | adminFilter: searchText" [userAccessData] = "userAccess"></app-access-control>
+    </div>
+  </div>
+  <p *ngIf="isFetching">
+    Loading.....
+  </p>
+
+
+

@@ -1,0 +1,36 @@
+<div class="card">
+  <div class="container" style="margin-left: vw;margin-right: 1vw;"  *ngIf="!isFetching">
+    <div class="input-group mb-3" style="margin-top: 1vw;">
+      <input type="text" class="form-control" placeholder="Search by first name"
+      aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" [(ngModel)]="searchText">
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col"></th>
+          <th scope="col">First</th>
+          <th scope="col">Last</th>
+          <th scope="col">Action</th>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let volunteer of Volunteers | async | volunteersFilter: searchText; let i = index">
+          <th scope="row">{{i + 1}}</th>
+          <td *ngIf="volunteer.img"><img [src]=" 'volunteers/'+volunteer.img | getDownloadURL" class="img-thumbnail rounded-circle" alt=""></td>
+          <td *ngIf="!volunteer.img"><img src="https://via.placeholder.com/150" class="img-thumbnail rounded-circle" alt=""></td>
+          <td>{{ volunteer.firstName }}</td>
+          <td>{{ volunteer.lastName }}</td>
+          <td><button class="btn btn-primary" [routerLink]="[volunteer.id]">Details</button></td>
+          <td><button class="btn btn-light" [routerLink]="[volunteer.id+'/edit']">Edit</button></td>
+        </tr>
+      </tbody>
+
+    </table>
+    </div>
+  </div>
+  <p *ngIf="isFetching">
+    Loading.....
+  </p>

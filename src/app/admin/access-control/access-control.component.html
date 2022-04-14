@@ -1,0 +1,52 @@
+<tr style="display: flex; flex-wrap: wrap;">
+  <!-- {{userAccessData|json}} -->
+  <!-- <td > {{ userAccessData.email }}</td> -->
+  <!-- <td *ngIf="!userAccessData.basic">New User <button class="btn btn-primary" (click)="toggleUserBasicAccess()">Verify user</button></td>
+  <td *ngIf="userAccessData.children && userAccessData.basic">Children <button class="btn btn-danger" (click)="toggleChildrenAccess()">Remove</button></td>
+  <td *ngIf="!userAccessData.children && userAccessData.basic">Children <button class="btn btn-success" (click)="toggleChildrenAccess()">Grant</button></td>
+  <td *ngIf="userAccessData.volunteers && userAccessData.basic">Volunteers <button class="btn btn-danger" (click)="toggleVolunteersAccess()">Remove</button></td>
+  <td *ngIf="!userAccessData.volunteers && userAccessData.basic">Volunteers <button class="btn btn-success" (click)="toggleVolunteersAccess()">Grant</button></td>
+  <td *ngIf="userAccessData.management && userAccessData.basic">Management <button class="btn btn-danger" (click)="toggleManagementAccess()">Remove</button></td>
+  <td *ngIf="!userAccessData.management && userAccessData.basic">Management <button class="btn btn-success" (click)="toggleManagementAccess()">Grant</button></td> -->
+</tr>
+<div class="row" style="margin-bottom: 20px;">
+  <span class="access-email">
+    {{ userAccessData.email }}
+  </span>
+  <span class="access-button-view">
+    <span class="accesss-button" *ngIf="!userAccessData.basic">
+      <button class="btn btn-primary" (click)="toggleUserBasicAccess()">Verify user</button>
+    </span>
+  </span>
+  <span class="access-button-view">
+    <span class="accesss-button" *ngIf="userAccessData.children && userAccessData.basic">
+      <button class="btn btn-danger" (click)="toggleChildrenAccess()">Remove</button>
+    </span>
+    <span class="accesss-button" *ngIf="!userAccessData.children && userAccessData.basic">
+      <button class="btn btn-success" (click)="toggleChildrenAccess()">Grant</button>
+    </span>
+  </span>
+  <span class="access-button-view">
+    <span class="accesss-button" *ngIf="userAccessData.volunteers && userAccessData.basic">
+      <button class="btn btn-danger" (click)="toggleVolunteersAccess()">Remove</button>
+    </span>
+    <span class="accesss-button" *ngIf="!userAccessData.volunteers && userAccessData.basic">
+      <button class="btn btn-success" (click)="toggleVolunteersAccess()">Grant</button>
+    </span>
+  </span>
+  <span class="access-button-view">
+    <span class="accesss-button" *ngIf="userAccessData.management && userAccessData.basic">
+      <button class="btn btn-danger" (click)="toggleManagementAccess()">Remove</button>
+    </span>
+    <span class="accesss-button" *ngIf="!userAccessData.management && userAccessData.basic">
+      <button class="btn btn-success" (click)="toggleManagementAccess()">Grant</button>
+    </span>
+  </span>
+</div>
+
+
+
+
+
+
+

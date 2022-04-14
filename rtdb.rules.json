@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "Access":{
+      ".read": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true",
+    	".write": "auth !=null"
+    },
+    "Summary":{
+      ".read": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true",
+    	".write": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true"
+    },
+    "Children":{
+      ".read": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true && root.child('Access').child(auth.uid).child('children').val()===true",
+    	".write": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true && root.child('Access').child(auth.uid).child('children').val()===true"
+    },
+    "Volunteers":{
+      ".read": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true && root.child('Access').child(auth.uid).child('volunteers').val()===true",
+    	".write": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true && root.child('Access').child(auth.uid).child('volunteers').val()===true"
+    },
+    "Management":{
+      ".read": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true && root.child('Access').child(auth.uid).child('management').val()===true",
+    	".write": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true && root.child('Access').child(auth.uid).child('management').val()===true"
+    }
+  }
+}

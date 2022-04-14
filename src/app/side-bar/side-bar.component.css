@@ -1,0 +1,12 @@
+
+
+li{
+  border: none;
+}
+li:hover{
+  background-color:var(--hover);
+}
+a{
+  color: #000;
+  text-decoration: none;
+}
