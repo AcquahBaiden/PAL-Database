@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "pal-database": {
+      "hosting": {
+        "PAL-DB": [
+          "pal-database"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "pal-database"
+  }
+}
