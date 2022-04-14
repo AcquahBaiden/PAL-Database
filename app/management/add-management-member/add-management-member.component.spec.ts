@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
+import { ManagementService } from '../management.service';
+import { MockManagementService } from '../mock-management.service';
 
 import { AddManagementMemberComponent } from './add-management-member.component';
 
@@ -8,7 +11,12 @@ describe('AddManagementMemberComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ AddManagementMemberComponent ]
+      declarations: [ AddManagementMemberComponent ],
+      imports: [FormsModule],
+      providers: [
+        AddManagementMemberComponent,
+        { provide: ManagementService, useClass: MockManagementService}
+      ]
     })
     .compileComponents();
   });

@@ -1,0 +1,8 @@
+<div class="card" *ngIf="showStaus">
+  <div class="card-body" [ngClass]="isError? 'bg-danger' : 'bg-success'" style="color: #fff; position: relative; ">
+    <p style="text-align: center;">{{message}}</p>
+
+    <span style="position: absolute; top:10px; right: 20px;" (click)="reset()">x</span>
+    <!-- <button (click)="reset()">Close</button> -->
+  </div>
+</div>

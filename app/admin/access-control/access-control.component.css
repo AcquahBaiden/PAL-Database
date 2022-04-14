@@ -1,0 +1,19 @@
+.access-email{
+  width: 12rem;
+  text-overflow: ellipsis;
+}
+.access-button-view{
+  width: 7rem;
+}
+
+@media screen and (max-width: 670px){
+  .row{
+    flex-wrap: nowrap;
+  }
+  .access-email{
+    width: 16rem;
+  }
+  .access-button-view{
+    display: none;
+  }
+}

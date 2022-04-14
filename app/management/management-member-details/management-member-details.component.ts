@@ -15,7 +15,7 @@ export class ManagementMemberDetailsComponent implements OnInit, OnDestroy {
   selectedMember: ManagementMember;
   dataLoaded = false;
   constructor(private route: ActivatedRoute,
-    private managementService: ManagementService,private router:Router) { }
+    private managementService: ManagementService, private router:Router) { }
 
   ngOnInit(): void {
     this.memberSubscription = this.route.params
@@ -29,16 +29,11 @@ export class ManagementMemberDetailsComponent implements OnInit, OnDestroy {
   }
 
   onDeleteMember(){
-    this.dataLoaded = false;
     this.managementService.deleteMember(this.memberId);
-    setTimeout(()=>{
-      this.dataLoaded = true;
-      this.router.navigate(['management']);
-    },1500)
+    this.router.navigate(['management']);
   }
 
   ngOnDestroy(){
     this.memberSubscription.unsubscribe();
-    this.dataLoaded =false;
   }
 }

@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-volunteers',
@@ -7,7 +6,7 @@ import { AuthService } from '../auth/auth.service';
   styleUrls: ['./volunteers.component.css']
 })
 export class VolunteersComponent implements OnInit {
-  constructor(private authService: AuthService) { }
+  constructor() { }
   // accesses:any;
   ngOnInit(): void {
     // this.authService.auth.onAuthStateChanged(user=>{

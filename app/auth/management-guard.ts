@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { CanActivate, Router, UrlTree } from "@angular/router";
 import { Observable } from "rxjs";
+import { NotificationService } from "../notification/notification.service";
 import { AuthService } from "./auth.service";
 
 @Injectable({ providedIn: "root" })
@@ -8,7 +9,8 @@ export class ManagementGuard implements CanActivate{
   userAccess = null;
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private notiService: NotificationService
 
   ) {}
 
@@ -19,6 +21,11 @@ export class ManagementGuard implements CanActivate{
       }else{
         return this.router.createUrlTree(['/noAccess']);
       }
+    }).catch(()=>{
+      let isError:boolean = true;
+      let message:string = 'You do not have access to this data. Contact admin for information.';
+      this.notiService.setState(isError,message,true);
+      return false;
     });
 
   }

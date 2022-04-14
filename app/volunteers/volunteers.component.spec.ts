@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { VolunteersComponent } from './volunteers.component';
+import { VolunteersFilterPipe } from './volunteers.pipe';
 
 describe('VolunteersComponent', () => {
   let component: VolunteersComponent;
@@ -8,7 +9,8 @@ describe('VolunteersComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ VolunteersComponent ]
+      declarations: [ VolunteersComponent, VolunteersFilterPipe ],
+
     })
     .compileComponents();
   });

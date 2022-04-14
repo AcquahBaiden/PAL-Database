@@ -36,18 +36,12 @@ export class ChildDetailsComponent implements OnInit, OnDestroy {
   }
 
   onDeleteChild(){
-    this.dataLoaded = false;
     this.childrenService.deleteChild(this.childId);
-    setTimeout(()=>{
-      this.dataLoaded = true;
-      this.router.navigate(['/children']);
-    },1500)
-
+    this.router.navigate(['/children']);
   }
 
   ngOnDestroy(): void {
     this.childChangeSubscription.unsubscribe();
-    this.dataLoaded =false;
   }
 
 }

@@ -8,6 +8,7 @@
   <table class="table">
     <thead>
       <tr>
+        <th scope="col">#</th>
         <th scope="col"></th>
         <th scope="col">First</th>
         <th scope="col">Last</th>
@@ -17,13 +18,14 @@
     </thead>
     <tbody>
       <tr *ngFor="let child of dbchildren  |async | appFilter: searchText; let i=index">
+        <th scope="row">{{i + 1}}</th>
         <td><img [src]="'children/'+child.img | getDownloadURL" class="img-thumbnail rounded-circle"
           alt="">
         </td>
         <td>{{ child.firstName }}</td>
         <td>{{ child.lastName }}</td>
-        <td><button class="btn btn-success" [routerLink]="[child.id]" >Details</button></td>
-        <td><button class="btn btn-primary" [routerLink]="[child.id+'/edit']">Edit</button></td>
+        <td><button class="btn btn-primary" [routerLink]="[child.id]" >Details</button></td>
+        <td><button class="btn btn-light" [routerLink]="[child.id+'/edit']">Edit</button></td>
       </tr>
     </tbody>
 

@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
 import { AdminServiceService } from './admin-service.service';
 
 @Component({
@@ -9,7 +8,7 @@ import { AdminServiceService } from './admin-service.service';
 })
 export class AdminComponent implements OnInit {
 
-  constructor(private adminService: AdminServiceService, private authService: AuthService) { }
+  constructor(private adminService: AdminServiceService) { }
   isFetching:boolean = true
   usersAccessList:any;
   searchText = '';

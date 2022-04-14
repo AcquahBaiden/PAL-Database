@@ -38,6 +38,7 @@ export class AddManagementMemberComponent implements OnInit {
     this.addMamangementMemberForm.reset();
   }
 
+
   onuploadProfileImg(event: any){
     this.isUploading = true;
     const fileName = this.addMamangementMemberForm.value.firstName + this.addMamangementMemberForm.value.lastName;

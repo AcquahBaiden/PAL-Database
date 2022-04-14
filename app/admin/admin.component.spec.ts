@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AdminServiceService } from './admin-service.service';
 
 import { AdminComponent } from './admin.component';
+import { AdminFilterPipe } from './admin.pipe';
+import { MockAdminService } from './mock-admin.service';
 
 describe('AdminComponent', () => {
   let component: AdminComponent;
@@ -8,7 +11,10 @@ describe('AdminComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ AdminComponent ]
+      declarations: [ AdminComponent, AdminFilterPipe ],
+      providers:[
+        AdminComponent, {provide: AdminServiceService, useClass: MockAdminService}
+      ]
     })
     .compileComponents();
   });
@@ -19,7 +25,7 @@ describe('AdminComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('should create AdminComponent', () => {
     expect(component).toBeTruthy();
   });
 });

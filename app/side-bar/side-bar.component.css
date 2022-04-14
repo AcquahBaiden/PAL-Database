@@ -1,24 +1,12 @@
 
-ul,li:hover{
-  font-size:120;
-}
-ul{
-  float: none;
-}
 
-.isActive{
-  font-size: 120%;
-  background-color: green;
-  opacity: 40%;
+li{
+  border: none;
 }
-.isActive,a{
-  color: gold;
+li:hover{
+  background-color:var(--hover);
+}
+a{
+  color: #000;
   text-decoration: none;
 }
-
-body{
-  background-color:red;
-  height:100%;
-}
-
-

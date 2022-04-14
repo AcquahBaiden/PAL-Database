@@ -135,7 +135,7 @@
           </ul>
         </div>
         <br>
-        <div class="form-group row" *ngIf="f.valid">
+        <div class="form-group row" *ngIf="f.valid" style="margin-top:20px; margin-bottom: 20px;">
           <label for="imgUpload" class="col col-form-label">Upload profile image</label>
           <div class="col">
             <input type="file" class="form-control-file" (change)="onuploadProfileImg($event)">
@@ -151,7 +151,7 @@
         <!-- <a [href]="imgDownloadURL | async">{{ imgDownloadURL | async }}</a> -->
         <img [src]="imgDownloadURL | async" alt="" style="max-height: 300px; max-width: 300px; border-radius: 50%;">
 
-        <button type="submit" class="btn btn-primary btn-lg btn-block"
+        <button type="submit" class="btn btn-primary btn-lg btn-block" style="width: 100%;"
         [disabled]="(!f.valid || isUploading)">Save</button>
       </form>
 

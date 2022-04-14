@@ -1,3 +1,27 @@
 .nav-link{
   cursor: pointer;
 }
+.nav-tabs .nav-item{
+  width: 50%;
+}
+
+.nav-tabs .nav-item a{
+  text-align: center;
+}
+
+.col-lg-2{
+  min-height: 95vh;
+}
+#loader-wrapper{
+  min-height: 95vh;
+  display: flex;
+  justify-content: center;
+  align-items:center;
+}
+
+
+@media screen and (max-width: 991px){
+  .col-lg-2{
+    min-height: auto;
+  }
+}

@@ -20,6 +20,7 @@ import { ChildrenModule } from './children/children.module';
 import { VolunteersModule } from './volunteers/volunteers.module';
 import { ManagementModule } from './management/management.module';
 import { AdminFilterPipe } from './admin/admin.pipe';
+import { NotificationComponent } from './notification/notification.component';
 
 
 @NgModule({
@@ -31,7 +32,8 @@ import { AdminFilterPipe } from './admin/admin.pipe';
     AdminComponent,
     AccessControlComponent,
     NoAccessComponent,
-    AdminFilterPipe
+    AdminFilterPipe,
+    NotificationComponent
   ],
   imports: [
     BrowserModule,

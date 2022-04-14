@@ -6,8 +6,7 @@ import { AngularFireDatabase } from '../../../node_modules/@angular/fire/databas
 import { AngularFireStorage } from '@angular/fire/storage';
 
 import { Child } from '../interfaces/child.interface';
-import { AuthService } from '../auth/auth.service';
-import { FilterPipe } from '../children/filter.pipe'
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable({
   providedIn: "root",
@@ -19,7 +18,7 @@ export class ChildrenService {
   constructor(
     private db: AngularFireDatabase,
     private storage: AngularFireStorage,
-    private authService: AuthService
+    private notiService: NotificationService
   ) {}
 
   getDbChildren() {
@@ -40,17 +39,22 @@ export class ChildrenService {
   }
 
   saveToDB(data: Child) {
-    const itemsRef = this.db.list("Children");
-    itemsRef.push(data);
-    this.db
-      .object("Summary/children/number")
-      .query.ref.transaction((number) => {
-        if (number === null) {
-          return (number = 1);
-        } else {
-          return number + 1;
-        }
-      });
+      try {
+        const itemsRef = this.db.list("Children");
+        itemsRef.push(data);
+        this.db
+          .object("Summary/children/number")
+          .query.ref.transaction((number) => {
+            if (number === null) {
+              return (number = 1);
+            } else {
+              return number + 1;
+            }
+          });
+          this.notiService.setState(false,`${data.firstName} succesfully saved`,true);
+      } catch (error) {
+        this.notiService.setState(true,'Something went wrong when saving profile',true);
+      }
   }
 
   uploadFile(event: any, fileName: string) {
@@ -76,7 +80,12 @@ export class ChildrenService {
   }
 
   updateChild(id: string, editedChild: Child) {
-    this.db.list("Children/").update(id, editedChild);
+    try {
+      this.db.list("Children/").update(id, editedChild);
+      this.notiService.setState(false,'Profile successfully updated',true);
+    } catch (error) {
+      this.notiService.setState(true,'Something went wrong when updating profile',true);
+    }
   }
 
   updateChildProfile(id: string, fileName: string) {
@@ -84,26 +93,32 @@ export class ChildrenService {
       .list("Children/" + id)
       .set("img", fileName)
       .then(() => {
+        this.notiService.setState(false,'Profile successfully updated',true);
         return true;
       })
-      .catch((error) => {
-        //////////////////Fix this
+      .catch(() => {
+        this.notiService.setState(true,'Something went wrong when updating profile',true);
       });
   }
 
   deleteChild(id: string) {
-    const childRef = this.db.list("Children/" + id);
-    setTimeout(() => {
+
+    try {
+      const childRef = this.db.list("Children/" + id);
       childRef.remove();
-    }, 1800);
-    this.db
-      .object("Summary/children/number")
-      .query.ref.transaction((number) => {
-        if (number === null) {
-          return (number = 0);
-        } else {
-          return number - 1;
-        }
-      });
+      this.db
+        .object("Summary/children/number")
+        .query.ref.transaction((number) => {
+          if (number === null) {
+            return (number = 0);
+          } else {
+            return number - 1;
+          }
+        });
+        this.notiService.setState(false,'Profile successfully deleted',true);
+    } catch (error) {
+      this.notiService.setState(true,'Something went wront when deleting profile',true);
+    }
+
   }
 }

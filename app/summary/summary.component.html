@@ -2,7 +2,7 @@
     <div class="col-sm" *ngFor="let summary of Summary | async">
       <div class="card">
         <div class="card-body">
-      <p style="color: gold;">{{ summary.category | uppercase }}</p>
+      <h2 style="font-size: 1.2rem;">{{ summary.category | uppercase }}</h2>
       <p>{{ summary.number }}</p>
     </div>
       </div>

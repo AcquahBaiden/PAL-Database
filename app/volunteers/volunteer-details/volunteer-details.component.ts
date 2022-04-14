@@ -18,6 +18,8 @@ export class VolunteerDetailsComponent implements OnInit, OnDestroy {
   profileUrl: Observable<string|null>
   detailsSubscription:Subscription;
   dataLoaded=false;
+  address:string[]=[];
+  volunteerInPorg:string[]=[];
 
   constructor(private route: ActivatedRoute,
     private volunteersService: VolunteersService, private router: Router
@@ -29,6 +31,16 @@ export class VolunteerDetailsComponent implements OnInit, OnDestroy {
         this.volunteerId = params['id'];
         this.volunteersService.getVolunteer(this.volunteerId).subscribe(volunteer=>{
           this.selectedVolunteer = volunteer;
+          if(volunteer.address){
+            for(const line in volunteer.address){
+              this.address.push(volunteer.address[line])
+            }
+          }
+          if(volunteer.volunteeringInProg){
+            for(const prog in volunteer.volunteeringInProg){
+              this.volunteerInPorg.push(volunteer.volunteeringInProg[prog])
+            }
+          }
           this.dataLoaded = true;
         });
       })
@@ -37,14 +49,10 @@ export class VolunteerDetailsComponent implements OnInit, OnDestroy {
   onDeleteVolunteer(){
     this.dataLoaded = false;
     this.volunteersService.deleteVolunteer(this.volunteerId);
-    setTimeout(()=>{
-      this.dataLoaded = true;
-      this.router.navigate(['volunteers']);
-    },1500)
+    this.router.navigate(['volunteers']);
   }
 
   ngOnDestroy(){
     this.volunteerSubscriptionChanged.unsubscribe();
-    this.dataLoaded =false;
   }
 }

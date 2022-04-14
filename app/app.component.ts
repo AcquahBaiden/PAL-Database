@@ -22,45 +22,37 @@ export class AppComponent {
     this.authService.loginWithPopUp();
   }
   onLogout() {
-    this.dataLoaded = false;
-    setTimeout(()=>{
-      this.authService.logout();
-    },1000)
-    this.dataLoaded = true;
-    this.isLoginError = false;
+    this.authService.logout();
   }
 
   onSignIn(){
-    setTimeout(() => {
-      this.dataLoaded = false;
-      this.authService
-        .signIn(this.loginForm.value.email, this.loginForm.value.password)
-        .then((user) => {
-          this.authService.AuthUserId = user.user.uid;
-          this.dataLoaded = true;
-        })
-        .catch((error) => {
-          this.dataLoaded = true;
-          this.isLoginError = true;
-          switch (error.code) {
-            case "auth/user-not-found":
-              this.errorMessage =
-                "Email address not registered to an account. Please sign up";
-              break;
-            case "auth/wrong-password":
-              this.errorMessage = "Incorrect password. Please try again!";
-              break;
-            case "auth/network-request-failed":
-              this.errorMessage =
-                "A network error occured. Please check your internet and try again";
-              break;
-            default:
-              this.errorMessage =
-                "Something went wrong. Please try again later";
-          }
-        });
-    }, 1000);
-
+    this.dataLoaded = false;
+    this.authService
+      .signIn(this.loginForm.value.email, this.loginForm.value.password)
+      .then((user) => {
+        this.authService.AuthUserId = user.user.uid;
+        this.dataLoaded = true;
+      })
+      .catch((error) => {
+        this.dataLoaded = true;
+        this.isLoginError = true;
+        switch (error.code) {
+          case "auth/user-not-found":
+            this.errorMessage =
+              "Email address not registered to an account. Please sign up";
+            break;
+          case "auth/wrong-password":
+            this.errorMessage = "Incorrect password. Please try again!";
+            break;
+          case "auth/network-request-failed":
+            this.errorMessage =
+              "A network error occured. Please check your internet and try again";
+            break;
+          default:
+            this.errorMessage =
+              "Something went wrong. Please try again later";
+        }
+      });
   }
 
   toggleLogInView(view: string){

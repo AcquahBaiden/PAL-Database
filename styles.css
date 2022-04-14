@@ -1,5 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
-
+:root{
+  --hover: #E7EEEC
+}
 html, body{
   background-color: #E7EEEC;
   min-height: 100%;
@@ -22,7 +24,10 @@ html, body{
   text-align: center;
   font-size: larger;
 }
-
+.card-img-top{
+  width: 150px;
+  height: 150px;
+}
 .nav-link:hover{
   background-color: #ffffff91;
   border-radius: 5%;
@@ -40,6 +45,10 @@ html, body{
   margin-left: auto;
   margin-right: auto;
   width: 50%;
+}
+
+.form-group.row{
+  margin-top: 20px;
 }
 
 .loader,
@@ -85,6 +94,12 @@ html, body{
 }
 
 @media screen and (min-width: 820px){
+  .sticky{
+    top: 0;
+    position: sticky;
+  }
+}
+@media screen and (min-width: 991px){
   .sticky{
     top: 0;
     position: sticky;

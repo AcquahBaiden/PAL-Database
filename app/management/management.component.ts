@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-management',
@@ -8,7 +7,7 @@ import { AuthService } from '../auth/auth.service';
 })
 export class ManagementComponent implements OnInit {
 
-  constructor(private authService: AuthService) { }
+  constructor() { }
   // accesses:any;
   ngOnInit(): void {
     // this.authService.auth.onAuthStateChanged(user=>{

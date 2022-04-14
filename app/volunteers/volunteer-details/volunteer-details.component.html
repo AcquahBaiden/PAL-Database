@@ -35,7 +35,18 @@
         <label>Program/Department</label>
         <textarea class="form-control" readonly rows="3">{{ selectedVolunteer.program }}</textarea>
       </div>
-
+      <div *ngIf="address">
+        <div class="form-group" *ngFor="let line of address; let index">
+          <label>Line {{index +1}}</label>
+            <input type="text" readonly class="form-control" value="{{line}}">
+        </div>
+      </div>
+      <div *ngIf="volunteerInPorg">
+        <div class="form-group" *ngFor="let prog of volunteerInPorg">
+          <label>Volunteering in</label>
+            <input type="text" readonly class="form-control" value="{{prog}}">
+        </div>
+      </div>
     </div>
     <button (click)="onDeleteVolunteer()" class="btn btn-danger">Delete this profile</button>
 
