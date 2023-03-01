@@ -38,7 +38,7 @@ export class ChildEditComponent implements OnInit, OnDestroy {
             school: child.school,
             parentName: child.parentName,
             parentTel: child.parentTel,
-            description: child.description,
+            description: child.description? child.description : '',
             telephone: child.telephone,
           });
           this.dataLoaded = true;
