@@ -1,12 +1,31 @@
-  <div class="row">
-    <div class="col-sm" *ngFor="let summary of Summary | async">
-      <div class="card">
-        <div class="card-body">
-      <h2 style="font-size: 1.2rem;">{{ summary.category | uppercase }}</h2>
-      <p>{{ summary.number }}</p>
-    </div>
+<div class="container py-4">
+  <div class="row g-4" *ngIf="!isFetching && Summary?.length">
+    <div class="col-sm-6 col-md-3" *ngFor="let summary of Summary">
+      <div class="card border-0 shadow-sm rounded-3 h-100">
+        <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
+          <div class="mb-3">
+            <i class="bi display-5 text-primary" 
+               [class.bi-people-fill]="summary.category === 'children'"
+               [class.bi-person-heart]="summary.category === 'volunteers'"
+               [class.bi-person-badge-fill]="summary.category === 'management'"
+               [class.bi-database-fill-check]="summary.category === 'DatabaseUsers'"></i>
+          </div>
+          <h6 class="text-muted text-uppercase fw-bold small mb-2 text-truncate">{{ summary.category }}</h6>
+          <h2 class="display-4 fw-bold mb-0 text-dark">{{ summary.number || 0 }}</h2>
+        </div>
       </div>
     </div>
   </div>
 
+  <div class="alert alert-info" *ngIf="!isFetching && (!Summary || Summary.length === 0)">
+    No summary data found in the database. Please ensure you have basic access rights.
+  </div>
 
+  <!-- Loading State -->
+  <div *ngIf="isFetching" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-secondary fw-medium">Loading statistics...</p>
+  </div>
+</div>

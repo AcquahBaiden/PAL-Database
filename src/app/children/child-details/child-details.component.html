@@ -1,59 +1,118 @@
-<div *ngIf="!dataLoaded" class="loader">
-
-</div>
-<div class="card" *ngIf="dataLoaded">
-  <div class="card-body">
-    <h4 class="card-title">PAL CHILD PROFILE</h4>
-    <h5 class="card-subtitle mb-2">{{selectedChild.firstName }} {{ selectedChild.lastName }}</h5>
-    <div *ngIf="selectedChild.img">
-      <img [src]="'children/'+selectedChild.img | getDownloadURL" class="card-img-top rounded-large" alt="...">
-    </div>
-    <div *ngIf="!selectedChild.img">
-      <img src="https://via.placeholder.com/150" class="card-img-top rounded-large" alt="">
-    </div>
-    <form>
-      <fieldset disabled>
-        <div class="form-group">
-          <label>Residence</label>
-          <input type="text" readonly class="form-control" value="{{selectedChild.residence}}">
-        </div>
-        <div class="form-group">
-          <label>Class/Form</label>
-          <input type="text" readonly class="form-control" value="{{selectedChild.class}}">
-        </div>
-        <div class="form-group">
-          <label>School</label>
-          <input type="text" readonly class="form-control" value="{{selectedChild.school}}">
-        </div>
-        <div class="form-group">
-          <label>Telephone</label>
-          <input type="text" readonly class="form-control" value="{{selectedChild.telephone}}">
-        </div>
-        <div class="form-group">
-          <label>Parent(s) Name</label>
-          <input type="text" readonly class="form-control" value="{{selectedChild.parentName}}">
-        </div>
-        <div class="form-group">
-          <label>Parent(s) Telephone</label>
-          <input type="text" readonly class="form-control" value="{{selectedChild.parentTel}}">
-        </div>
-        <div class="form-group">
-          <label>Child's interest</label>
-          <select class="form-control" id="exampleFormControlSelect1" *ngFor="let interest of selectedChild.interests">
-            <option style="list-style: none;">{{interest}}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Notes/Description</label>
-          <textarea class="form-control" rows="4">{{ selectedChild.description }}</textarea>
-        </div>
-      </fieldset>
-    </form>
-    <h6 class="card-subtitle-muted">Programs enrolled in</h6>
-
+<div *ngIf="!dataLoaded" class="text-center py-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
   </div>
-  <ul class="list-group list-group-flush" *ngFor="let program of selectedChild.programs" style="margin-bottom: 40px;">
-    <li class="list-group-item">{{program.program}} {{program.year}}</li>
-  </ul>
-  <button (click)="onDeleteChild()" class="btn btn-danger">Delete this profile</button>
+</div>
+
+<div class="container-fluid py-2" *ngIf="dataLoaded && selectedChild">
+  <div class="row g-4">
+    <!-- Profile Header/Card -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-3 text-center p-4 h-100">
+        <div class="profile-image-container mx-auto mb-4" style="width: 150px; height: 150px;">
+          <img *ngIf="selectedChild.img" [src]="'children/'+selectedChild.img | getDownloadURL | async" 
+               class="rounded-circle shadow-sm h-100 w-100 object-fit-cover border border-4 border-white" alt="Profile photo">
+          <img *ngIf="!selectedChild.img" src="assets/img/stock.jpeg" 
+               class="rounded-circle shadow-sm h-100 w-100 object-fit-cover border border-4 border-white" alt="Profile photo">
+        </div>
+        <h4 class="fw-bold text-dark mb-1">{{selectedChild.firstName }} {{ selectedChild.lastName }}</h4>
+        <p class="text-muted mb-4">{{selectedChild.class || 'Student'}}</p>
+        
+        <div class="d-grid gap-2">
+          <button class="btn btn-outline-primary" [routerLink]="['edit']">
+            <i class="bi bi-pencil-square me-2"></i>Edit Profile
+          </button>
+          <button (click)="onDeleteChild()" class="btn btn-outline-danger">
+            <i class="bi bi-trash me-2"></i>Delete Profile
+          </button>
+        </div>
+
+        <hr class="my-4 opacity-25">
+
+        <div class="text-start">
+          <h6 class="text-uppercase small fw-bold text-muted mb-3">Interests</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <span *ngFor="let interest of selectedChild.interests" 
+                  class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 fw-normal">
+              {{interest}}
+            </span>
+            <p *ngIf="!selectedChild.interests?.length" class="text-muted small italic mb-0">No interests listed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details Column -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
+        <h5 class="fw-bold mb-4 d-flex align-items-center">
+          <i class="bi bi-person-lines-fill me-2 text-primary"></i>Personal Information
+        </h5>
+        
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Residence</label>
+            <p class="mb-0 text-dark">{{selectedChild.residence || 'Not provided'}}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Telephone</label>
+            <p class="mb-0 text-dark">{{selectedChild.telephone || 'Not provided'}}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Current School</label>
+            <p class="mb-0 text-dark">{{selectedChild.school || 'Not provided'}}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Class/Form</label>
+            <p class="mb-0 text-dark">{{selectedChild.class || 'Not provided'}}</p>
+          </div>
+        </div>
+
+        <hr class="my-4 opacity-25">
+
+        <h5 class="fw-bold mb-4 d-flex align-items-center">
+          <i class="bi bi-house-heart me-2 text-primary"></i>Guardian Details
+        </h5>
+        
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Parent(s) Name</label>
+            <p class="mb-0 text-dark">{{selectedChild.parentName || 'Not provided'}}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Parent Telephone</label>
+            <p class="mb-0 text-dark">{{selectedChild.parentTel || 'Not provided'}}</p>
+          </div>
+        </div>
+
+        <hr class="my-4 opacity-25">
+
+        <h5 class="fw-bold mb-3 d-flex align-items-center">
+          <i class="bi bi-card-text me-2 text-primary"></i>Notes
+        </h5>
+        <p class="text-secondary bg-light p-3 rounded-3 mb-0" style="white-space: pre-wrap;">
+          {{ selectedChild.description || 'No additional notes provided for this child.' }}
+        </p>
+      </div>
+
+      <!-- Programs Section -->
+      <div class="card border-0 shadow-sm rounded-3 p-4">
+        <h5 class="fw-bold mb-4 d-flex align-items-center">
+          <i class="bi bi-mortarboard me-2 text-primary"></i>Enrolled Programs
+        </h5>
+        
+        <div class="list-group list-group-flush border rounded-3 overflow-hidden" *ngIf="selectedChild.programs?.length">
+          <div *ngFor="let program of selectedChild.programs" 
+               class="list-group-item d-flex justify-content-between align-items-center py-3">
+            <span class="fw-medium text-dark">{{program.program}}</span>
+            <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">{{program.year}}</span>
+          </div>
+        </div>
+        
+        <div *ngIf="!selectedChild.programs?.length" class="text-center py-4 bg-light rounded-3">
+          <p class="text-muted mb-0 italic">Not currently enrolled in any programs</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

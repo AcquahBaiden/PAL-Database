@@ -1,8 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AdminServiceService } from '../admin-service.service';
 
+import { CommonModule } from '@angular/common';
+
 @Component({
-  selector: 'app-access-control',
+  selector: '[app-access-control]',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './access-control.component.html',
   styleUrls: ['./access-control.component.css']
 })

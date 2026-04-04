@@ -4,9 +4,20 @@ li{
   border: none;
 }
 li:hover{
-  background-color:var(--hover);
+  background-color: var(--hover);
 }
 a{
   color: #000;
   text-decoration: none;
 }
+.list-group-item.active {
+  background-color: var(--bs-primary-bg-subtle) !important;
+  color: var(--bs-primary) !important;
+  font-weight: 600;
+  border-left: 4px solid var(--bs-primary) !important;
+}
+.list-group-item:hover:not(.active) {
+  background-color: var(--bs-light) !important;
+  color: var(--bs-primary) !important;
+}
+

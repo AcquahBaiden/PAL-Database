@@ -5,7 +5,7 @@
     	".write": "auth !=null"
     },
     "Summary":{
-      ".read": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true",
+      ".read": "auth !=null",
     	".write": "auth !=null && root.child('Access').child(auth.uid).child('basic').val()===true"
     },
     "Children":{

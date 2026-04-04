@@ -1,6 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'adminFilter' })
+@Pipe({
+  name: 'adminFilter',
+  standalone: true
+})
+
 export class AdminFilterPipe implements PipeTransform {
   /**
    * Transform

@@ -1,12 +1,12 @@
-<div class="row">
-  <div class="col-xs-12 col">
-    <app-children-list></app-children-list>
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <app-children-list></app-children-list>
+    </div>
+    <div class="col-lg-6">
+      <router-outlet></router-outlet>
+    </div>
   </div>
-  <div class="col-xs-12 col">
-    <router-outlet>
-    </router-outlet>
-  </div>
-
 </div>
 
 

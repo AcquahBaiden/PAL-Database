@@ -1,4 +1,7 @@
 {
+  "database": {
+    "rules": "rtdb.rules.json"
+  },
   "hosting": {
     "public": "dist/PAL-DB",
     "ignore": [

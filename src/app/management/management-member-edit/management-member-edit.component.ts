@@ -1,78 +1,98 @@
-import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
 import { NgForm } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
-import { Subscription } from "rxjs";
+import { Subscription, Observable } from "rxjs";
 
 import { ManagementMember } from "src/app/interfaces/management-member.interface";
 import { ManagementService } from "../management.service";
 
+import { switchMap, tap } from 'rxjs/operators';
+
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { SharedModule } from '../../shared/shared.module';
+
 @Component({
   selector: "app-management-member-edit",
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule, SharedModule],
   templateUrl: "./management-member-edit.component.html",
   styleUrls: ["./management-member-edit.component.css"],
 })
 export class ManagementMemberEditComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
-    private managementService: ManagementService
+    private managementService: ManagementService,
+    private cdr: ChangeDetectorRef
   ) {}
-  @ViewChild("editForm", { static: false }) Form: NgForm;
-  memberIDToEdit: string;
-  editSubscription: Subscription;
+  @ViewChild("editForm", { static: false }) editForm!: NgForm;
+  memberId: string = '';
+  memberSubscription!: Subscription;
   member: ManagementMember;
-  profileImg: string = null;
-  imageLoaded: boolean = false;
+  isUploading = false;
+  uploadPercent: Observable<number | undefined>;
   dataLoaded = false;
 
   ngOnInit(): void {
-    this.route.params.subscribe((params) => {
-      this.memberIDToEdit = params["id"];
-      this.editSubscription = this.managementService
-        .getMember(this.memberIDToEdit)
-        .subscribe((member) => {
-          this.member = member;
-          this.Form.setValue({
-            firstName: this.member.firstName,
-            lastName: member.lastName,
-            email: member.email,
-            telephone: member.telephone,
-            residence: member.residence,
-            position: member.position,
-            description: member.description,
-          });
-          this.dataLoaded = true;
-          this.profileImg = this.member.img;
-          this.profileImg === ""
-            ? (this.imageLoaded = false)
-            : (this.imageLoaded = true);
+    this.memberSubscription = this.route.params.pipe(
+      tap(params => {
+        this.memberId = params['id'];
+        this.dataLoaded = false;
+        this.cdr.detectChanges();
+      }),
+      switchMap(params => this.managementService.getMember(params['id']))
+    ).subscribe(member => {
+      if (member) {
+        this.member = member;
+        this.dataLoaded = true;
+        this.cdr.detectChanges();
+        setTimeout(() => {
+          if (this.editForm) {
+            this.editForm.form.patchValue({
+              firstName: member.firstName,
+              lastName: member.lastName,
+              email: member.email || '',
+              telephone: member.telephone || '',
+              residence: member.residence || '',
+              position: member.position || '',
+              description: member.description || '',
+            });
+            this.cdr.detectChanges();
+          }
         });
+      }
     });
   }
 
-  onUpdateMember(form: NgForm) {
-    this.managementService.updateManagementMember(
-      this.memberIDToEdit,
-      form.value
-    );
+  async onUpdateMember(form: NgForm) {
+    if (form.valid) {
+      await this.managementService.updateManagementMember(
+        this.memberId,
+        form.value
+      );
+    }
   }
 
   onuploadProfileImg(event: any) {
-    const fileName = (this.member.firstName + this.member.lastName).concat(
-      Math.floor(Math.random() * 100).toString()
-    );
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.isUploading = true;
+    const fileName = `mgmt_${this.member.firstName}_${this.member.lastName}_${Date.now()}`;
+    
     this.managementService.uploadFile(event, fileName);
-    setTimeout(() => {
-      this.managementService
-        .updateMemberProfilePhoto(this.memberIDToEdit, fileName)
-        .then(() => {
-          this.profileImg = fileName;
-        });
-    }, 2000);
+    this.uploadPercent = this.managementService.uploadPercent;
+
+    setTimeout(async () => {
+      await this.managementService.updateMemberProfilePhoto(this.memberId, fileName);
+      this.isUploading = false;
+    }, 4000);
   }
 
   ngOnDestroy() {
-    this.editSubscription.unsubscribe();
-    this.profileImg = null;
-    this.dataLoaded = false;
+    if (this.memberSubscription) {
+      this.memberSubscription.unsubscribe();
+    }
   }
 }

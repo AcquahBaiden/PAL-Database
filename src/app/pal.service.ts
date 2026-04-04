@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
-import { AngularFireDatabase} from '@angular/fire/database';
+import { Injectable, inject } from '@angular/core';
+import { AngularFireDatabase } from '@angular/fire/compat/database';
 
-
+import { map } from 'rxjs/operators';
 import { Child } from './interfaces/child.interface';
+import { Summary } from './interfaces/summary.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -14,11 +15,14 @@ export class PALService{
     lastName: 'Name'
   };
 
-  constructor(private db: AngularFireDatabase) {}
+  private db = inject(AngularFireDatabase);
 
-  getDBSummaries(){
-    return this.db.list('Summary').valueChanges()
+  constructor() {}
+
+  getDBSummaries() {
+    return this.db.object('Summary').valueChanges();
   }
 
 
 }
+

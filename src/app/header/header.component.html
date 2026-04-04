@@ -1,6 +1,13 @@
-<div class="btn-group">
-  <button class="btn" (click)="onAddChild()" style="min-width: 30%;">Add PAL Child</button>
-  <button class="btn" (click)="onAddVolunteer()">Add Volunteer</button>
-  <button class="btn" (click)="onAddManagement()">Add Manager</button>
- </div>
+<div class="d-flex gap-2" role="group" aria-label="Action buttons">
+  <button type="button" class="btn btn-primary btn-sm fw-medium px-3 rounded-2 shadow-sm" (click)="onAddChild()">
+    <i class="bi bi-person-plus me-1"></i> Add PAL Child
+  </button>
+  <button type="button" class="btn btn-primary btn-sm fw-medium px-3 rounded-2 shadow-sm" (click)="onAddVolunteer()">
+    <i class="bi bi-people me-1"></i> Add Volunteer
+  </button>
+  <button type="button" class="btn btn-primary btn-sm fw-medium px-3 rounded-2 shadow-sm" (click)="onAddManagement()">
+    <i class="bi bi-person-badge me-1"></i> Add Manager
+  </button>
+</div>
+
 

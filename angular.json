@@ -66,18 +66,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "PAL-DB:build"
+            "buildTarget": "PAL-DB:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "PAL-DB:build:production"
+              "buildTarget": "PAL-DB:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "PAL-DB:build"
+            "buildTarget": "PAL-DB:build"
           }
         },
         "test": {
@@ -130,7 +130,6 @@
       }
     }
   },
-  "defaultProject": "PAL-DB",
   "cli": {
     "analytics": "6ce88a3b-8d20-4384-940d-22e7378cb3af"
   }

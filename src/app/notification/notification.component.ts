@@ -1,38 +1,50 @@
 import { Component, OnInit } from '@angular/core';
 import { NotificationService } from './notification.service';
 
+import { CommonModule } from '@angular/common';
+
 @Component({
   selector: 'app-notification',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './notification.component.html',
   styleUrls: ['./notification.component.css'],
 })
 export class NotificationComponent implements OnInit {
-showStaus:boolean = false;
-isError:boolean = false;
-message:string='No message here';
-  constructor(private notiServicce: NotificationService) { }
+  showStatus = false;
+  isError = false;
+  message = '';
+  private timeout: any;
+
+  constructor(private notiService: NotificationService) { }
 
   ngOnInit(): void {
-    this.notiServicce.currentState.subscribe(stateData=>{
-      this.reset();
-      if(stateData.showStatus){
-        this.setStatus(stateData.isError,stateData.message);
+    this.notiService.currentState.subscribe(stateData => {
+      if (stateData.showStatus) {
+        this.setStatus(stateData.isError, stateData.message);
+      } else {
+        this.reset();
       }
-    })
+    });
   }
 
-  reset(){
-    this.showStaus = false;
+  reset() {
+    this.showStatus = false;
     this.message = '';
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
   }
 
-  setStatus(isError:boolean,message:string){
+  setStatus(isError: boolean, message: string) {
     this.reset();
     this.isError = isError;
-    setTimeout(()=>{
-      this.message = message;
-      this.showStaus = true;
-    },1000)
-  }
+    this.message = message;
+    this.showStatus = true;
 
+    // Auto-dismiss after 5 seconds
+    this.timeout = setTimeout(() => {
+      this.showStatus = false;
+    }, 5000);
+  }
 }

@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
 import { finalize, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
-import { AngularFireDatabase } from '../../../node_modules/@angular/fire/database';
-import { AngularFireStorage } from '@angular/fire/storage';
+import { AngularFireDatabase } from '@angular/fire/compat/database';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 
 import { Child } from '../interfaces/child.interface';
 import { NotificationService } from '../notification/notification.service';
@@ -12,49 +12,48 @@ import { NotificationService } from '../notification/notification.service';
   providedIn: "root",
 })
 export class ChildrenService {
-  public uploadPercent: Observable<number>;
+  public uploadPercent: Observable<number | undefined>;
   public downloadURL!: Observable<string>;
+  private childrenStream: Observable<Child[]>;
+  private envInjector = inject(EnvironmentInjector);
 
   constructor(
     private db: AngularFireDatabase,
     private storage: AngularFireStorage,
     private notiService: NotificationService
-  ) {}
-
-  getDbChildren() {
-    return this.db
-      .object<Child[]>("Children")
+  ) {
+    this.childrenStream = this.db
+      .object<{ [key: string]: Child }>("Children")
       .valueChanges()
       .pipe(
-        map((responseData: any) => {
-          const ChildrenData: Child[] = [];
-          for (const key in responseData) {
-            if (responseData.hasOwnProperty(key)) {
-              ChildrenData.push({ ...responseData[key], id: key });
-            }
-          }
-          return ChildrenData;
+        map((responseData) => {
+          if (!responseData) return [];
+          return Object.keys(responseData).map(key => ({
+            ...responseData[key],
+            id: key
+          }));
         })
       );
   }
 
-  saveToDB(data: Child) {
-      try {
-        const itemsRef = this.db.list("Children");
-        itemsRef.push(data);
-        this.db
-          .object("Summary/children/number")
-          .query.ref.transaction((number) => {
-            if (number === null) {
-              return (number = 1);
-            } else {
-              return number + 1;
-            }
-          });
-          this.notiService.setState(false,`${data.firstName} succesfully saved`,true);
-      } catch (error) {
-        this.notiService.setState(true,'Something went wrong when saving profile',true);
-      }
+  getDbChildren(): Observable<Child[]> {
+    return this.childrenStream;
+  }
+
+  async saveToDB(data: Child) {
+    try {
+      const itemsRef = this.db.list("Children");
+      await itemsRef.push(data);
+      await this.db
+        .object("Summary/children/number")
+        .query.ref.transaction((number) => {
+          return (number || 0) + 1;
+        });
+      this.notiService.setState(false, `${data.firstName} successfully saved`, true);
+    } catch (error) {
+      console.error('Error saving to DB:', error);
+      this.notiService.setState(true, 'Something went wrong when saving profile', true);
+    }
   }
 
   uploadFile(event: any, fileName: string) {
@@ -68,57 +67,44 @@ export class ChildrenService {
       .subscribe();
   }
 
-  getChild(id: string) {
-    return this.db
-      .object("Children/" + id)
-      .valueChanges()
-      .pipe(
-        map((responseData: Child) => {
-          return responseData;
-        })
+  getChild(id: string): Observable<Child> {
+    return runInInjectionContext(this.envInjector, () => {
+      return this.db.object<Child>("Children/" + id).valueChanges();
+    });
+  }
+
+  async updateChild(id: string, editedChild: Child) {
+    try {
+      await runInInjectionContext(this.envInjector, () => this.db.object("Children/" + id).update(editedChild));
+      this.notiService.setState(false, 'Profile successfully updated', true);
+    } catch (error) {
+      console.error('Error updating child:', error);
+      this.notiService.setState(true, 'Something went wrong when updating profile', true);
+    }
+  }
+
+  async updateChildProfile(id: string, fileName: string) {
+    try {
+      await runInInjectionContext(this.envInjector, () => this.db.object("Children/" + id).update({ img: fileName }));
+      this.notiService.setState(false, 'Profile photo successfully updated', true);
+      return true;
+    } catch (error) {
+      console.error('Error updating profile photo:', error);
+      this.notiService.setState(true, 'Something went wrong when updating profile photo', true);
+      return false;
+    }
+  }
+
+  async deleteChild(id: string) {
+    try {
+      await runInInjectionContext(this.envInjector, () => this.db.object("Children/" + id).remove());
+      await runInInjectionContext(this.envInjector, () => 
+        this.db.object("Summary/children/number").query.ref.transaction((number) => Math.max(0, (number || 0) - 1))
       );
-  }
-
-  updateChild(id: string, editedChild: Child) {
-    try {
-      this.db.list("Children/").update(id, editedChild);
-      this.notiService.setState(false,'Profile successfully updated',true);
+      this.notiService.setState(false, 'Profile successfully deleted', true);
     } catch (error) {
-      this.notiService.setState(true,'Something went wrong when updating profile',true);
+      console.error('Error deleting child:', error);
+      this.notiService.setState(true, 'Something went wrong when deleting profile', true);
     }
-  }
-
-  updateChildProfile(id: string, fileName: string) {
-    return this.db
-      .list("Children/" + id)
-      .set("img", fileName)
-      .then(() => {
-        this.notiService.setState(false,'Profile successfully updated',true);
-        return true;
-      })
-      .catch(() => {
-        this.notiService.setState(true,'Something went wrong when updating profile',true);
-      });
-  }
-
-  deleteChild(id: string) {
-
-    try {
-      const childRef = this.db.list("Children/" + id);
-      childRef.remove();
-      this.db
-        .object("Summary/children/number")
-        .query.ref.transaction((number) => {
-          if (number === null) {
-            return (number = 0);
-          } else {
-            return number - 1;
-          }
-        });
-        this.notiService.setState(false,'Profile successfully deleted',true);
-    } catch (error) {
-      this.notiService.setState(true,'Something went wront when deleting profile',true);
-    }
-
   }
 }

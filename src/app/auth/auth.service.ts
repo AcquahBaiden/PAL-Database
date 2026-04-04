@@ -1,8 +1,9 @@
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
-import { AngularFireDatabase } from "@angular/fire/database";
-import  firebase  from 'firebase/app'
-import { first } from "rxjs/operators";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFireDatabase } from "@angular/fire/compat/database";
+import firebase from 'firebase/compat/app';
+import { first, tap } from "rxjs/operators";
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
@@ -58,7 +59,7 @@ export class AuthService {
     if (this.userIsNewSignup) {
       return null;
     } else {
-      return this.auth.authState.pipe(first()).toPromise();
+      return firstValueFrom(this.auth.authState);
     }
   }
 

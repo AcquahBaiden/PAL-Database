@@ -1,38 +1,51 @@
+<tr>
+  <td class="ps-4 fw-medium">{{ userAccessData.email }}</td>
+  
+  <td class="text-center">
+    <button *ngIf="!userAccessData.basic" class="btn btn-sm btn-outline-primary px-3" (click)="toggleUserBasicAccess()">
+      <i class="bi bi-check-circle me-1"></i> Verify
+    </button>
+    <span *ngIf="userAccessData.basic" class="badge bg-success-subtle text-success border border-success-subtle fw-normal">
+      <i class="bi bi-check-lg"></i> Verified
+    </span>
+  </td>
 
-<div class="row" style="margin-bottom: 20px;">
-  <span class="access-email">
-    {{ userAccessData.email }}
-  </span>
-  <span class="access-button-view">
-    <span class="accesss-button" *ngIf="!userAccessData.basic">
-      <button class="btn btn-primary" (click)="toggleUserBasicAccess()">Verify user</button>
-    </span>
-  </span>
-  <span class="access-button-view">
-    <span class="accesss-button" *ngIf="userAccessData.children && userAccessData.basic">
-      <button class="btn btn-danger" (click)="toggleChildrenAccess()">Remove</button>
-    </span>
-    <span class="accesss-button" *ngIf="!userAccessData.children && userAccessData.basic">
-      <button class="btn btn-success" (click)="toggleChildrenAccess()">Grant</button>
-    </span>
-  </span>
-  <span class="access-button-view">
-    <span class="accesss-button" *ngIf="userAccessData.volunteers && userAccessData.basic">
-      <button class="btn btn-danger" (click)="toggleVolunteersAccess()">Remove</button>
-    </span>
-    <span class="accesss-button" *ngIf="!userAccessData.volunteers && userAccessData.basic">
-      <button class="btn btn-success" (click)="toggleVolunteersAccess()">Grant</button>
-    </span>
-  </span>
-  <span class="access-button-view">
-    <span class="accesss-button" *ngIf="userAccessData.management && userAccessData.basic">
-      <button class="btn btn-danger" (click)="toggleManagementAccess()">Remove</button>
-    </span>
-    <span class="accesss-button" *ngIf="!userAccessData.management && userAccessData.basic">
-      <button class="btn btn-success" (click)="toggleManagementAccess()">Grant</button>
-    </span>
-  </span>
-</div>
+  <td class="text-center">
+    <button *ngIf="userAccessData.basic" 
+            class="btn btn-sm" 
+            [class.btn-outline-danger]="userAccessData.children" 
+            [class.btn-outline-success]="!userAccessData.children" 
+            (click)="toggleChildrenAccess()">
+      <i class="bi me-1" [class.bi-x-circle]="userAccessData.children" [class.bi-plus-circle]="!userAccessData.children"></i>
+      {{ userAccessData.children ? 'Remove' : 'Grant' }}
+    </button>
+    <span *ngIf="!userAccessData.basic" class="text-muted small italic">Awaiting verification</span>
+  </td>
+
+  <td class="text-center">
+    <button *ngIf="userAccessData.basic" 
+            class="btn btn-sm" 
+            [class.btn-outline-danger]="userAccessData.volunteers" 
+            [class.btn-outline-success]="!userAccessData.volunteers" 
+            (click)="toggleVolunteersAccess()">
+      <i class="bi me-1" [class.bi-x-circle]="userAccessData.volunteers" [class.bi-plus-circle]="!userAccessData.volunteers"></i>
+      {{ userAccessData.volunteers ? 'Remove' : 'Grant' }}
+    </button>
+    <span *ngIf="!userAccessData.basic" class="text-muted small italic">Awaiting verification</span>
+  </td>
+
+  <td class="text-center pe-4">
+    <button *ngIf="userAccessData.basic" 
+            class="btn btn-sm" 
+            [class.btn-outline-danger]="userAccessData.management" 
+            [class.btn-outline-success]="!userAccessData.management" 
+            (click)="toggleManagementAccess()">
+      <i class="bi me-1" [class.bi-x-circle]="userAccessData.management" [class.bi-plus-circle]="!userAccessData.management"></i>
+      {{ userAccessData.management ? 'Remove' : 'Grant' }}
+    </button>
+    <span *ngIf="!userAccessData.basic" class="text-muted small italic">Awaiting verification</span>
+  </td>
+</tr>
 
 
 

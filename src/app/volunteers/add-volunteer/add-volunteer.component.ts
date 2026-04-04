@@ -1,97 +1,76 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, NgForm, Validators } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { SharedModule } from '../../shared/shared.module';
 import { Observable } from 'rxjs';
-
 import { Volunteer } from 'src/app/interfaces/volunteer.interface';
 import { VolunteersService } from '../volunteers.service';
 
 @Component({
   selector: 'app-add-volunteer',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule, SharedModule],
   templateUrl: './add-volunteer.component.html',
   styleUrls: ['./add-volunteer.component.css']
 })
 export class AddVolunteerComponent implements OnInit {
 
   @ViewChild('v') addVolunteerForm!: NgForm;
-  newForm: FormGroup;
-  submitted:boolean = false;
-  newVolunteer: Volunteer={firstName:'', lastName:''};
-  imgUploadPercent: Observable<number>;
-  imgDownloadURL:Observable<string>;
+  imgUploadPercent: Observable<number | undefined>;
+  imgDownloadURL: Observable<string>;
   isUploading = false;
-  imagePath: string = null;
-  retrieving: boolean = false;
-  constructor(private volunteersService: VolunteersService, private fb: FormBuilder) { }
+  imageFileName: string = '';
+
+  constructor(private volunteersService: VolunteersService) { }
 
   ngOnInit(): void {
-    // this.newForm = this.fb.group({
-    //   title:['new volunteer'],
-    //   firstName: ['',Validators.required],
-    //   lastName: ['',Validators.required],
-    //   residence: [''],
-    //   address: this.fb.array([{
-    //     Line1: [''],
-    //     Line2: [''],
-    //     Line3: [''],
-    //   }]),
-    //   telephone: [''],
-    //   img: [''],
-    //   school: [''],
-    //   level: [''],
-    //   program: [''],
-    //   id: [''],
-    //   email: [''],
-    //   registeredProgram:[{
-    //     Prog1: [''],
-    //     Prog2: [''],
-    //     Prog3: [''],
-    //   }]
-    //     })
   }
 
-  onSaveVolunteer(form: NgForm){
-    this.submitted = true;
-    const address = {
-      Line1:form.value.Line1,
-      Line2:form.value.Line2,
-      Line3:form.value.Line3
+  async onSaveVolunteer(form: NgForm) {
+    const val = form.value;
+    const newVolunteer: Volunteer = {
+      firstName: val.firstName,
+      lastName: val.lastName,
+      email: val.email,
+      telephone: val.telephone,
+      residence: val.residence,
+      level: val.level,
+      school: val.school,
+      program: val.program,
+      address: {
+        Line1: val.Line1,
+        Line2: val.Line2,
+        Line3: val.Line3
+      },
+      volunteeringInProg: {
+        Prog1: val.Prog1,
+        Prog2: val.Prog2,
+        Prog3: val.Prog3
+      },
+      img: this.imageFileName || undefined
     };
-    const volunteeringInProg = {
-      Prog1: form.value.Prog1,
-      Prog2: form.value.Prog2,
-      Prog3: form.value.Prog3
-    };
-    delete form.value.Line1;
-    delete form.value.Line2;
-    delete form.value.Line3;
-    delete form.value.Prog1;
-    delete form.value.Prog2;
-    delete form.value.Prog3;
-    this.newVolunteer = form.value;
-    this.newVolunteer.address = address;
-    this.newVolunteer.volunteeringInProg = volunteeringInProg;
-    console.log(this.newVolunteer);
-    if(this.imagePath){
-      this.newVolunteer.img = this.imagePath;
-      this.volunteersService.saveToDB(this.newVolunteer);
-    }else{
-      this.volunteersService.saveToDB(this.newVolunteer);
-    }
+
+    await this.volunteersService.saveToDB(newVolunteer);
     this.addVolunteerForm.reset();
-
+    this.imageFileName = '';
+    this.imgDownloadURL = new Observable<string>();
   }
 
+  onuploadProfileImg(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-  onuploadProfileImg(event: any){
     this.isUploading = true;
-    const fileName = this.addVolunteerForm.value.firstName + this.addVolunteerForm.value.lastName;
+    const fileName = `vol_${this.addVolunteerForm.value.firstName}_${this.addVolunteerForm.value.lastName}_${Date.now()}`;
+    
     this.volunteersService.uploadFile(event, fileName);
     this.imgUploadPercent = this.volunteersService.uploadPercent;
-    this.imagePath = fileName;
-    setTimeout(()=>{
+    this.imageFileName = fileName;
+
+    setTimeout(() => {
       this.imgDownloadURL = this.volunteersService.downloadURL;
       this.isUploading = false;
-      this.retrieving = true;
-    }, 6000)
+    }, 5000);
   }
 }

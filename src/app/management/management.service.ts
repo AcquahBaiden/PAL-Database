@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
 import { finalize, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
-import { AngularFireDatabase } from '@angular/fire/database';
-import { AngularFireStorage } from '@angular/fire/storage';
+import { AngularFireDatabase } from '@angular/fire/compat/database';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { ManagementMember } from '../interfaces/management-member.interface';
 import { NotificationService } from '../notification/notification.service';
 
@@ -11,60 +11,56 @@ import { NotificationService } from '../notification/notification.service';
   providedIn: "root",
 })
 export class ManagementService {
-  public uploadPercent: Observable<number>;
+  public uploadPercent: Observable<number | undefined>;
   public downloadURL!: Observable<string>;
+  private managementStream: Observable<ManagementMember[]>;
+  private envInjector = inject(EnvironmentInjector);
+
   constructor(
     private db: AngularFireDatabase,
     private storage: AngularFireStorage,
     private notiService: NotificationService
-  ) {}
-
-  getMamangementData() {
-    return this.db
-      .object("Management")
+  ) {
+    this.managementStream = this.db
+      .object<{ [key: string]: ManagementMember }>("Management")
       .valueChanges()
       .pipe(
-        map((responseData: any) => {
-          const MembersData: ManagementMember[] = [];
-          for (const key in responseData) {
-            if (responseData.hasOwnProperty(key)) {
-              MembersData.push({ ...responseData[key], id: key });
-            }
-          }
-          return MembersData;
+        map((responseData) => {
+          if (!responseData) return [];
+          return Object.keys(responseData).map(key => ({
+            ...responseData[key],
+            id: key
+          }));
         })
       );
   }
 
-  getMember(id: string) {
-    const ref = "Management/".concat(id);
-    return this.db
-      .object<ManagementMember>(ref)
-      .valueChanges()
-      .pipe(
-        map((memeberData: ManagementMember) => {
-          return memeberData;
-        })
-      );
+  getMamangementData(): Observable<ManagementMember[]> {
+    return this.managementStream;
   }
 
-  saveToFirebase(data: ManagementMember) {
-      try {
+  getMember(id: string): Observable<ManagementMember> {
+    return runInInjectionContext(this.envInjector, () => {
+      return this.db.object<ManagementMember>("Management/" + id).valueChanges();
+    });
+  }
+
+  async saveToFirebase(data: ManagementMember) {
+    try {
+      await runInInjectionContext(this.envInjector, async () => {
         const itemsRef = this.db.list("Management");
-        itemsRef.push(data);
-        this.db
+        await itemsRef.push(data);
+        await this.db
           .object("Summary/management/number")
           .query.ref.transaction((number) => {
-            if (number === null) {
-              return (number = 1);
-            } else {
-              return number + 1;
-            }
+            return (number || 0) + 1;
           });
-          this.notiService.setState(false,`${data.firstName} succesfully saved`,true);
-      } catch (error) {
-        this.notiService.setState(true,'Something went wrong when saving profile',true);
-      }
+      });
+      this.notiService.setState(false, `${data.firstName} successfully saved`, true);
+    } catch (error) {
+      console.error('Error saving management member:', error);
+      this.notiService.setState(true, 'Something went wrong when saving profile', true);
+    }
   }
 
   uploadFile(event: any, fileName: string) {
@@ -78,44 +74,46 @@ export class ManagementService {
       .subscribe();
   }
 
-  deleteMember(id: string) {
+  async deleteMember(id: string) {
     try {
-      const volRef = this.db.list("Management/" + id);
-      volRef.remove();
-      this.db
-        .object("Summary/management/number")
-        .query.ref.transaction((number) => {
-          if (number === null) {
-            return (number = 0);
-          } else {
-            return number - 1;
-          }
-        });
-        this.notiService.setState(false,'Profile successfully deleted',true);
-    } catch (error) {
-      this.notiService.setState(true,'Something went wront when deleting profile',true);
-    }
-  }
-
-  updateManagementMember(id: string, editedMember: ManagementMember) {
-    try {
-      this.db.list("Management").update(id, editedMember);
-      this.notiService.setState(false,'Profile successfully updated',true);
-    } catch (error) {
-      this.notiService.setState(true,'Something went wrong when updating profile',true);
-    }
-  }
-
-  updateMemberProfilePhoto(id: string, fileName: string) {
-    return this.db
-      .list("Management/" + id)
-      .set("img", fileName)
-      .then(() => {
-        this.notiService.setState(false,'Profile successfully updated',true);
-        return true;
-      })
-      .catch((error) => {
-        this.notiService.setState(true,'Something went wrong when updating profile',true);
+      await runInInjectionContext(this.envInjector, async () => {
+        await this.db.object("Management/" + id).remove();
+        await this.db
+          .object("Summary/management/number")
+          .query.ref.transaction((number) => {
+            return Math.max(0, (number || 0) - 1);
+          });
       });
+      this.notiService.setState(false, 'Profile successfully deleted', true);
+    } catch (error) {
+      console.error('Error deleting management member:', error);
+      this.notiService.setState(true, 'Something went wrong when deleting profile', true);
+    }
+  }
+
+  async updateManagementMember(id: string, editedMember: ManagementMember) {
+    try {
+      await runInInjectionContext(this.envInjector, async () => {
+        await this.db.object("Management/" + id).update(editedMember);
+      });
+      this.notiService.setState(false, 'Profile successfully updated', true);
+    } catch (error) {
+      console.error('Error updating management member:', error);
+      this.notiService.setState(true, 'Something went wrong when updating profile', true);
+    }
+  }
+
+  async updateMemberProfilePhoto(id: string, fileName: string) {
+    try {
+      await runInInjectionContext(this.envInjector, async () => {
+        await this.db.object("Management/" + id).update({ img: fileName });
+      });
+      this.notiService.setState(false, 'Profile photo successfully updated', true);
+      return true;
+    } catch (error) {
+      console.error('Error updating management profile photo:', error);
+      this.notiService.setState(true, 'Something went wrong when updating profile', true);
+      return false;
+    }
   }
 }

@@ -1,101 +1,108 @@
-<div *ngIf="!dataLoaded">
-
+<div *ngIf="!dataLoaded" class="text-center py-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
 </div>
-<div class="card">
-  <div class="card-body">
-  <h4 class="card-title">Editing Volunteer</h4>
-  <form (ngSubmit)="onUpdateVolunteer(editForm)" #editForm="ngForm">
-  <div *ngIf="imageLoaded">
-    <img [src]="'volunteers/'+profileImg | getDownloadURL" class="card-img-top rounded-large" alt="...">
-  </div>
-  <div *ngIf="!imageLoaded">
-    <img src="https://via.placeholder.com/150" class="card-img-top rounded-large" alt="">
-  </div>
-  <div class="form-group row">
-    <label for="imgUpload" class="col col-form-label">Update profile image</label>
-    <div class="col">
-      <input type="file" class="form-control-file" (change)="onuploadProfileImg($event)">
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="firstName" class="col col-form-label">First name</label>
-    <div class="col">
-      <input type="text" class="form-control"
-      ngModel name="firstName"
-      required
-      #firstName="ngModel">
-      <span class="help-block" *ngIf="!firstName.valid && firstName.touched">
-        <p>Please enter a valid first name</p>
-      </span>
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="lastName" class="col col-form-label">Last name</label>
-    <div class="col">
-      <input type="text" class="form-control"
-      ngModel name="lastName"
-      required
-      #lastName="ngModel">
-      <span class="help-block" *ngIf="!lastName.valid && lastName.touched">
-        <p>Please enter a valid last name</p>
-      </span>
-    </div>
 
-  </div>
-  <div class="form-group row">
-    <label for="" class="col col-form-label">Email</label>
-    <div class="col">
-      <input type="text" class="form-control"
-      ngModel name="email"
-      >
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="" class="col col-form-label">Telephone</label>
-    <div class="col">
-      <input type="text" class="form-control"
-      ngModel name="telephone"
-      >
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="" class="col col-form-label">Residence</label>
-    <div class="col">
-      <textarea class="form-control"
-      ngModel name = "residence"
-      ></textarea>
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="" class="col col-form-label">Level</label>
-    <div class="col">
-      <input type="text" class="form-control"
-      ngModel name="level"
-      >
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="" class="col col-form-label">School</label>
-    <div class="col">
-      <textarea class="form-control"
-      ngModel name="school"
-      ></textarea>
-    </div>
-  </div>
+<div class="container py-4" *ngIf="dataLoaded && selectedVol">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-semibold text-primary">
+            <i class="bi bi-pencil-square me-2"></i>Edit Volunteer Profile
+          </h5>
+          <button class="btn btn-sm btn-outline-secondary" [routerLink]="['../']">
+            <i class="bi bi-arrow-left me-1"></i>Back to Profile
+          </button>
+        </div>
+        
+        <div class="card-body p-4">
+          <!-- Profile Photo Update -->
+          <div class="text-center mb-4">
+            <div class="profile-image-container mx-auto mb-3" style="width: 150px; height: 150px;">
+              <img *ngIf="selectedVol.img" [src]="'volunteers/'+selectedVol.img | getDownloadURL | async" 
+                   class="rounded-circle shadow-sm h-100 w-100 object-fit-cover border border-4 border-white" alt="Profile photo">
+              <img *ngIf="!selectedVol.img" src="assets/img/stock.jpeg" 
+                   class="rounded-circle shadow-sm h-100 w-100 object-fit-cover border border-4 border-white" alt="Profile photo">
+            </div>
+            <div class="col-md-6 mx-auto">
+              <label for="imgUpload" class="btn btn-sm btn-outline-primary mb-2">
+                <i class="bi bi-camera me-1"></i> Change Photo
+              </label>
+              <input type="file" class="d-none" id="imgUpload" (change)="onuploadProfileImg($event)">
+              <div *ngIf="isUploading" class="mt-2">
+                <div class="progress" style="height: 4px; width: 150px; margin: 0 auto;">
+                  <div class="progress-bar" role="progressbar" [style.width]="(uploadPercent | async) + '%'"></div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-  <div class="form-group row">
-    <label for="" class="col col-form-label">Program/Department</label>
-    <div class="col">
-      <textarea type="text" class="form-control"
-      ngModel name="program"
-      ></textarea>
+          <form (ngSubmit)="onUpdateVolunteer(editForm)" #editForm="ngForm" class="needs-validation">
+            
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="firstName" class="form-label small fw-bold text-muted text-uppercase">First Name</label>
+                <input type="text" class="form-control bg-light border-0 py-2" id="firstName"
+                  ngModel name="firstName" required #firstName="ngModel">
+              </div>
+              <div class="col-md-6">
+                <label for="lastName" class="form-label small fw-bold text-muted text-uppercase">Last Name</label>
+                <input type="text" class="form-control bg-light border-0 py-2" id="lastName"
+                  ngModel name="lastName" required #lastName="ngModel">
+              </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="email" class="form-label small fw-bold text-muted text-uppercase">Email Address</label>
+                <input type="email" class="form-control bg-light border-0 py-2" id="email"
+                  ngModel name="email">
+              </div>
+              <div class="col-md-6">
+                <label for="telephone" class="form-label small fw-bold text-muted text-uppercase">Telephone</label>
+                <input type="tel" class="form-control bg-light border-0 py-2" id="telephone"
+                  ngModel name="telephone">
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="residence" class="form-label small fw-bold text-muted text-uppercase">Residence</label>
+              <input type="text" class="form-control bg-light border-0 py-2" id="residence"
+                ngModel name="residence">
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <label for="level" class="form-label small fw-bold text-muted text-uppercase">Level/Year</label>
+                <input type="text" class="form-control bg-light border-0 py-2" id="level"
+                  ngModel name="level">
+              </div>
+              <div class="col-md-8">
+                <label for="school" class="form-label small fw-bold text-muted text-uppercase">School / Institution</label>
+                <input type="text" class="form-control bg-light border-0 py-2" id="school"
+                  ngModel name="school">
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="program" class="form-label small fw-bold text-muted text-uppercase">Program / Course</label>
+              <input type="text" class="form-control bg-light border-0 py-2" id="program"
+                ngModel name="program">
+            </div>
+
+            <div class="pt-3">
+              <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-3 fw-bold shadow-sm"
+                [disabled]="!editForm.valid">
+                <i class="bi bi-check-lg me-2"></i>Update Volunteer Record
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="form-group row">
-    <button type="submit" class="btn btn-primary btn-block">Update Volunteer Data</button>
-  </div>
-  </form>
-
-</div>
 </div>
 

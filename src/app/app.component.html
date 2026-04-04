@@ -1,104 +1,129 @@
 
-<div id="loader-wrapper" *ngIf="!dataLoaded">
-  <div class="loader">
-    Loading ...
+<div id="loader-wrapper" *ngIf="!dataLoaded" class="vh-100 d-flex justify-content-center align-items-center">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading ...</span>
   </div>
 </div>
-<div style="min-height: 95vh;" *ngIf="dataLoaded">
-  <div  *ngIf="authService.auth.user | async as user; else login">
-    <nav class="navbar navbar-primary bg-primary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-          <img src="https://playandlearnfoundation.org/wp-content/uploads/2017/09/cropped-logo2.png" alt="" width="30" height="24" class="d-inline-block align-top">
-          <span style="color: #fff; padding-left: 15px;">PAL Database</span>
+<div class="min-vh-100 d-flex flex-column" *ngIf="dataLoaded">
+  <div *ngIf="authService.auth.user | async as user; else login" class="flex-grow-1 d-flex flex-column">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top border-bottom py-3">
+      <div class="container-fluid px-4">
+        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="#">
+          <i class="bi bi-layers-fill fs-4 me-2"></i>
+          <span>PAL Database</span>
         </a>
-        <ul class="nav justify-content-end">
-          <li class="nav-item">
-            <a class="nav-link" (click)="onLogout()" style="color: #fff;">Logout</a>
-          </li>
-        </ul>
-      </div>
-      <div class="container-fluid" style="justify-content:right">
-        <app-header></app-header>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <div class="ms-auto d-flex align-items-center gap-3">
+            <app-header></app-header>
+            <div class="vr d-none d-lg-block mx-1"></div>
+            <button class="btn btn-light border-0 text-danger fw-medium d-flex align-items-center px-3" (click)="onLogout()">
+              <i class="bi bi-box-arrow-right me-2"></i> Logout
+            </button>
+          </div>
+        </div>
       </div>
     </nav>
-    <div class="container-fluid">
-
-      <div class="row">
-        <div class="col-lg-2 bg-light" >
+    
+    <div class="container-fluid flex-grow-1">
+      <div class="row h-100">
+        <div class="col-lg-2 bg-white border-end py-3 shadow-sm">
          <app-side-bar></app-side-bar>
         </div>
-        <div class="col-lg-10" style="background-color: #E7EEEC; padding-top: 30px;">
-          <div id="feedback-container">
+        <div class="col-lg-10 bg-light py-4">
+          <div id="feedback-container" class="container">
             <app-notification></app-notification>
           </div>
-            <router-outlet>
-
-            </router-outlet>
-
+          <div class="container">
+            <router-outlet></router-outlet>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<ng-template class="container" #login>
-  <div class="container" style="height: 100vh; display: flex; justify-content: center; align-items: center;">
-    <div class="card" style="width: 18rem;">
-      <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a class="nav-link" [class.active]="formIsLogin" (click)="toggleLogInView('login')">Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" [class.active]="!formIsLogin" (click)="toggleLogInView('signIn')">Sign Up</a>
-        </li>
-      </ul>
-      <div class="card-body">
-        <div class="alert alert-danger" role="alert" *ngIf="isLoginError">
-          {{errorMessage}}
+<ng-template #login>
+  <div class="container vh-100 d-flex justify-content-center align-items-center bg-light">
+    <div class="card shadow-lg border-0 overflow-hidden" style="width: 26rem; border-radius: 1rem;">
+      <div class="card-header bg-white p-0 border-bottom">
+        <div class="d-flex text-center">
+          <div class="flex-fill py-3 role-button border-bottom border-3" 
+               [class.border-primary]="formIsLogin" [class.text-primary]="formIsLogin" [class.fw-bold]="formIsLogin"
+               (click)="toggleLogInView('login')" style="cursor: pointer;">
+            Login
+          </div>
+          <div class="flex-fill py-3 role-button border-bottom border-3" 
+               [class.border-primary]="!formIsLogin" [class.text-primary]="!formIsLogin" [class.fw-bold]="!formIsLogin"
+               (click)="toggleLogInView('signIn')" style="cursor: pointer;">
+            Sign Up
+          </div>
         </div>
-        <form (ngSubmit)="onSignIn()"  #loginForm="ngForm" *ngIf="formIsLogin">
-          <h3 class="card-title">Log in</h3>
-          <div class="form-group">
-            <label for="exampleInputEmail1">Email address</label>
-            <input type="email" class="form-control" aria-describedby="emailHelp"
-            ngModel
-            name="email"
-            required
-            #email="ngModel">
+      </div>
+      
+      <div class="card-body p-5">
+        <div class="text-center mb-4">
+          <img src="assets/img/stock.jpeg" alt="Logo" width="60" class="mb-3 rounded-circle shadow-sm" style="object-fit: cover; height: 60px;">
+          <h3 class="h4 fw-bold text-dark">{{ formIsLogin ? 'Welcome Back' : 'Create Account' }}</h3>
+          <p class="text-muted small">{{ formIsLogin ? 'Enter your credentials to access your account' : 'Join the PAL Foundation database' }}</p>
+        </div>
+
+        <div class="alert alert-danger d-flex align-items-center py-2 px-3 mb-4" role="alert" *ngIf="isLoginError">
+          <i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0"></i>
+          <div class="small fw-medium">{{errorMessage}}</div>
+        </div>
+        
+        <!-- Login Form -->
+        <form (ngSubmit)="onSignIn()" #loginForm="ngForm" *ngIf="formIsLogin">
+          <div class="mb-3">
+            <label for="loginEmail" class="form-label small fw-bold text-muted text-uppercase">Email address</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0"><i class="bi bi-envelope text-muted"></i></span>
+              <input type="email" class="form-control bg-light border-0 py-2" id="loginEmail"
+                ngModel name="email" required #email="ngModel" placeholder="name@example.com">
+            </div>
           </div>
-          <div class="form-group">
-            <label for="exampleInputPassword1">Password</label>
-            <input type="password" class="form-control"
-            ngModel
-            required
-            name="password"
-            #password="ngModel">
+          <div class="mb-4">
+            <label for="loginPassword" class="form-label small fw-bold text-muted text-uppercase">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0"><i class="bi bi-lock text-muted"></i></span>
+              <input type="password" class="form-control bg-light border-0 py-2" id="loginPassword"
+                ngModel required name="password" #password="ngModel" placeholder="Enter password">
+            </div>
           </div>
-          <div>
-            <button type="submit" class="btn btn-primary btn-block" style="width: 100%; margin-top:20px;" [disabled]="!loginForm.valid">Log in</button>
-          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm d-flex justify-content-center align-items-center" 
+                  [disabled]="!loginForm.valid || isSubmitting">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            {{ isSubmitting ? 'Signing in...' : 'Log in' }}
+          </button>
         </form>
-        <form (ngSubmit)="onSignUp()"  #signUpForm="ngForm" *ngIf="!formIsLogin">
-          <h3 class="card-title">Sign up</h3>
-          <div class="form-group">
-            <label for="exampleInputEmail1">Email address</label>
-            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-            ngModel
-            name="signupEmail"
-            #signupEmail="ngModel"
-            required>
+
+        <!-- Sign Up Form -->
+        <form (ngSubmit)="onSignUp()" #signUpForm="ngForm" *ngIf="!formIsLogin">
+          <div class="mb-3">
+            <label for="signupEmail" class="form-label small fw-bold text-muted text-uppercase">Email address</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0"><i class="bi bi-envelope text-muted"></i></span>
+              <input type="email" class="form-control bg-light border-0 py-2" id="signupEmail"
+                ngModel name="signupEmail" #signupEmail="ngModel" required placeholder="name@example.com">
+            </div>
           </div>
-          <div class="form-group">
-            <label for="exampleInputPassword1">Password</label>
-            <input type="password" class="form-control" id="exampleInputPassword1"
-            ngModel
-            name="signupPassword"
-            #signupPassword="ngModel"
-            required
-            minlength="6">
+          <div class="mb-4">
+            <label for="signupPassword" class="form-label small fw-bold text-muted text-uppercase">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0"><i class="bi bi-lock text-muted"></i></span>
+              <input type="password" class="form-control bg-light border-0 py-2" id="signupPassword"
+                ngModel name="signupPassword" #signupPassword="ngModel" required minlength="6"
+                placeholder="Min. 6 characters">
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary btn-block" style="width: 100%; margin-top:20px;" [disabled]="!signUpForm.valid">Create account</button>
+          <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm d-flex justify-content-center align-items-center" 
+                  [disabled]="!signUpForm.valid || isSubmitting">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            {{ isSubmitting ? 'Creating account...' : 'Create account' }}
+          </button>
         </form>
       </div>
     </div>
