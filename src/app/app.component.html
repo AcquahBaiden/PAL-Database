@@ -1,49 +1,52 @@
+<app-notification></app-notification>
 
-<div id="loader-wrapper" *ngIf="!dataLoaded" class="vh-100 d-flex justify-content-center align-items-center">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading ...</span>
+<ng-container *ngIf="sessionStore.session$ | async as session">
+  <div id="loader-wrapper" *ngIf="session.status === 'loading'" class="vh-100 d-flex justify-content-center align-items-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading ...</span>
+    </div>
   </div>
-</div>
-<div class="min-vh-100 d-flex flex-column" *ngIf="dataLoaded">
-  <div *ngIf="authService.auth.user | async as user; else login" class="flex-grow-1 d-flex flex-column">
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top border-bottom py-3">
-      <div class="container-fluid px-4">
-        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="#">
-          <i class="bi bi-layers-fill fs-4 me-2"></i>
-          <span>PAL Database</span>
-        </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarContent">
-          <div class="ms-auto d-flex align-items-center gap-3">
-            <app-header></app-header>
-            <div class="vr d-none d-lg-block mx-1"></div>
-            <button class="btn btn-light border-0 text-danger fw-medium d-flex align-items-center px-3" (click)="onLogout()">
-              <i class="bi bi-box-arrow-right me-2"></i> Logout
-            </button>
+  <div class="min-vh-100 d-flex flex-column" *ngIf="session.status !== 'loading'">
+    <div *ngIf="session.status === 'signedIn'; else login" class="flex-grow-1 d-flex flex-column vh-100 overflow-hidden">
+      <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom py-3 flex-shrink-0 z-3">
+        <div class="container-fluid px-4">
+          <div class="d-flex align-items-center">
+            <a class="navbar-brand d-flex align-items-center fw-bold text-primary me-4" href="#">
+              <i class="bi bi-layers-fill fs-4 me-2"></i>
+              <span>PAL Database</span>
+            </a>
+          </div>
+          <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarContent">
+            <div class="ms-auto d-flex align-items-center gap-3">
+              <app-header></app-header>
+              <div class="vr d-none d-lg-block mx-1"></div>
+              <button class="btn btn-light border-0 text-danger fw-medium d-flex align-items-center px-3" (click)="onLogout()">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
-    
-    <div class="container-fluid flex-grow-1">
-      <div class="row h-100">
-        <div class="col-lg-2 bg-white border-end py-3 shadow-sm">
-         <app-side-bar></app-side-bar>
+      </nav>
+
+      <div class="d-flex flex-grow-1 overflow-hidden position-relative">
+        <div class="bg-white border-end shadow-sm flex-shrink-0 z-2" 
+             style="transition: width 0.3s ease;"
+             [style.width]="isSidebarCollapsed ? '60px' : '220px'">
+           <app-side-bar [isCollapsed]="isSidebarCollapsed" (toggleSidebar)="toggleSidebar()"></app-side-bar>
         </div>
-        <div class="col-lg-10 bg-light py-4">
-          <div id="feedback-container" class="container">
-            <app-notification></app-notification>
-          </div>
-          <div class="container">
+        <div class="bg-light py-4 flex-grow-1 overflow-auto w-100">
+          <div id="feedback-container" class="container-fluid px-lg-4"></div>
+          <div class="container-fluid px-lg-4">
             <router-outlet></router-outlet>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</ng-container>
 
 <ng-template #login>
   <div class="container vh-100 d-flex justify-content-center align-items-center bg-light">
@@ -76,7 +79,7 @@
         </div>
         
         <!-- Login Form -->
-        <form (ngSubmit)="onSignIn()" #loginForm="ngForm" *ngIf="formIsLogin">
+        <form #loginForm="ngForm" *ngIf="formIsLogin">
           <div class="mb-3">
             <label for="loginEmail" class="form-label small fw-bold text-muted text-uppercase">Email address</label>
             <div class="input-group">
@@ -93,7 +96,7 @@
                 ngModel required name="password" #password="ngModel" placeholder="Enter password">
             </div>
           </div>
-          <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm d-flex justify-content-center align-items-center" 
+          <button type="button" (click)="onSignIn(loginForm)" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm d-flex justify-content-center align-items-center" 
                   [disabled]="!loginForm.valid || isSubmitting">
             <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
             {{ isSubmitting ? 'Signing in...' : 'Log in' }}
@@ -101,7 +104,7 @@
         </form>
 
         <!-- Sign Up Form -->
-        <form (ngSubmit)="onSignUp()" #signUpForm="ngForm" *ngIf="!formIsLogin">
+        <form #signUpForm="ngForm" *ngIf="!formIsLogin">
           <div class="mb-3">
             <label for="signupEmail" class="form-label small fw-bold text-muted text-uppercase">Email address</label>
             <div class="input-group">
@@ -119,7 +122,7 @@
                 placeholder="Min. 6 characters">
             </div>
           </div>
-          <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm d-flex justify-content-center align-items-center" 
+          <button type="button" (click)="onSignUp(signUpForm)" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm d-flex justify-content-center align-items-center" 
                   [disabled]="!signUpForm.valid || isSubmitting">
             <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
             {{ isSubmitting ? 'Creating account...' : 'Create account' }}
@@ -129,5 +132,3 @@
     </div>
   </div>
 </ng-template>
-
-

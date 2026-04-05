@@ -1,23 +1,45 @@
-<div class="list-group list-group-flush mt-2">
-  <a routerLink="/summary" routerLinkActive="active" class="list-group-item list-group-item-action border-0 rounded-end mb-2 px-4 py-3 d-flex align-items-center">
-    <i class="bi bi-speedometer2 fs-5 me-3"></i> 
-    <span>Summary</span>
-  </a>
-  <a routerLink="children" routerLinkActive="active" class="list-group-item list-group-item-action border-0 rounded-end mb-2 px-4 py-3 d-flex align-items-center">
-    <i class="bi bi-people fs-5 me-3"></i> 
-    <span>Children</span>
-  </a>
-  <a routerLink="volunteers" routerLinkActive="active" class="list-group-item list-group-item-action border-0 rounded-end mb-2 px-4 py-3 d-flex align-items-center">
-    <i class="bi bi-person-heart fs-5 me-3"></i> 
-    <span>Volunteers</span>
-  </a>
-  <a routerLink="management" routerLinkActive="active" class="list-group-item list-group-item-action border-0 rounded-end mb-2 px-4 py-3 d-flex align-items-center">
-    <i class="bi bi-person-badge fs-5 me-3"></i> 
-    <span>Management</span>
-  </a>
-  <a routerLink="admin" routerLinkActive="active" class="list-group-item list-group-item-action border-0 rounded-end mb-2 px-4 py-3 d-flex align-items-center">
-    <i class="bi bi-shield-lock fs-5 me-3"></i> 
-    <span>Admin</span>
-  </a>
+<div class="sidebar-header d-flex align-items-center py-3 border-bottom mb-2" 
+     [ngClass]="isCollapsed ? 'justify-content-center px-0' : 'justify-content-end px-3'">
+  <button class="btn btn-sm btn-light border-0 shadow-sm text-secondary rounded-circle d-flex align-items-center justify-content-center" 
+          style="width: 32px; height: 32px;" (click)="onToggle()" title="Toggle Sidebar">
+    <i class="bi" [ngClass]="isCollapsed ? 'bi-list' : 'bi-layout-sidebar'"></i>
+  </button>
 </div>
 
+<div class="list-group list-group-flush" *ngIf="sessionStore.permissions$ | async as permissions">
+  <a *ngIf="permissions.basic" routerLink="/summary" routerLinkActive="active" 
+     class="list-group-item list-group-item-action border-0 rounded-end mb-2 py-3 d-flex align-items-center"
+     [ngClass]="isCollapsed ? 'px-0 justify-content-center' : 'px-3'"
+     [title]="isCollapsed ? 'Summary' : ''">
+    <i class="bi bi-speedometer2 fs-5" [ngClass]="isCollapsed ? 'mx-0' : 'me-3'"></i> 
+    <span *ngIf="!isCollapsed" class="fw-medium">Summary</span>
+  </a>
+  <a *ngIf="permissions.children" routerLink="/children" routerLinkActive="active" 
+     class="list-group-item list-group-item-action border-0 rounded-end mb-2 py-3 d-flex align-items-center"
+     [ngClass]="isCollapsed ? 'px-0 justify-content-center' : 'px-3'"
+     [title]="isCollapsed ? 'Children' : ''">
+    <i class="bi bi-people fs-5" [ngClass]="isCollapsed ? 'mx-0' : 'me-3'"></i> 
+    <span *ngIf="!isCollapsed" class="fw-medium">Children</span>
+  </a>
+  <a *ngIf="permissions.volunteers" routerLink="/volunteers" routerLinkActive="active" 
+     class="list-group-item list-group-item-action border-0 rounded-end mb-2 py-3 d-flex align-items-center"
+     [ngClass]="isCollapsed ? 'px-0 justify-content-center' : 'px-3'"
+     [title]="isCollapsed ? 'Volunteers' : ''">
+    <i class="bi bi-person-heart fs-5" [ngClass]="isCollapsed ? 'mx-0' : 'me-3'"></i> 
+    <span *ngIf="!isCollapsed" class="fw-medium">Volunteers</span>
+  </a>
+  <a *ngIf="permissions.management" routerLink="/management" routerLinkActive="active" 
+     class="list-group-item list-group-item-action border-0 rounded-end mb-2 py-3 d-flex align-items-center"
+     [ngClass]="isCollapsed ? 'px-0 justify-content-center' : 'px-3'"
+     [title]="isCollapsed ? 'Management' : ''">
+    <i class="bi bi-person-badge fs-5" [ngClass]="isCollapsed ? 'mx-0' : 'me-3'"></i> 
+    <span *ngIf="!isCollapsed" class="fw-medium">Management</span>
+  </a>
+  <a *ngIf="permissions.admin" routerLink="/admin" routerLinkActive="active" 
+     class="list-group-item list-group-item-action border-0 rounded-end mb-2 py-3 d-flex align-items-center"
+     [ngClass]="isCollapsed ? 'px-0 justify-content-center' : 'px-3'"
+     [title]="isCollapsed ? 'Admin' : ''">
+    <i class="bi bi-shield-lock fs-5" [ngClass]="isCollapsed ? 'mx-0' : 'me-3'"></i> 
+    <span *ngIf="!isCollapsed" class="fw-medium">Admin</span>
+  </a>
+</div>

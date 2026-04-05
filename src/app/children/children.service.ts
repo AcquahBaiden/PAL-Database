@@ -1,9 +1,10 @@
-import { Injectable, EnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
-import { finalize, map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
-import { AngularFireDatabase } from '@angular/fire/compat/database';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { Database, ref, objectVal, push, update, remove, runTransaction } from '@angular/fire/database';
+import { Storage, ref as storageRef, getDownloadURL } from '@angular/fire/storage';
+import { uploadBytesResumable } from 'firebase/storage';
 
 import { Child } from '../interfaces/child.interface';
 import { NotificationService } from '../notification/notification.service';
@@ -15,25 +16,21 @@ export class ChildrenService {
   public uploadPercent: Observable<number | undefined>;
   public downloadURL!: Observable<string>;
   private childrenStream: Observable<Child[]>;
-  private envInjector = inject(EnvironmentInjector);
 
-  constructor(
-    private db: AngularFireDatabase,
-    private storage: AngularFireStorage,
-    private notiService: NotificationService
-  ) {
-    this.childrenStream = this.db
-      .object<{ [key: string]: Child }>("Children")
-      .valueChanges()
-      .pipe(
-        map((responseData) => {
-          if (!responseData) return [];
-          return Object.keys(responseData).map(key => ({
-            ...responseData[key],
-            id: key
-          }));
-        })
-      );
+  private db = inject(Database);
+  private storage = inject(Storage);
+  private notiService = inject(NotificationService);
+
+  constructor() {
+    this.childrenStream = objectVal<{ [key: string]: Child }>(ref(this.db, "Children")).pipe(
+      map((responseData) => {
+        if (!responseData) return [];
+        return Object.keys(responseData).map(key => ({
+          ...responseData[key],
+          id: key
+        }));
+      })
+    );
   }
 
   getDbChildren(): Observable<Child[]> {
@@ -42,13 +39,10 @@ export class ChildrenService {
 
   async saveToDB(data: Child) {
     try {
-      const itemsRef = this.db.list("Children");
-      await itemsRef.push(data);
-      await this.db
-        .object("Summary/children/number")
-        .query.ref.transaction((number) => {
-          return (number || 0) + 1;
-        });
+      const listRef = ref(this.db, "Children");
+      await push(listRef, data);
+      const countRef = ref(this.db, "Summary/children/number");
+      await runTransaction(countRef, (number) => (number || 0) + 1);
       this.notiService.setState(false, `${data.firstName} successfully saved`, true);
     } catch (error) {
       console.error('Error saving to DB:', error);
@@ -58,24 +52,32 @@ export class ChildrenService {
 
   uploadFile(event: any, fileName: string) {
     const file = event.target.files[0];
-    const fileRef = this.storage.ref("children/" + fileName);
-    const task = this.storage.upload("children/" + fileName, file);
-    this.uploadPercent = task.percentageChanges();
-    task
-      .snapshotChanges()
-      .pipe(finalize(() => (this.downloadURL = fileRef.getDownloadURL())))
-      .subscribe();
+    const fileRef = storageRef(this.storage, "children/" + fileName);
+    const task = uploadBytesResumable(fileRef, file);
+    this.uploadPercent = new Observable<number | undefined>(subscriber => {
+      task.on('state_changed',
+        (snapshot) => subscriber.next((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
+        (error) => subscriber.error(error),
+        () => subscriber.complete()
+      );
+    });
+    task.then(() => {
+      this.downloadURL = new Observable(subscriber => {
+        getDownloadURL(fileRef).then(url => {
+          subscriber.next(url);
+          subscriber.complete();
+        });
+      });
+    });
   }
 
   getChild(id: string): Observable<Child> {
-    return runInInjectionContext(this.envInjector, () => {
-      return this.db.object<Child>("Children/" + id).valueChanges();
-    });
+    return objectVal<Child>(ref(this.db, "Children/" + id));
   }
 
   async updateChild(id: string, editedChild: Child) {
     try {
-      await runInInjectionContext(this.envInjector, () => this.db.object("Children/" + id).update(editedChild));
+      await update(ref(this.db, "Children/" + id), editedChild as any);
       this.notiService.setState(false, 'Profile successfully updated', true);
     } catch (error) {
       console.error('Error updating child:', error);
@@ -85,7 +87,7 @@ export class ChildrenService {
 
   async updateChildProfile(id: string, fileName: string) {
     try {
-      await runInInjectionContext(this.envInjector, () => this.db.object("Children/" + id).update({ img: fileName }));
+      await update(ref(this.db, "Children/" + id), { img: fileName });
       this.notiService.setState(false, 'Profile photo successfully updated', true);
       return true;
     } catch (error) {
@@ -97,10 +99,9 @@ export class ChildrenService {
 
   async deleteChild(id: string) {
     try {
-      await runInInjectionContext(this.envInjector, () => this.db.object("Children/" + id).remove());
-      await runInInjectionContext(this.envInjector, () => 
-        this.db.object("Summary/children/number").query.ref.transaction((number) => Math.max(0, (number || 0) - 1))
-      );
+      await remove(ref(this.db, "Children/" + id));
+      const countRef = ref(this.db, "Summary/children/number");
+      await runTransaction(countRef, (number) => Math.max(0, (number || 0) - 1));
       this.notiService.setState(false, 'Profile successfully deleted', true);
     } catch (error) {
       console.error('Error deleting child:', error);

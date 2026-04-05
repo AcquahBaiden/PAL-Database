@@ -70,10 +70,10 @@
             <div class="mb-4">
               <label for="imgUpload" class="form-label small fw-bold text-muted text-uppercase">Profile Photo</label>
               <div class="d-flex align-items-start gap-4">
-                <div class="profile-preview shadow-sm rounded-circle bg-light d-flex align-items-center justify-content-center overflow-hidden" 
-                     style="width: 120px; height: 120px; border: 2px dashed #dee2e6;">
-                  <img *ngIf="imgDownloadURL | async" [src]="imgDownloadURL | async" class="img-fluid h-100 w-100 object-fit-cover" alt="Profile preview">
-                  <i *ngIf="!(imgDownloadURL | async)" class="bi bi-person text-muted display-4"></i>
+                <div class="shadow-sm rounded-circle bg-light d-flex align-items-center justify-content-center overflow-hidden" 
+                     style="width: 250px; height: 250px; border: 2px dashed #dee2e6; padding: 6px;">
+                  <img *ngIf="imgDownloadURL | async" [src]="imgDownloadURL | async" class="rounded-circle object-fit-cover w-100 h-100" alt="Profile preview">
+                  <i *ngIf="!(imgDownloadURL | async)" class="bi bi-person text-muted display-1"></i>
                 </div>
                 <div class="flex-grow-1">
                   <input type="file" class="form-control border-0 bg-light py-2" id="imgUpload" 

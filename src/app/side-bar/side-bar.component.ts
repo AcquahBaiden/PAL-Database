@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { SessionStore } from '../auth/session.store';
 
 @Component({
   selector: 'app-side-bar',
@@ -12,9 +13,16 @@ import { RouterModule } from '@angular/router';
 })
 export class SideBarComponent implements OnInit {
 
-  constructor() { }
+  @Input() isCollapsed = false;
+  @Output() toggleSidebar = new EventEmitter<void>();
+
+  constructor(public sessionStore: SessionStore) { }
 
   ngOnInit(): void {
+  }
+
+  onToggle() {
+    this.toggleSidebar.emit();
   }
 
 }

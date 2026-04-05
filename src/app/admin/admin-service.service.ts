@@ -1,50 +1,45 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs/operators';
-
-import { AngularFireDatabase } from '@angular/fire/compat/database';
+import { Database, ref, objectVal, update } from '@angular/fire/database';
+import { normalizeAccessData } from '../auth/access.utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminServiceService {
-  constructor(private db: AngularFireDatabase) { }
+  private db = inject(Database);
 
   getUsersAccessInfo(){
-    return this.db.object('Access').valueChanges()
-      .pipe(
-        map((responseData:any)=>{
-          const accessData:any = [];
-          for(const key in responseData){
-            if(responseData.hasOwnProperty(key)){
-              accessData.push({...responseData[key], id:key})
-            }
-          }
+    return objectVal(ref(this.db, 'Access')).pipe(
+      map((responseData: any) => {
+        const accessData: any = [];
+        if (!responseData) {
           return accessData;
         }
-      ))
+
+        for (const key in responseData) {
+          if (responseData.hasOwnProperty(key)) {
+            accessData.push({
+              ...normalizeAccessData(responseData[key]),
+              id: key
+            });
+          }
+        }
+        return accessData;
+      })
+    );
   }
 
-  updateAccessToChildren(id:string, value: boolean){
-    const ref = 'Access/'.concat(id);
-    this.db.list(ref).set('children', !value);
-    this.db.list(ref+'/Children/').set('access', !value);
+  updateAccessToChildren(id: string, value: boolean){
+    update(ref(this.db, `Access/${id}`), { children: !value });
   }
-  updateAccessToVolunteers(id:string, value: boolean){
-    const ref = 'Access/'.concat(id);
-    this.db.list(ref).set('volunteers', !value);
-    this.db.list(ref+'/Volunteers/').set('access', !value);
-
+  updateAccessToVolunteers(id: string, value: boolean){
+    update(ref(this.db, `Access/${id}`), { volunteers: !value });
   }
-  updateAccessToManagement(id:string, value: boolean){
-    const ref = 'Access/'.concat(id);
-    this.db.list(ref).set('management', !value);
-    this.db.list(ref+'/Management/').set('access', !value);
-
+  updateAccessToManagement(id: string, value: boolean){
+    update(ref(this.db, `Access/${id}`), { management: !value });
   }
-
-  updateBasicAccess(id:string, value:boolean){
-    const ref = 'Access/'.concat(id);
-    this.db.list(ref).set('basic', !value);
-    this.db.list(ref+'/Basic/').set('access', !value);
+  updateBasicAccess(id: string, value: boolean){
+    update(ref(this.db, `Access/${id}`), { basic: !value });
   }
 }

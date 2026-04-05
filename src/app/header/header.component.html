@@ -1,13 +1,12 @@
-<div class="d-flex gap-2" role="group" aria-label="Action buttons">
-  <button type="button" class="btn btn-primary btn-sm fw-medium px-3 rounded-2 shadow-sm" (click)="onAddChild()">
+<div class="d-flex gap-2" role="group" aria-label="Action buttons" *ngIf="sessionStore.permissions$ | async as permissions">
+  <button *ngIf="permissions.children" type="button" class="btn btn-primary btn-sm fw-medium px-3 rounded-2 shadow-sm" (click)="onAddChild()">
     <i class="bi bi-person-plus me-1"></i> Add PAL Child
   </button>
-  <button type="button" class="btn btn-primary btn-sm fw-medium px-3 rounded-2 shadow-sm" (click)="onAddVolunteer()">
+  <button *ngIf="permissions.volunteers" type="button" class="btn btn-primary btn-sm fw-medium px-3 rounded-2 shadow-sm" (click)="onAddVolunteer()">
     <i class="bi bi-people me-1"></i> Add Volunteer
   </button>
-  <button type="button" class="btn btn-primary btn-sm fw-medium px-3 rounded-2 shadow-sm" (click)="onAddManagement()">
+  <button *ngIf="permissions.management" type="button" class="btn btn-primary btn-sm fw-medium px-3 rounded-2 shadow-sm" (click)="onAddManagement()">
     <i class="bi bi-person-badge me-1"></i> Add Manager
   </button>
 </div>
-
 

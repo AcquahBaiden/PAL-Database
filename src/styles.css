@@ -1,12 +1,21 @@
 /* You can add global styles to this file, and also import other style files */
 :root{
-  --hover: #E7EEEC
+  --hover: #E7EEEC;
+  --app-font-family: 'Nunito', 'Inter', sans-serif;
 }
 html, body{
   background-color: #E7EEEC;
   min-height: 100%;
-  font-family: 'Padauk', sans-serif;
+  font-family: var(--app-font-family);
   font-size: medium;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 
 
@@ -32,11 +41,6 @@ html, body{
   background-color: #ffffff91;
   border-radius: 5%;
   font-size: 101%;
-}
-
-.rounded-circle{
-  max-width: 3rem;
-  max-height: 3rem;
 }
 
 .rounded-large{

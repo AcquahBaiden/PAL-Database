@@ -2,7 +2,6 @@ import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
-import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 import { ChildDetailsComponent } from "./child-details/child-details.component";
 import { ChildEditComponent } from "./child-edit/child-edit.component";
 import { ChildrenListComponent } from "./children-list/children-list.component";
@@ -13,11 +12,10 @@ import { SharedModule } from "../shared/shared.module";
 
 @NgModule({
   imports: [
-    RouterModule, 
-    CommonModule, 
-    FormsModule, 
-    AngularFireStorageModule, 
-    ReactiveFormsModule, 
+    RouterModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     SharedModule,
     ChildrenListComponent,
     ChildrenComponent,

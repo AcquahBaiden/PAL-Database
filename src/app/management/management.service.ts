@@ -1,9 +1,11 @@
-import { Injectable, EnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
-import { finalize, map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import { AngularFireDatabase } from '@angular/fire/compat/database';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { Database, ref, objectVal, push, update, remove, runTransaction } from '@angular/fire/database';
+import { Storage, ref as storageRef, getDownloadURL } from '@angular/fire/storage';
+import { uploadBytesResumable } from 'firebase/storage';
+
 import { ManagementMember } from '../interfaces/management-member.interface';
 import { NotificationService } from '../notification/notification.service';
 
@@ -14,25 +16,21 @@ export class ManagementService {
   public uploadPercent: Observable<number | undefined>;
   public downloadURL!: Observable<string>;
   private managementStream: Observable<ManagementMember[]>;
-  private envInjector = inject(EnvironmentInjector);
 
-  constructor(
-    private db: AngularFireDatabase,
-    private storage: AngularFireStorage,
-    private notiService: NotificationService
-  ) {
-    this.managementStream = this.db
-      .object<{ [key: string]: ManagementMember }>("Management")
-      .valueChanges()
-      .pipe(
-        map((responseData) => {
-          if (!responseData) return [];
-          return Object.keys(responseData).map(key => ({
-            ...responseData[key],
-            id: key
-          }));
-        })
-      );
+  private db = inject(Database);
+  private storage = inject(Storage);
+  private notiService = inject(NotificationService);
+
+  constructor() {
+    this.managementStream = objectVal<{ [key: string]: ManagementMember }>(ref(this.db, "Management")).pipe(
+      map((responseData) => {
+        if (!responseData) return [];
+        return Object.keys(responseData).map(key => ({
+          ...responseData[key],
+          id: key
+        }));
+      })
+    );
   }
 
   getMamangementData(): Observable<ManagementMember[]> {
@@ -40,22 +38,15 @@ export class ManagementService {
   }
 
   getMember(id: string): Observable<ManagementMember> {
-    return runInInjectionContext(this.envInjector, () => {
-      return this.db.object<ManagementMember>("Management/" + id).valueChanges();
-    });
+    return objectVal<ManagementMember>(ref(this.db, "Management/" + id));
   }
 
   async saveToFirebase(data: ManagementMember) {
     try {
-      await runInInjectionContext(this.envInjector, async () => {
-        const itemsRef = this.db.list("Management");
-        await itemsRef.push(data);
-        await this.db
-          .object("Summary/management/number")
-          .query.ref.transaction((number) => {
-            return (number || 0) + 1;
-          });
-      });
+      const listRef = ref(this.db, "Management");
+      await push(listRef, data);
+      const countRef = ref(this.db, "Summary/management/number");
+      await runTransaction(countRef, (number) => (number || 0) + 1);
       this.notiService.setState(false, `${data.firstName} successfully saved`, true);
     } catch (error) {
       console.error('Error saving management member:', error);
@@ -65,25 +56,30 @@ export class ManagementService {
 
   uploadFile(event: any, fileName: string) {
     const file = event.target.files[0];
-    const fileRef = this.storage.ref("management/" + fileName);
-    const task = this.storage.upload("management/" + fileName, file);
-    this.uploadPercent = task.percentageChanges();
-    task
-      .snapshotChanges()
-      .pipe(finalize(() => (this.downloadURL = fileRef.getDownloadURL())))
-      .subscribe();
+    const fileRef = storageRef(this.storage, "management/" + fileName);
+    const task = uploadBytesResumable(fileRef, file);
+    this.uploadPercent = new Observable<number | undefined>(subscriber => {
+      task.on('state_changed',
+        (snapshot) => subscriber.next((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
+        (error) => subscriber.error(error),
+        () => subscriber.complete()
+      );
+    });
+    task.then(() => {
+      this.downloadURL = new Observable(subscriber => {
+        getDownloadURL(fileRef).then(url => {
+          subscriber.next(url);
+          subscriber.complete();
+        });
+      });
+    });
   }
 
   async deleteMember(id: string) {
     try {
-      await runInInjectionContext(this.envInjector, async () => {
-        await this.db.object("Management/" + id).remove();
-        await this.db
-          .object("Summary/management/number")
-          .query.ref.transaction((number) => {
-            return Math.max(0, (number || 0) - 1);
-          });
-      });
+      await remove(ref(this.db, "Management/" + id));
+      const countRef = ref(this.db, "Summary/management/number");
+      await runTransaction(countRef, (number) => Math.max(0, (number || 0) - 1));
       this.notiService.setState(false, 'Profile successfully deleted', true);
     } catch (error) {
       console.error('Error deleting management member:', error);
@@ -93,9 +89,7 @@ export class ManagementService {
 
   async updateManagementMember(id: string, editedMember: ManagementMember) {
     try {
-      await runInInjectionContext(this.envInjector, async () => {
-        await this.db.object("Management/" + id).update(editedMember);
-      });
+      await update(ref(this.db, "Management/" + id), editedMember as any);
       this.notiService.setState(false, 'Profile successfully updated', true);
     } catch (error) {
       console.error('Error updating management member:', error);
@@ -105,9 +99,7 @@ export class ManagementService {
 
   async updateMemberProfilePhoto(id: string, fileName: string) {
     try {
-      await runInInjectionContext(this.envInjector, async () => {
-        await this.db.object("Management/" + id).update({ img: fileName });
-      });
+      await update(ref(this.db, "Management/" + id), { img: fileName });
       this.notiService.setState(false, 'Profile photo successfully updated', true);
       return true;
     } catch (error) {

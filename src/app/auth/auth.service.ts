@@ -1,76 +1,41 @@
-import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { AngularFireDatabase } from "@angular/fire/compat/database";
-import firebase from 'firebase/compat/app';
-import { first, tap } from "rxjs/operators";
-import { firstValueFrom } from 'rxjs';
+import { Injectable, inject } from "@angular/core";
+import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut, GoogleAuthProvider, UserCredential } from "@angular/fire/auth";
+import { Database, ref, update, runTransaction } from "@angular/fire/database";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
-  constructor(
-    public auth: AngularFireAuth,
-    private db: AngularFireDatabase
-  ) {}
-  AuthUserId: string = null;
-  userIsNewSignup: boolean;
+  private auth = inject(Auth);
+  private db = inject(Database);
 
   loginWithPopUp() {
-    this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    return signInWithPopup(this.auth, new GoogleAuthProvider());
   }
 
   signIn(email: string, password: string) {
-    return this.auth.signInWithEmailAndPassword(email, password);
-  }
-
-  logout() {
-    this.auth.signOut();
+    return signInWithEmailAndPassword(this.auth, email, password);
   }
 
   signUp(email: string, password: string) {
-    return this.auth.createUserWithEmailAndPassword(email, password);
+    return createUserWithEmailAndPassword(this.auth, email, password);
   }
 
-  setUpAccessData(user:firebase.auth.UserCredential) {
-    this.db
-        .object("Access/" + user.user.uid)
-        .update({
-          'basic': false,
-          'admin': false,
-          'email': user.user.email,
-          'volunteers': false,
-          'children': false,
-          'management':false,
-        })
-        .then(() => (this.userIsNewSignup = false));
+  logout() {
+    return signOut(this.auth);
   }
 
-  addNewUserCount(){
-    this.db.object('Summary/DatabaseUsers/number').query.ref
-    .transaction(number=>{
-      if(number===null){
-        return number = 1;
-      }else{
-        return number + 1;
-      }
-    })
+  setUpAccessData(user: UserCredential) {
+    return update(ref(this.db, "Access/" + user.user.uid), {
+      basic: false,
+      admin: false,
+      email: user.user.email,
+      volunteers: false,
+      children: false,
+      management: false,
+    });
   }
 
-  getUserId() {
-    if (this.userIsNewSignup) {
-      return null;
-    } else {
-      return firstValueFrom(this.auth.authState);
-    }
+  addNewUserCount() {
+    const countRef = ref(this.db, 'Summary/DatabaseUsers/number');
+    runTransaction(countRef, (number) => (number === null ? 1 : number + 1));
   }
-
-
-   async getUserAccessFromDatabase() {
-    if(await this.getUserId()){
-      return this.auth.currentUser.then((user) => {
-        return this.db.database.ref("Access/" + user.uid).once('value',()=>{})
-      });
-    }
-    return null;
-  }
-
 }

@@ -1,6 +1,6 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { Observable, of } from 'rxjs';
+import { Pipe, PipeTransform, inject } from '@angular/core';
+import { Storage, ref, getDownloadURL } from '@angular/fire/storage';
+import { Observable, from, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Pipe({
@@ -8,11 +8,11 @@ import { catchError } from 'rxjs/operators';
   standalone: true
 })
 export class GetDownloadURLPipe implements PipeTransform {
-  constructor(private storage: AngularFireStorage) {}
+  private storage = inject(Storage);
 
   transform(path: string): Observable<string | null> {
     if (!path) return of(null);
-    return this.storage.ref(path).getDownloadURL().pipe(
+    return from(getDownloadURL(ref(this.storage, path))).pipe(
       catchError(() => of(null))
     );
   }

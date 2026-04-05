@@ -1,6 +1,5 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
-import { AngularFireStorageModule } from "@angular/fire/compat/storage";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
 import { AddManagementMemberComponent } from "./add-management-member/add-management-member.component";
@@ -13,11 +12,10 @@ import { SharedModule } from "../shared/shared.module";
 
 @NgModule({
   imports: [
-    RouterModule, 
-    CommonModule, 
-    FormsModule, 
-    AngularFireStorageModule, 
-    ReactiveFormsModule, 
+    RouterModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     SharedModule,
     ManagementComponent,
     AddManagementMemberComponent,

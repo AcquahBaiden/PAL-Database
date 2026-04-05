@@ -9,15 +9,22 @@ li:hover{
 a{
   color: #000;
   text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .list-group-item.active {
   background-color: var(--bs-primary-bg-subtle) !important;
   color: var(--bs-primary) !important;
   font-weight: 600;
-  border-left: 4px solid var(--bs-primary) !important;
+  border-left: 3px solid var(--bs-primary) !important;
 }
 .list-group-item:hover:not(.active) {
   background-color: var(--bs-light) !important;
   color: var(--bs-primary) !important;
 }
+i {
+  transition: margin 0.2s ease;
+}
+
 

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { SessionStore } from '../auth/session.store';
 
 @Component({
   selector: 'app-header',
@@ -13,7 +14,10 @@ import { RouterModule } from '@angular/router';
 })
 export class HeaderComponent implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    public sessionStore: SessionStore
+  ) { }
 
   ngOnInit(): void {
   }

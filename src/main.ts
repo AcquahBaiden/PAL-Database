@@ -6,11 +6,11 @@ import { AppRoutingModule } from './app/app-routing.module';
 import { environment } from './environments/environment';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
-import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire/compat';
-import { AngularFireAnalyticsModule } from '@angular/fire/compat/analytics';
-import { AngularFireStorageModule } from '@angular/fire/compat/storage';
-import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
-import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+import { provideDatabase, getDatabase } from '@angular/fire/database';
+import { provideStorage, getStorage } from '@angular/fire/storage';
+import { provideAnalytics, getAnalytics } from '@angular/fire/analytics';
 
 if (environment.production) {
   enableProdMode();
@@ -19,16 +19,15 @@ if (environment.production) {
 bootstrapApplication(AppComponent, {
   providers: [
     provideAnimations(),
-    { provide: FIREBASE_OPTIONS, useValue: environment.firebaseConfig },
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideAuth(() => getAuth()),
+    provideDatabase(() => getDatabase()),
+    provideStorage(() => getStorage()),
+    provideAnalytics(() => getAnalytics()),
     importProvidersFrom(
       AppRoutingModule,
       NgbModule,
       FormsModule,
-      AngularFireModule.initializeApp(environment.firebaseConfig),
-      AngularFireDatabaseModule,
-      AngularFireAuthModule,
-      AngularFireStorageModule,
-      AngularFireAnalyticsModule
     )
   ]
 }).catch(err => console.error(err));

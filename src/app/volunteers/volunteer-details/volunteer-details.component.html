@@ -7,13 +7,13 @@
 <div class="container-fluid py-2" *ngIf="dataLoaded && selectedVolunteer">
   <div class="row g-4">
     <!-- Profile Header Card -->
-    <div class="col-lg-4">
+    <div class="col-xl-5 col-lg-12">
       <div class="card border-0 shadow-sm rounded-3 text-center p-4 h-100">
-        <div class="profile-image-container mx-auto mb-4" style="width: 150px; height: 150px;">
+        <div class="mx-auto mb-4 d-flex justify-content-center align-items-center rounded-circle bg-light shadow-sm" style="width: 250px; height: 250px; padding: 6px;">
           <img *ngIf="selectedVolunteer.img" [src]="'volunteers/'+selectedVolunteer.img | getDownloadURL | async" 
-               class="rounded-circle shadow-sm h-100 w-100 object-fit-cover border border-4 border-white" alt="Profile photo">
+               class="rounded-circle object-fit-cover w-100 h-100" alt="Profile photo">
           <img *ngIf="!selectedVolunteer.img" src="assets/img/stock.jpeg" 
-               class="rounded-circle shadow-sm h-100 w-100 object-fit-cover border border-4 border-white" alt="Profile photo">
+               class="rounded-circle object-fit-cover w-100 h-100" alt="Profile photo">
         </div>
         <h4 class="fw-bold text-dark mb-1">{{selectedVolunteer.firstName }} {{ selectedVolunteer.lastName }}</h4>
         <p class="text-muted mb-4">{{selectedVolunteer.program || 'Volunteer'}}</p>
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Details Column -->
-    <div class="col-lg-8">
+    <div class="col-xl-7 col-lg-12">
       <div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
         <h5 class="fw-bold mb-4 d-flex align-items-center">
           <i class="bi bi-info-circle me-2 text-primary"></i>Background Information

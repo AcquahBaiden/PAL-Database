@@ -1,6 +1,5 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
-import { AngularFireStorageModule } from "@angular/fire/compat/storage";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
 import { AddVolunteerComponent } from "./add-volunteer/add-volunteer.component";
@@ -13,17 +12,16 @@ import { SharedModule } from "../shared/shared.module";
 
 @NgModule({
   imports: [
-    RouterModule, 
-    CommonModule, 
-    FormsModule, 
-    AngularFireStorageModule, 
-    ReactiveFormsModule, 
+    RouterModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     SharedModule,
     VolunteersComponent,
     AddVolunteerComponent,
     VolunteerListComponent,
     VolunteerDetailsComponent,
-    VolunteerEditComponent, // I should also make this standalone soon
+    VolunteerEditComponent,
     VolunteersFilterPipe
   ]
 })

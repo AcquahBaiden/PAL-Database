@@ -2,11 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { AdminComponent } from './admin/admin.component';
-import { AdminGuard } from './auth/admin-guard';
-import { BasicGuard } from './auth/basic-guard';
-import { ChildrenGuard } from './auth/children.guard';
-import { ManagementGuard } from './auth/management-guard';
-import { VolunteersGuard } from './auth/volunteers-guard';
+import { PermissionGuard } from './auth/permission.guard';
 import { AddChildComponent } from './children/add-child/add-child.component';
 import { ChildDetailsComponent } from './children/child-details/child-details.component';
 import { ChildEditComponent } from './children/child-edit/child-edit.component';
@@ -24,21 +20,21 @@ import { VolunteersComponent } from './volunteers/volunteers.component';
 
 const routes: Routes = [
   {path: '', redirectTo: '/summary', pathMatch: 'full'},
-  {path: 'summary', component: SummaryComponent, canActivate: [BasicGuard]},
+  {path: 'summary', component: SummaryComponent, canActivate: [PermissionGuard], data: { permission: 'basic' }},
   {path: 'noAccess', component: NoAccessComponent},
-  {path: 'admin', component: AdminComponent, canActivate:[AdminGuard]},
-  {path: 'add-child', component: AddChildComponent, canActivate:[ChildrenGuard]},
-  {path: 'children', component: ChildrenComponent, canActivate:[ChildrenGuard], children:[
+  {path: 'admin', component: AdminComponent, canActivate:[PermissionGuard], data: { permission: 'admin' }},
+  {path: 'add-child', component: AddChildComponent, canActivate:[PermissionGuard], data: { permission: 'children' }},
+  {path: 'children', component: ChildrenComponent, canActivate:[PermissionGuard], data: { permission: 'children' }, children:[
     {path:':id', component: ChildDetailsComponent},
     {path:':id/edit',component: ChildEditComponent},
   ]},
-  {path: 'add-volunteer', component: AddVolunteerComponent, canActivate:[VolunteersGuard]},
-  {path: 'volunteers', component: VolunteersComponent, canActivate:[VolunteersGuard], children:[
+  {path: 'add-volunteer', component: AddVolunteerComponent, canActivate:[PermissionGuard], data: { permission: 'volunteers' }},
+  {path: 'volunteers', component: VolunteersComponent, canActivate:[PermissionGuard], data: { permission: 'volunteers' }, children:[
     {path: ':id', component: VolunteerDetailsComponent},
     {path: ':id/edit', component: VolunteerEditComponent}
   ]},
-  {path: 'add-management-member', component: AddManagementMemberComponent, canActivate:[ManagementGuard]},
-  {path: 'management', component: ManagementComponent, canActivate:[ManagementGuard], children: [
+  {path: 'add-management-member', component: AddManagementMemberComponent, canActivate:[PermissionGuard], data: { permission: 'management' }},
+  {path: 'management', component: ManagementComponent, canActivate:[PermissionGuard], data: { permission: 'management' }, children: [
     {path: ':id', component: ManagementMemberDetailsComponent},
     {path: ':id/edit', component: ManagementMemberEditComponent}
   ]}

@@ -1,1 +1,6 @@
-
+.child-profile-photo-frame {
+  width: min(100%, 280px);
+  aspect-ratio: 1 / 1;
+  padding: 8px;
+  overflow: hidden;
+}
