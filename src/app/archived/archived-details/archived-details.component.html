@@ -1,0 +1,195 @@
+<div *ngIf="!dataLoaded" class="text-center py-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<div *ngIf="dataLoaded && !hasPermission" class="card border-0 shadow-sm rounded-3 p-4">
+  <h5 class="fw-bold mb-2">No access</h5>
+  <p class="text-muted mb-0">You do not have permission to view this archived profile type.</p>
+</div>
+
+<div class="container-fluid py-2" *ngIf="dataLoaded && hasPermission && childProfile && recordType === 'child'">
+  <div class="row g-4">
+    <div class="col-xl-5 col-lg-12">
+      <div class="card border-0 shadow-sm rounded-3 text-center p-4 h-100">
+        <div class="child-profile-photo-frame mx-auto mb-4 d-flex justify-content-center align-items-center rounded-circle bg-light shadow-sm">
+          <img *ngIf="childProfile.img" [src]="'children/'+childProfile.img | getDownloadURL | async" class="rounded-circle object-fit-cover w-100 h-100" alt="Profile photo">
+          <img *ngIf="!childProfile.img" src="assets/img/stock.jpeg" class="rounded-circle object-fit-cover w-100 h-100" alt="Profile photo">
+        </div>
+        <h4 class="fw-bold text-dark mb-1">{{ childProfile.firstName }} {{ childProfile.lastName }}</h4>
+        <p class="text-muted mb-4">{{ childProfile.class || 'Student' }}</p>
+
+        <div class="bg-light rounded-3 p-3 text-start mb-4">
+          <div class="small text-uppercase fw-bold text-muted mb-2">Archive Details</div>
+          <div class="fw-medium text-dark">{{ childProfile.archivedReason || 'Archived' }}</div>
+          <div class="small text-muted mt-1" *ngIf="childProfile.archivedReasonDetail">{{ childProfile.archivedReasonDetail }}</div>
+          <div class="small text-muted mt-2">Archived {{ childProfile.archivedAt | date:'medium' }}</div>
+        </div>
+
+        <div class="text-start">
+          <h6 class="text-uppercase small fw-bold text-muted mb-3">Interests</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <span *ngFor="let interest of childInterestList" class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 fw-normal">
+              {{ interest }}
+            </span>
+            <p *ngIf="!childInterestList.length" class="text-muted small italic mb-0">No interests listed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-7 col-lg-12">
+      <div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
+        <h5 class="fw-bold mb-4 d-flex align-items-center">
+          <i class="bi bi-person-lines-fill me-2 text-primary"></i>Personal Information
+        </h5>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Residence</label>
+            <p class="mb-0 text-dark">{{ childProfile.residence || 'Not provided' }}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Telephone</label>
+            <p class="mb-0 text-dark">{{ childProfile.telephone || 'Not provided' }}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Current School</label>
+            <p class="mb-0 text-dark">{{ childProfile.school || 'Not provided' }}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Class/Form</label>
+            <p class="mb-0 text-dark">{{ childProfile.class || 'Not provided' }}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Parent(s) Name</label>
+            <p class="mb-0 text-dark">{{ childProfile.parentName || 'Not provided' }}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Parent Telephone</label>
+            <p class="mb-0 text-dark">{{ childProfile.parentTel || 'Not provided' }}</p>
+          </div>
+        </div>
+
+        <hr class="my-4 opacity-25">
+
+        <h5 class="fw-bold mb-3 d-flex align-items-center">
+          <i class="bi bi-card-text me-2 text-primary"></i>Notes
+        </h5>
+        <p class="text-secondary bg-light p-3 rounded-3 mb-0" style="white-space: pre-wrap;">
+          {{ childProfile.description || 'No additional notes provided for this child.' }}
+        </p>
+      </div>
+
+      <div class="mb-4">
+        <app-profile-history [versions]="childHistory"></app-profile-history>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-3 p-4">
+        <h5 class="fw-bold mb-4 d-flex align-items-center">
+          <i class="bi bi-mortarboard me-2 text-primary"></i>Enrolled Programs
+        </h5>
+
+        <div class="list-group list-group-flush border rounded-3 overflow-hidden" *ngIf="childProfile.programs?.length">
+          <div *ngFor="let program of childProfile.programs" class="list-group-item d-flex justify-content-between align-items-center py-3">
+            <span class="fw-medium text-dark">{{ program.program }}</span>
+            <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">{{ program.year }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="!childProfile.programs?.length" class="text-center py-4 bg-light rounded-3">
+          <p class="text-muted mb-0 italic">No program history recorded</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid py-2" *ngIf="dataLoaded && hasPermission && volunteerProfile && recordType === 'volunteer'">
+  <div class="row g-4">
+    <div class="col-xl-5 col-lg-12">
+      <div class="card border-0 shadow-sm rounded-3 text-center p-4 h-100">
+        <div class="mx-auto mb-4 d-flex justify-content-center align-items-center rounded-circle bg-light shadow-sm" style="width: 250px; height: 250px; padding: 6px;">
+          <img *ngIf="volunteerProfile.img" [src]="'volunteers/'+volunteerProfile.img | getDownloadURL | async" class="rounded-circle object-fit-cover w-100 h-100" alt="Profile photo">
+          <img *ngIf="!volunteerProfile.img" src="assets/img/stock.jpeg" class="rounded-circle object-fit-cover w-100 h-100" alt="Profile photo">
+        </div>
+        <h4 class="fw-bold text-dark mb-1">{{ volunteerProfile.firstName }} {{ volunteerProfile.lastName }}</h4>
+        <p class="text-muted mb-4">{{ volunteerProfile.program || 'Volunteer' }}</p>
+
+        <div class="bg-light rounded-3 p-3 text-start mb-4">
+          <div class="small text-uppercase fw-bold text-muted mb-2">Archive Details</div>
+          <div class="fw-medium text-dark">{{ volunteerProfile.archivedReason || 'Archived' }}</div>
+          <div class="small text-muted mt-1" *ngIf="volunteerProfile.archivedReasonDetail">{{ volunteerProfile.archivedReasonDetail }}</div>
+          <div class="small text-muted mt-2">Archived {{ volunteerProfile.archivedAt | date:'medium' }}</div>
+        </div>
+
+        <div class="text-start">
+          <h6 class="text-uppercase small fw-bold text-muted mb-3">Contact Info</h6>
+          <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-envelope text-primary me-3"></i>
+            <span class="text-dark small text-truncate">{{ volunteerProfile.email || 'No email' }}</span>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="bi bi-telephone text-primary me-3"></i>
+            <span class="text-dark small">{{ volunteerProfile.telephone || 'No phone' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-7 col-lg-12">
+      <div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
+        <h5 class="fw-bold mb-4 d-flex align-items-center">
+          <i class="bi bi-info-circle me-2 text-primary"></i>Background Information
+        </h5>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Residence</label>
+            <p class="mb-0 text-dark">{{ volunteerProfile.residence || 'Not provided' }}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Institution/School</label>
+            <p class="mb-0 text-dark">{{ volunteerProfile.school || 'Not provided' }}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Level/Year</label>
+            <p class="mb-0 text-dark">{{ volunteerProfile.level || 'Not provided' }}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="small fw-bold text-muted text-uppercase d-block mb-1">Major/Department</label>
+            <p class="mb-0 text-dark">{{ volunteerProfile.program || 'Not provided' }}</p>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-top opacity-75" *ngIf="addressLines.length">
+          <label class="small fw-bold text-muted text-uppercase d-block mb-2">Full Address</label>
+          <div class="bg-light p-3 rounded-3">
+            <p class="mb-1 text-dark small" *ngFor="let line of addressLines">{{ line }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <app-profile-history [versions]="volunteerHistory"></app-profile-history>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-3 p-4">
+        <h5 class="fw-bold mb-4 d-flex align-items-center">
+          <i class="bi bi-hand-thumbs-up me-2 text-primary"></i>Volunteering In
+        </h5>
+
+        <div class="d-flex flex-wrap gap-2" *ngIf="programs.length">
+          <span *ngFor="let prog of programs" class="badge bg-primary-subtle text-primary border border-primary-subtle px-4 py-2 rounded fw-normal">
+            {{ prog }}
+          </span>
+        </div>
+
+        <div *ngIf="!programs.length" class="text-center py-4 bg-light rounded-3">
+          <p class="text-muted mb-0 italic">No specific programs assigned</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -17,4 +17,12 @@ export interface Child{
   id?:string;
   interests?:string | string[];
   programs?:{program:string, year: string}[];
+  createdAt?: number;
+  updatedAt?: number;
+  latestVersionId?: string;
+  archived?: boolean;
+  archivedAt?: number;
+  archivedReason?: string;
+  archivedReasonDetail?: string;
+  archivedBy?: string | null;
 }

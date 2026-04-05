@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { AdminComponent } from './admin/admin.component';
+import { ArchivedComponent } from './archived/archived.component';
+import { ArchivedDetailsComponent } from './archived/archived-details/archived-details.component';
 import { PermissionGuard } from './auth/permission.guard';
 import { AddChildComponent } from './children/add-child/add-child.component';
 import { ChildDetailsComponent } from './children/child-details/child-details.component';
@@ -23,6 +25,9 @@ const routes: Routes = [
   {path: 'summary', component: SummaryComponent, canActivate: [PermissionGuard], data: { permission: 'basic' }},
   {path: 'noAccess', component: NoAccessComponent},
   {path: 'admin', component: AdminComponent, canActivate:[PermissionGuard], data: { permission: 'admin' }},
+  {path: 'archived', component: ArchivedComponent, canActivate:[PermissionGuard], data: { permission: 'basic' }, children: [
+    {path: ':type/:id', component: ArchivedDetailsComponent}
+  ]},
   {path: 'add-child', component: AddChildComponent, canActivate:[PermissionGuard], data: { permission: 'children' }},
   {path: 'children', component: ChildrenComponent, canActivate:[PermissionGuard], data: { permission: 'children' }, children:[
     {path:':id', component: ChildDetailsComponent},
@@ -37,7 +42,7 @@ const routes: Routes = [
   {path: 'management', component: ManagementComponent, canActivate:[PermissionGuard], data: { permission: 'management' }, children: [
     {path: ':id', component: ManagementMemberDetailsComponent},
     {path: ':id/edit', component: ManagementMemberEditComponent}
-  ]}
+  ]},
 ];
 
 @NgModule({

@@ -18,5 +18,13 @@ export interface Volunteer{
     Prog1: string;
     Prog2: string;
     Prog3: string;
-  }
+  };
+  createdAt?: number;
+  updatedAt?: number;
+  latestVersionId?: string;
+  archived?: boolean;
+  archivedAt?: number;
+  archivedReason?: string;
+  archivedReasonDetail?: string;
+  archivedBy?: string | null;
 }

@@ -22,9 +22,14 @@
           <button class="btn btn-outline-primary" [routerLink]="['edit']">
             <i class="bi bi-pencil-square me-2"></i>Edit Profile
           </button>
-          <button (click)="onDeleteChild()" class="btn btn-outline-danger">
-            <i class="bi bi-trash me-2"></i>Delete Profile
+          <button *ngIf="!selectedChild.archived" (click)="openArchiveModal()" class="btn btn-outline-danger">
+            <i class="bi bi-archive me-2"></i>Archive Profile
           </button>
+          <div *ngIf="selectedChild.archived" class="bg-light rounded-3 p-3 text-start">
+            <div class="small fw-bold text-uppercase text-muted mb-1">Archived</div>
+            <div class="fw-medium text-dark">{{ selectedChild.archivedReason || 'Archived' }}</div>
+            <div class="small text-muted mt-1" *ngIf="selectedChild.archivedReasonDetail">{{ selectedChild.archivedReasonDetail }}</div>
+          </div>
         </div>
 
         <hr class="my-4 opacity-25">
@@ -32,11 +37,11 @@
         <div class="text-start">
           <h6 class="text-uppercase small fw-bold text-muted mb-3">Interests</h6>
           <div class="d-flex flex-wrap gap-2">
-            <span *ngFor="let interest of selectedChild.interests" 
+            <span *ngFor="let interest of interestList" 
                   class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 fw-normal">
               {{interest}}
             </span>
-            <p *ngIf="!selectedChild.interests?.length" class="text-muted small italic mb-0">No interests listed</p>
+            <p *ngIf="!interestList.length" class="text-muted small italic mb-0">No interests listed</p>
           </div>
         </div>
       </div>
@@ -95,6 +100,10 @@
         </p>
       </div>
 
+      <div class="mb-4">
+        <app-profile-history [versions]="history"></app-profile-history>
+      </div>
+
       <!-- Programs Section -->
       <div class="card border-0 shadow-sm rounded-3 p-4">
         <h5 class="fw-bold mb-4 d-flex align-items-center">
@@ -116,3 +125,33 @@
     </div>
   </div>
 </div>
+
+<ng-template #archiveModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Archive Child Profile</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <div class="modal-body">
+    <p class="text-muted">Select a reason for archiving this child profile.</p>
+
+    <div class="vstack gap-2">
+      <div *ngFor="let reason of archiveReasonOptions" class="form-check">
+        <input class="form-check-input" type="radio" name="archiveReason" [id]="reason" [value]="reason" [(ngModel)]="archiveReason">
+        <label class="form-check-label" [for]="reason">{{ reason }}</label>
+      </div>
+    </div>
+
+    <div class="mt-3" *ngIf="archiveReason === 'Other'">
+      <label for="childOtherReason" class="form-label small fw-bold text-muted text-uppercase">Other Reason</label>
+      <textarea id="childOtherReason" class="form-control" rows="3" [(ngModel)]="otherArchiveReason"></textarea>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmArchive(modal)" [disabled]="archiveReason === 'Other' && !otherArchiveReason.trim()">
+      Archive Profile
+    </button>
+  </div>
+</ng-template>

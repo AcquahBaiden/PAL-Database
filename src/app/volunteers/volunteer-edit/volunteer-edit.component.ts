@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, Observable } from 'rxjs';
 
 import { Volunteer } from 'src/app/interfaces/volunteer.interface';
@@ -25,6 +25,7 @@ export class VolunteerEditComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute, 
     private volunteersService: VolunteersService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -71,6 +72,7 @@ export class VolunteerEditComponent implements OnInit, OnDestroy {
   async onUpdateVolunteer(form: NgForm) {
     if (form.valid) {
       await this.volunteersService.updateVolunteer(this.volId, form.value);
+      await this.router.navigate(['../'], { relativeTo: this.route });
     }
   }
 

@@ -1,0 +1,90 @@
+<div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+  <div class="card-header bg-white border-bottom py-3">
+    <div class="d-flex flex-column gap-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-dark fw-semibold">Archived Profiles</h5>
+        <span class="badge bg-light text-muted border">{{ filteredRecords.length }} records</span>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-7">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control bg-light border-start-0 ps-0"
+              placeholder="Search archived profiles..."
+              [(ngModel)]="searchText"
+              (ngModelChange)="onSearchChange()">
+          </div>
+        </div>
+
+        <div class="col-md-5">
+          <select class="form-select bg-light border-0" [(ngModel)]="selectedFilter" (ngModelChange)="onFilterChange()">
+            <option *ngFor="let filter of availableFilters" [ngValue]="filter">
+              {{ filter === 'all' ? 'All archived records' : (filter === 'child' ? 'Children only' : 'Volunteers only') }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light text-muted small text-uppercase fw-bold">
+          <tr>
+            <th class="ps-4 py-3" style="width: 56px">#</th>
+            <th class="py-3">Profile</th>
+            <th class="py-3">Type</th>
+            <th class="py-3">Archived</th>
+            <th class="py-3 text-end pe-4">Open</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let record of paginatedRecords; let i = index">
+            <td class="ps-4 fw-medium text-muted small">{{ ((page - 1) * pageSize) + i + 1 }}</td>
+            <td>
+              <div class="fw-medium text-dark">{{ record.profile.firstName }} {{ record.profile.lastName }}</div>
+              <div class="small text-muted">{{ record.archivedReason }}</div>
+            </td>
+            <td>
+              <span class="badge text-bg-light border text-capitalize">{{ record.type === 'child' ? 'Child' : 'Volunteer' }}</span>
+            </td>
+            <td class="text-secondary small">{{ record.archivedAt | date:'mediumDate' }}</td>
+            <td class="text-end pe-4">
+              <button class="btn btn-outline-primary btn-sm" [routerLink]="['/archived', record.type, record.id]">
+                <i class="bi bi-eye me-1"></i>View
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="!filteredRecords.length && !isFetching" class="text-center py-5">
+      <i class="bi bi-archive text-muted display-4"></i>
+      <p class="mt-3 text-secondary mb-0">No archived profiles match the current filters.</p>
+    </div>
+
+    <div *ngIf="isFetching" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3 text-secondary mb-0">Loading archived profiles...</p>
+    </div>
+  </div>
+
+  <app-pagination-controls
+    *ngIf="filteredRecords.length && !isFetching"
+    [page]="page"
+    [pageSize]="pageSize"
+    [totalItems]="filteredRecords.length"
+    itemLabel="archived records"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)">
+  </app-pagination-controls>
+</div>
