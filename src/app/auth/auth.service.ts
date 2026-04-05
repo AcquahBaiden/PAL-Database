@@ -1,7 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut, GoogleAuthProvider, UserCredential } from "@angular/fire/auth";
-import { Database, ref, update } from "@angular/fire/database";
-import { get, set } from 'firebase/database';
+import { Database } from "@angular/fire/database";
+import { ref, update } from 'firebase/database';
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
@@ -36,10 +36,6 @@ export class AuthService {
   }
 
   async addNewUserCount() {
-    const countRef = ref(this.db, 'Summary/DatabaseUsers/number');
-    const snapshot = await get(countRef);
-    const currentValue = Number(snapshot.val());
-    const safeCurrentValue = Number.isFinite(currentValue) ? currentValue : 0;
-    await set(countRef, safeCurrentValue + 1);
+    return Promise.resolve();
   }
 }

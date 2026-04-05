@@ -3,9 +3,9 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Auth } from '@angular/fire/auth';
-import { Database, objectVal, push, ref, remove, update } from '@angular/fire/database';
+import { Database, objectVal } from '@angular/fire/database';
 import { Storage, getDownloadURL, ref as storageRef } from '@angular/fire/storage';
-import { get, set } from 'firebase/database';
+import { get, push, ref, remove, set, update } from 'firebase/database';
 import { uploadBytesResumable } from 'firebase/storage';
 
 import { Child } from '../interfaces/child.interface';
@@ -73,22 +73,24 @@ export class ChildrenService {
     );
   }
 
-  async saveToDB(data: Child) {
+  async saveToDB(data: Child): Promise<boolean> {
     try {
       const timestamp = Date.now();
       const listRef = ref(this.db, 'Children');
-      await push(listRef, sanitizeFirebaseData({
+      const childRef = push(listRef);
+      await set(childRef, sanitizeFirebaseData({
         ...data,
         createdAt: timestamp,
         updatedAt: timestamp,
         archived: false
       }));
 
-      await this.adjustSummaryCount('children', 1);
       this.notiService.setState(false, `${data.firstName} successfully saved`, true);
+      return true;
     } catch (error) {
       console.error('Error saving to DB:', error);
       this.notiService.setState(true, 'Something went wrong when saving profile', true);
+      return false;
     }
   }
 
@@ -209,10 +211,6 @@ export class ChildrenService {
         latestVersionId: versionId
       }) as any);
 
-      if (!currentChild.archived) {
-        await this.adjustSummaryCount('children', -1);
-      }
-
       this.notiService.setState(false, 'Profile successfully archived', true);
     } catch (error) {
       console.error('Error archiving child:', error);
@@ -224,7 +222,6 @@ export class ChildrenService {
   async deleteChild(id: string) {
     try {
       await remove(ref(this.db, 'Children/' + id));
-      await this.adjustSummaryCount('children', -1);
       this.notiService.setState(false, 'Profile successfully deleted', true);
     } catch (error) {
       console.error('Error deleting child:', error);
@@ -240,19 +237,12 @@ export class ChildrenService {
   private async saveHistorySnapshot(id: string, child: Child, timestamp: number): Promise<string> {
     const historyListRef = ref(this.db, `ChildrenHistory/${id}`);
     const { id: _, ...profile } = child;
-    const historyRef = await push(historyListRef, sanitizeFirebaseData({
+    const historyRef = push(historyListRef);
+    await set(historyRef, sanitizeFirebaseData({
       timestamp,
       profile
     }));
 
     return historyRef.key as string;
-  }
-
-  private async adjustSummaryCount(category: string, delta: number): Promise<void> {
-    const countRef = ref(this.db, `Summary/${category}/number`);
-    const snapshot = await get(countRef);
-    const currentValue = Number(snapshot.val());
-    const safeCurrentValue = Number.isFinite(currentValue) ? currentValue : 0;
-    await set(countRef, Math.max(0, safeCurrentValue + delta));
   }
 }

@@ -33,6 +33,17 @@ export class AddVolunteerComponent implements OnInit {
   }
 
   async onSaveVolunteer(form: NgForm) {
+    if (form.invalid) {
+      Object.values(form.controls).forEach((control) => control.markAsTouched());
+      this.notificationService.setState(true, 'First name and last name are required before saving a volunteer profile.', true);
+      return;
+    }
+
+    if (this.isUploading) {
+      this.notificationService.setState(true, 'Please wait for the profile photo upload to finish before saving.', true);
+      return;
+    }
+
     const val = form.value;
     const newVolunteer: Volunteer = {
       firstName: val.firstName,
@@ -56,10 +67,12 @@ export class AddVolunteerComponent implements OnInit {
       img: this.imageFileName || undefined
     };
 
-    await this.volunteersService.saveToDB(newVolunteer);
-    this.addVolunteerForm.reset();
-    this.imageFileName = '';
-    this.imgDownloadURL = new Observable<string>();
+    const saved = await this.volunteersService.saveToDB(newVolunteer);
+    if (saved) {
+      this.addVolunteerForm.reset();
+      this.imageFileName = '';
+      this.imgDownloadURL = new Observable<string>();
+    }
   }
 
   async onuploadProfileImg(event: any) {

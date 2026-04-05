@@ -38,6 +38,17 @@ export class AddChildComponent implements OnInit {
   }
 
   async onSaveChild(form: NgForm) {
+    if (form.invalid) {
+      Object.values(form.controls).forEach((control) => control.markAsTouched());
+      this.notificationService.setState(true, 'First name and last name are required before saving a child profile.', true);
+      return;
+    }
+
+    if (this.isUploading) {
+      this.notificationService.setState(true, 'Please wait for the profile photo upload to finish before saving.', true);
+      return;
+    }
+
     const formValue = form.value;
     const newChild: Child = {
       firstName: formValue.firstName,
@@ -54,8 +65,10 @@ export class AddChildComponent implements OnInit {
       img: this.imageFileName || undefined
     };
 
-    await this.childrenService.saveToDB(newChild);
-    this.resetForm();
+    const saved = await this.childrenService.saveToDB(newChild);
+    if (saved) {
+      this.resetForm();
+    }
   }
 
   resetForm() {

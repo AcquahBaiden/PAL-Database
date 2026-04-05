@@ -35,6 +35,17 @@ export class AddManagementMemberComponent implements OnInit {
   }
 
   async onSaveMember(form: NgForm) {
+    if (form.invalid) {
+      Object.values(form.controls).forEach((control) => control.markAsTouched());
+      this.notificationService.setState(true, 'First name and last name are required before saving a management profile.', true);
+      return;
+    }
+
+    if (this.isUploading) {
+      this.notificationService.setState(true, 'Please wait for the profile photo upload to finish before saving.', true);
+      return;
+    }
+
     const val = form.value;
     const newMember: ManagementMember = {
       firstName: val.firstName,
@@ -47,10 +58,12 @@ export class AddManagementMemberComponent implements OnInit {
       img: this.imageFileName || undefined
     };
 
-    await this.managementService.saveToFirebase(newMember);
-    this.addMamangementMemberForm.reset();
-    this.imageFileName = '';
-    this.imgDownloadURL = new Observable<string>();
+    const saved = await this.managementService.saveToFirebase(newMember);
+    if (saved) {
+      this.addMamangementMemberForm.reset();
+      this.imageFileName = '';
+      this.imgDownloadURL = new Observable<string>();
+    }
   }
 
   async onuploadProfileImg(event: any) {

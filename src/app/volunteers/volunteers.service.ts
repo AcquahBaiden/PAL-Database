@@ -3,9 +3,9 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Auth } from '@angular/fire/auth';
-import { Database, objectVal, push, ref, remove, update } from '@angular/fire/database';
+import { Database, objectVal } from '@angular/fire/database';
 import { Storage, getDownloadURL, ref as storageRef } from '@angular/fire/storage';
-import { get, set } from 'firebase/database';
+import { get, push, ref, remove, set, update } from 'firebase/database';
 import { uploadBytesResumable } from 'firebase/storage';
 
 import { Volunteer } from '../interfaces/volunteer.interface';
@@ -94,22 +94,24 @@ export class VolunteersService {
     );
   }
 
-  async saveToDB(data: Volunteer) {
+  async saveToDB(data: Volunteer): Promise<boolean> {
     try {
       const timestamp = Date.now();
       const listRef = ref(this.db, 'Volunteers');
-      await push(listRef, sanitizeFirebaseData({
+      const volunteerRef = push(listRef);
+      await set(volunteerRef, sanitizeFirebaseData({
         ...data,
         createdAt: timestamp,
         updatedAt: timestamp,
         archived: false
       }));
 
-      await this.adjustSummaryCount('volunteers', 1);
       this.notiService.setState(false, `${data.firstName} successfully saved`, true);
+      return true;
     } catch (error) {
       console.error('Error saving volunteer:', error);
       this.notiService.setState(true, 'Something went wrong when saving profile', true);
+      return false;
     }
   }
 
@@ -144,7 +146,6 @@ export class VolunteersService {
   async deleteVolunteer(id: string) {
     try {
       await remove(ref(this.db, 'Volunteers/' + id));
-      await this.adjustSummaryCount('volunteers', -1);
       this.notiService.setState(false, 'Profile successfully deleted', true);
     } catch (error) {
       console.error('Error deleting volunteer:', error);
@@ -220,10 +221,6 @@ export class VolunteersService {
         latestVersionId: versionId
       }) as any);
 
-      if (!currentVolunteer.archived) {
-        await this.adjustSummaryCount('volunteers', -1);
-      }
-
       this.notiService.setState(false, 'Profile successfully archived', true);
     } catch (error) {
       console.error('Error archiving volunteer:', error);
@@ -240,19 +237,12 @@ export class VolunteersService {
   private async saveHistorySnapshot(id: string, volunteer: Volunteer, timestamp: number): Promise<string> {
     const historyListRef = ref(this.db, `VolunteersHistory/${id}`);
     const { id: _, ...profile } = volunteer;
-    const historyRef = await push(historyListRef, sanitizeFirebaseData({
+    const historyRef = push(historyListRef);
+    await set(historyRef, sanitizeFirebaseData({
       timestamp,
       profile
     }));
 
     return historyRef.key as string;
-  }
-
-  private async adjustSummaryCount(category: string, delta: number): Promise<void> {
-    const countRef = ref(this.db, `Summary/${category}/number`);
-    const snapshot = await get(countRef);
-    const currentValue = Number(snapshot.val());
-    const safeCurrentValue = Number.isFinite(currentValue) ? currentValue : 0;
-    await set(countRef, Math.max(0, safeCurrentValue + delta));
   }
 }
