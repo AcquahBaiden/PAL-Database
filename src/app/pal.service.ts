@@ -1,20 +1,22 @@
 import { Injectable, inject } from '@angular/core';
-import { Database, ref, objectVal } from '@angular/fire/database';
+import { Database } from '@angular/fire/database';
+import { ref, get } from 'firebase/database';
 
 import { Child } from './interfaces/child.interface';
 
 @Injectable({
   providedIn: 'root'
 })
-export class PALService{
-  Children:Child | Child[] = {
+export class PALService {
+  Children: Child | Child[] = {
     firstName: 'Name',
     lastName: 'Name'
   };
 
   private db = inject(Database);
 
-  getDBSummaries() {
-    return objectVal(ref(this.db, 'Summary'));
+  async getDBSummaries() {
+    const snapshot = await get(ref(this.db, 'Summary'));
+    return snapshot.val();
   }
 }

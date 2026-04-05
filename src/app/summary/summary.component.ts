@@ -1,5 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { Summary } from '../interfaces/summary.interface';
@@ -15,27 +14,25 @@ type SummaryResponse = Record<string, SummaryValue> | null;
   templateUrl: './summary.component.html',
   styleUrls: ['./summary.component.css']
 })
-export class SummaryComponent implements OnInit, OnDestroy {
+export class SummaryComponent implements OnInit {
+
   Summary: Summary[] = [];
   isFetching = true;
-  private sub!: Subscription;
   private readonly categoryOrder = ['children', 'volunteers', 'management', 'DatabaseUsers'];
 
-  constructor(private palService: PALService) {
-  }
+  constructor(private palService: PALService, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit(): void {
-    this.sub = this.palService.getDBSummaries().subscribe({
-      next: (summaryData) => {
-        this.Summary = this.normalizeSummary(summaryData as SummaryResponse);
-        this.isFetching = false;
-      },
-      error: (err: any) => {
-        console.error('Error fetching Summary data:', err);
-        this.Summary = [];
-        this.isFetching = false;
-      }
-    });
+  async ngOnInit(): Promise<void> {
+    try {
+      const summaryData = await this.palService.getDBSummaries();
+      this.Summary = this.normalizeSummary(summaryData as SummaryResponse);
+    } catch (err) {
+      console.error('[Summary] Error fetching Summary data:', err);
+      this.Summary = [];
+    } finally {
+      this.isFetching = false;
+      this.cdr.detectChanges();
+    }
   }
 
   private normalizeSummary(summaryData: SummaryResponse): Summary[] {
@@ -69,11 +66,6 @@ export class SummaryComponent implements OnInit, OnDestroy {
     return index === -1 ? this.categoryOrder.length : index;
   }
 
-  ngOnDestroy(): void {
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
-  }
 }
 
 
