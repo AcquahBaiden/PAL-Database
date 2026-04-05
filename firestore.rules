@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function accessDoc() {
+      return get(/databases/$(database)/documents/access/$(request.auth.uid));
+    }
+
+    function hasPermission(permission) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/access/$(request.auth.uid))
+        && accessDoc().data[permission] == true;
+    }
+
+    function hasBasicAccess() {
+      return hasPermission('basic');
+    }
+
+    function isAdmin() {
+      return hasPermission('admin');
+    }
+
+    match /access/{userId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.auth.uid == userId;
+      allow update, delete: if isAdmin();
+    }
+
+    match /children/{childId} {
+      allow read, write: if hasBasicAccess() && hasPermission('children');
+
+      match /history/{historyId} {
+        allow read, write: if hasBasicAccess() && hasPermission('children');
+      }
+    }
+
+    match /volunteers/{volunteerId} {
+      allow read, write: if hasBasicAccess() && hasPermission('volunteers');
+
+      match /history/{historyId} {
+        allow read, write: if hasBasicAccess() && hasPermission('volunteers');
+      }
+    }
+
+    match /management/{memberId} {
+      allow read, write: if hasBasicAccess() && hasPermission('management');
+    }
+  }
+}

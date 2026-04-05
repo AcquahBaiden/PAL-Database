@@ -3,41 +3,25 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Auth } from '@angular/fire/auth';
-import { Database, objectVal } from '@angular/fire/database';
+import {
+  Firestore,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  orderBy,
+  query,
+  setDoc,
+  where
+} from '@angular/fire/firestore';
 import { Storage, getDownloadURL, ref as storageRef } from '@angular/fire/storage';
-import { get, push, ref, remove, set, update } from 'firebase/database';
 import { uploadBytesResumable } from 'firebase/storage';
 
 import { Volunteer } from '../interfaces/volunteer.interface';
 import { ProfileVersion } from '../interfaces/profile-history.interface';
 import { NotificationService } from '../notification/notification.service';
-
-function sanitizeFirebaseData<T>(value: T, seen = new WeakSet<object>()): T {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => sanitizeFirebaseData(item, seen))
-      .filter((item) => item !== undefined) as T;
-  }
-
-  if (value && typeof value === 'object') {
-    if (seen.has(value as object)) {
-      return undefined as T;
-    }
-
-    seen.add(value as object);
-    return Object.entries(value as Record<string, unknown>).reduce((acc, [key, entryValue]) => {
-      if (entryValue !== undefined) {
-        const sanitizedEntry = sanitizeFirebaseData(entryValue, seen);
-        if (sanitizedEntry !== undefined) {
-          acc[key] = sanitizedEntry;
-        }
-      }
-      return acc;
-    }, {} as Record<string, unknown>) as T;
-  }
-
-  return value;
-}
+import { compareByName, observeCollectionData, observeDocumentData, toFirestorePlainData } from '../shared/firestore-data.utils';
 
 @Injectable({
   providedIn: 'root',
@@ -45,71 +29,45 @@ function sanitizeFirebaseData<T>(value: T, seen = new WeakSet<object>()): T {
 export class VolunteersService {
   public uploadPercent: Observable<number | undefined>;
   public downloadURL!: Observable<string>;
-  private volunteersStream: Observable<Volunteer[]>;
 
-  private db = inject(Database);
+  private firestore = inject(Firestore);
   private storage = inject(Storage);
   private auth = inject(Auth);
   private notiService = inject(NotificationService);
 
-  constructor() {
-    this.volunteersStream = objectVal<Record<string, Volunteer> | null>(ref(this.db, 'Volunteers')).pipe(
-      map((responseData) => {
-        if (!responseData) {
-          return [];
-        }
-
-        return Object.keys(responseData).map((key) => ({
-          ...responseData[key],
-          id: key
-        }));
-      })
-    );
-  }
+  private readonly volunteersCollection = collection(this.firestore, 'volunteers');
+  private readonly activeVolunteersQuery = query(this.volunteersCollection, where('archived', '==', false));
+  private readonly archivedVolunteersQuery = query(this.volunteersCollection, where('archived', '==', true));
+  private readonly volunteersStream = observeCollectionData<Volunteer>(this.activeVolunteersQuery, { idField: 'id' }).pipe(
+    map((volunteers) => volunteers.sort(compareByName))
+  );
+  private readonly archivedVolunteersStream = observeCollectionData<Volunteer>(this.archivedVolunteersQuery, { idField: 'id' }).pipe(
+    map((volunteers) => volunteers.sort((left, right) => (right.archivedAt || 0) - (left.archivedAt || 0)))
+  );
 
   getVolunteersData(): Observable<Volunteer[]> {
-    return this.volunteersStream.pipe(
-      map((volunteers) => volunteers.filter((volunteer) => !volunteer.archived))
-    );
+    return this.volunteersStream;
   }
 
   getArchivedVolunteers(): Observable<Volunteer[]> {
-    return this.volunteersStream.pipe(
-      map((volunteers) =>
-        volunteers
-          .filter((volunteer) => volunteer.archived)
-          .sort((left, right) => (right.archivedAt || 0) - (left.archivedAt || 0))
-      )
-    );
+    return this.archivedVolunteersStream;
   }
 
   getVolunteer(id: string): Observable<Volunteer> {
-    return objectVal<Volunteer>(ref(this.db, 'Volunteers/' + id));
+    return observeDocumentData<Volunteer>(doc(this.firestore, 'volunteers', id), { idField: 'id' }) as Observable<Volunteer>;
   }
 
   getVolunteerProfileHistory(id: string): Observable<ProfileVersion<Volunteer>[]> {
-    return objectVal<Record<string, ProfileVersion<Volunteer>> | null>(ref(this.db, `VolunteersHistory/${id}`)).pipe(
-      map((responseData) => {
-        if (!responseData) {
-          return [];
-        }
-
-        return Object.keys(responseData)
-          .map((key) => ({
-            ...responseData[key],
-            id: key
-          }))
-          .sort((left, right) => (right.timestamp || 0) - (left.timestamp || 0));
-      })
+    return observeCollectionData<ProfileVersion<Volunteer>>(
+      query(collection(this.firestore, 'volunteers', id, 'history'), orderBy('timestamp', 'desc')),
+      { idField: 'id' }
     );
   }
 
   async saveToDB(data: Volunteer): Promise<boolean> {
     try {
       const timestamp = Date.now();
-      const listRef = ref(this.db, 'Volunteers');
-      const volunteerRef = push(listRef);
-      await set(volunteerRef, sanitizeFirebaseData({
+      await addDoc(this.volunteersCollection, this.buildVolunteerRecord({
         ...data,
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -130,6 +88,7 @@ export class VolunteersService {
     if (!file) {
       throw new Error('No file selected');
     }
+
     const fileRef = storageRef(this.storage, 'volunteers/' + fileName);
     const task = uploadBytesResumable(fileRef, file);
 
@@ -155,7 +114,7 @@ export class VolunteersService {
 
   async deleteVolunteer(id: string) {
     try {
-      await remove(ref(this.db, 'Volunteers/' + id));
+      await deleteDoc(doc(this.firestore, 'volunteers', id));
       this.notiService.setState(false, 'Profile successfully deleted', true);
     } catch (error) {
       console.error('Error deleting volunteer:', error);
@@ -172,13 +131,13 @@ export class VolunteersService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentVolunteer, timestamp);
-      await set(ref(this.db, 'Volunteers/' + id), sanitizeFirebaseData({
+      await setDoc(doc(this.firestore, 'volunteers', id), this.buildVolunteerRecord({
         ...currentVolunteer,
         ...editedVolunteer,
         createdAt: currentVolunteer.createdAt || currentVolunteer.updatedAt || timestamp,
         updatedAt: timestamp,
         latestVersionId: versionId
-      }) as any);
+      }));
 
       this.notiService.setState(false, 'Profile successfully updated', true);
     } catch (error) {
@@ -197,13 +156,13 @@ export class VolunteersService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentVolunteer, timestamp);
-      await set(ref(this.db, 'Volunteers/' + id), sanitizeFirebaseData({
+      await setDoc(doc(this.firestore, 'volunteers', id), this.buildVolunteerRecord({
         ...currentVolunteer,
         img: fileName,
         createdAt: currentVolunteer.createdAt || currentVolunteer.updatedAt || timestamp,
         updatedAt: timestamp,
         latestVersionId: versionId
-      }) as any);
+      }));
 
       this.notiService.setState(false, 'Profile photo successfully updated', true);
       return true;
@@ -223,7 +182,7 @@ export class VolunteersService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentVolunteer, timestamp);
-      await set(ref(this.db, 'Volunteers/' + id), sanitizeFirebaseData({
+      await setDoc(doc(this.firestore, 'volunteers', id), this.buildVolunteerRecord({
         ...currentVolunteer,
         archived: true,
         archivedAt: timestamp,
@@ -232,7 +191,7 @@ export class VolunteersService {
         archivedBy: this.auth.currentUser?.email || null,
         updatedAt: timestamp,
         latestVersionId: versionId
-      }) as any);
+      }));
 
       this.notiService.setState(false, 'Profile successfully archived', true);
     } catch (error) {
@@ -243,19 +202,48 @@ export class VolunteersService {
   }
 
   private async getVolunteerSnapshot(id: string): Promise<Volunteer | null> {
-    const snapshot = await get(ref(this.db, `Volunteers/${id}`));
-    return snapshot.exists() ? (snapshot.val() as Volunteer) : null;
+    const snapshot = await getDoc(doc(this.firestore, 'volunteers', id));
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    return {
+      ...(snapshot.data() as Volunteer),
+      id: snapshot.id
+    };
   }
 
   private async saveHistorySnapshot(id: string, volunteer: Volunteer, timestamp: number): Promise<string> {
-    const historyListRef = ref(this.db, `VolunteersHistory/${id}`);
-    const { id: _, ...profile } = volunteer;
-    const historyRef = push(historyListRef);
-    await set(historyRef, sanitizeFirebaseData({
+    const versionId = `${timestamp}-${Math.random().toString(36).slice(2, 10)}`;
+    await setDoc(doc(this.firestore, 'volunteers', id, 'history', versionId), toFirestorePlainData({
       timestamp,
-      profile
+      profile: this.buildVolunteerRecord(volunteer)
     }));
 
-    return historyRef.key as string;
+    return versionId;
+  }
+
+  private buildVolunteerRecord(volunteer: Partial<Volunteer>) {
+    return toFirestorePlainData({
+      firstName: volunteer.firstName,
+      lastName: volunteer.lastName,
+      residence: volunteer.residence,
+      address: volunteer.address,
+      telephone: volunteer.telephone,
+      img: volunteer.img,
+      school: volunteer.school,
+      level: volunteer.level,
+      program: volunteer.program,
+      email: volunteer.email,
+      volunteeringInProg: volunteer.volunteeringInProg,
+      createdAt: volunteer.createdAt,
+      updatedAt: volunteer.updatedAt,
+      latestVersionId: volunteer.latestVersionId,
+      archived: volunteer.archived,
+      archivedAt: volunteer.archivedAt,
+      archivedReason: volunteer.archivedReason,
+      archivedReasonDetail: volunteer.archivedReasonDetail,
+      archivedBy: volunteer.archivedBy
+    });
   }
 }

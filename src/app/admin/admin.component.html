@@ -25,7 +25,8 @@
             <th class="py-3 text-center">Basic Access</th>
             <th class="py-3 text-center">Children</th>
             <th class="py-3 text-center">Volunteers</th>
-            <th class="py-3 text-center pe-4">Management</th>
+            <th class="py-3 text-center">Management</th>
+            <th class="py-3 text-center pe-4">Archived</th>
           </tr>
         </thead>
         <tbody app-access-control *ngFor="let userAccess of usersAccessList | async | adminFilter: searchText" [userAccessData]="userAccess">
@@ -48,6 +49,5 @@
     </div>
   </div>
 </div>
-
 
 

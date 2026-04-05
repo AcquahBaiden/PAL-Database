@@ -34,7 +34,7 @@
     <span *ngIf="!userAccessData.basic" class="text-muted small italic">Awaiting verification</span>
   </td>
 
-  <td class="text-center pe-4">
+  <td class="text-center">
     <button *ngIf="userAccessData.basic" 
             class="btn btn-sm" 
             [class.btn-outline-danger]="userAccessData.management" 
@@ -45,8 +45,19 @@
     </button>
     <span *ngIf="!userAccessData.basic" class="text-muted small italic">Awaiting verification</span>
   </td>
-</tr>
 
+  <td class="text-center pe-4">
+    <button *ngIf="userAccessData.basic"
+            class="btn btn-sm"
+            [class.btn-outline-danger]="userAccessData.archived"
+            [class.btn-outline-success]="!userAccessData.archived"
+            (click)="toggleArchivedAccess()">
+      <i class="bi me-1" [class.bi-x-circle]="userAccessData.archived" [class.bi-plus-circle]="!userAccessData.archived"></i>
+      {{ userAccessData.archived ? 'Remove' : 'Grant' }}
+    </button>
+    <span *ngIf="!userAccessData.basic" class="text-muted small italic">Awaiting verification</span>
+  </td>
+</tr>
 
 
 

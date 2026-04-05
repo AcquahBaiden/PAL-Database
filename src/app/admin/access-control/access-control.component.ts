@@ -29,4 +29,7 @@ export class AccessControlComponent implements OnInit {
   toggleManagementAccess(){
     this.adminService.updateAccessToManagement(this.userAccessData.id,this.userAccessData.management);
   }
+  toggleArchivedAccess(){
+    this.adminService.updateAccessToArchived(this.userAccessData.id,this.userAccessData.archived);
+  }
 }

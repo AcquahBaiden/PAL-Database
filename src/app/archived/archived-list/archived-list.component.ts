@@ -47,6 +47,15 @@ export class ArchivedListComponent implements OnInit, OnDestroy {
       this.sessionStore.permissions$
     ]).subscribe({
       next: ([children, volunteers, permissions]) => {
+        if (!permissions?.archived) {
+          this.availableFilters = ['all'];
+          this.selectedFilter = 'all';
+          this.archivedRecords = [];
+          this.isFetching = false;
+          this.cdr.detectChanges();
+          return;
+        }
+
         const archivedChildren = permissions?.children ? children.map((child) => this.toChildRecord(child)) : [];
         const archivedVolunteers = permissions?.volunteers ? volunteers.map((volunteer) => this.toVolunteerRecord(volunteer)) : [];
 

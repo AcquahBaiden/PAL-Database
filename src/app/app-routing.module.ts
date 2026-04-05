@@ -25,7 +25,7 @@ const routes: Routes = [
   {path: 'summary', component: SummaryComponent, canActivate: [PermissionGuard], data: { permission: 'basic' }},
   {path: 'noAccess', component: NoAccessComponent},
   {path: 'admin', component: AdminComponent, canActivate:[PermissionGuard], data: { permission: 'admin' }},
-  {path: 'archived', component: ArchivedComponent, canActivate:[PermissionGuard], data: { permission: 'basic' }, children: [
+  {path: 'archived', component: ArchivedComponent, canActivate:[PermissionGuard], data: { permission: 'archived' }, children: [
     {path: ':type/:id', component: ArchivedDetailsComponent}
   ]},
   {path: 'add-child', component: AddChildComponent, canActivate:[PermissionGuard], data: { permission: 'children' }},

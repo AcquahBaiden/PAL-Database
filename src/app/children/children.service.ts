@@ -3,41 +3,25 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Auth } from '@angular/fire/auth';
-import { Database, objectVal } from '@angular/fire/database';
+import {
+  Firestore,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  orderBy,
+  query,
+  setDoc,
+  where
+} from '@angular/fire/firestore';
 import { Storage, getDownloadURL, ref as storageRef } from '@angular/fire/storage';
-import { get, push, ref, remove, set, update } from 'firebase/database';
 import { uploadBytesResumable } from 'firebase/storage';
 
 import { Child } from '../interfaces/child.interface';
 import { ProfileVersion } from '../interfaces/profile-history.interface';
 import { NotificationService } from '../notification/notification.service';
-
-function sanitizeFirebaseData<T>(value: T, seen = new WeakSet<object>()): T {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => sanitizeFirebaseData(item, seen))
-      .filter((item) => item !== undefined) as T;
-  }
-
-  if (value && typeof value === 'object') {
-    if (seen.has(value as object)) {
-      return undefined as T;
-    }
-
-    seen.add(value as object);
-    return Object.entries(value as Record<string, unknown>).reduce((acc, [key, entryValue]) => {
-      if (entryValue !== undefined) {
-        const sanitizedEntry = sanitizeFirebaseData(entryValue, seen);
-        if (sanitizedEntry !== undefined) {
-          acc[key] = sanitizedEntry;
-        }
-      }
-      return acc;
-    }, {} as Record<string, unknown>) as T;
-  }
-
-  return value;
-}
+import { compareByName, observeCollectionData, observeDocumentData, toFirestorePlainData } from '../shared/firestore-data.utils';
 
 @Injectable({
   providedIn: 'root',
@@ -45,50 +29,34 @@ function sanitizeFirebaseData<T>(value: T, seen = new WeakSet<object>()): T {
 export class ChildrenService {
   public uploadPercent: Observable<number | undefined>;
   public downloadURL!: Observable<string>;
-  private childrenStream: Observable<Child[]>;
 
-  private db = inject(Database);
+  private firestore = inject(Firestore);
   private storage = inject(Storage);
   private auth = inject(Auth);
   private notiService = inject(NotificationService);
 
-  constructor() {
-    this.childrenStream = objectVal<Record<string, Child> | null>(ref(this.db, 'Children')).pipe(
-      map((responseData) => {
-        if (!responseData) {
-          return [];
-        }
-
-        return Object.keys(responseData).map((key) => ({
-          ...responseData[key],
-          id: key
-        }));
-      })
-    );
-  }
+  private readonly childrenCollection = collection(this.firestore, 'children');
+  private readonly activeChildrenQuery = query(this.childrenCollection, where('archived', '==', false));
+  private readonly archivedChildrenQuery = query(this.childrenCollection, where('archived', '==', true));
+  private readonly childrenStream = observeCollectionData<Child>(this.activeChildrenQuery, { idField: 'id' }).pipe(
+    map((children) => children.sort(compareByName))
+  );
+  private readonly archivedChildrenStream = observeCollectionData<Child>(this.archivedChildrenQuery, { idField: 'id' }).pipe(
+    map((children) => children.sort((left, right) => (right.archivedAt || 0) - (left.archivedAt || 0)))
+  );
 
   getDbChildren(): Observable<Child[]> {
-    return this.childrenStream.pipe(
-      map((children) => children.filter((child) => !child.archived))
-    );
+    return this.childrenStream;
   }
 
   getArchivedChildren(): Observable<Child[]> {
-    return this.childrenStream.pipe(
-      map((children) =>
-        children
-          .filter((child) => child.archived)
-          .sort((left, right) => (right.archivedAt || 0) - (left.archivedAt || 0))
-      )
-    );
+    return this.archivedChildrenStream;
   }
 
   async saveToDB(data: Child): Promise<boolean> {
     try {
       const timestamp = Date.now();
-      const listRef = ref(this.db, 'Children');
-      const childRef = push(listRef);
-      await set(childRef, sanitizeFirebaseData({
+      await addDoc(this.childrenCollection, this.buildChildRecord({
         ...data,
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -98,7 +66,7 @@ export class ChildrenService {
       this.notiService.setState(false, `${data.firstName} successfully saved`, true);
       return true;
     } catch (error) {
-      console.error('Error saving to DB:', error);
+      console.error('Error saving to Firestore:', error);
       this.notiService.setState(true, 'Something went wrong when saving profile', true);
       return false;
     }
@@ -109,6 +77,7 @@ export class ChildrenService {
     if (!file) {
       throw new Error('No file selected');
     }
+
     const fileRef = storageRef(this.storage, 'children/' + fileName);
     const task = uploadBytesResumable(fileRef, file);
 
@@ -133,48 +102,32 @@ export class ChildrenService {
   }
 
   getChild(id: string): Observable<Child> {
-    return objectVal<Child>(ref(this.db, 'Children/' + id));
+    return observeDocumentData<Child>(doc(this.firestore, 'children', id), { idField: 'id' }) as Observable<Child>;
   }
 
   getChildProfileHistory(id: string): Observable<ProfileVersion<Child>[]> {
-    return objectVal<Record<string, ProfileVersion<Child>> | null>(ref(this.db, `ChildrenHistory/${id}`)).pipe(
-      map((responseData) => {
-        if (!responseData) {
-          return [];
-        }
-
-        return Object.keys(responseData)
-          .map((key) => ({
-            ...responseData[key],
-            id: key
-          }))
-          .sort((left, right) => (right.timestamp || 0) - (left.timestamp || 0));
-      })
+    return observeCollectionData<ProfileVersion<Child>>(
+      query(collection(this.firestore, 'children', id, 'history'), orderBy('timestamp', 'desc')),
+      { idField: 'id' }
     );
   }
 
   async updateChild(id: string, editedChild: Partial<Child>) {
     try {
-      console.debug('[ChildrenService.updateChild] start', { id });
       const currentChild = await this.getChildSnapshot(id);
       if (!currentChild) {
         throw new Error('Child profile not found');
       }
 
       const timestamp = Date.now();
-      console.debug('[ChildrenService.updateChild] snapshot loaded', { id, hasImage: !!currentChild.img });
       const versionId = await this.saveHistorySnapshot(id, currentChild, timestamp);
-      console.debug('[ChildrenService.updateChild] history saved', { id, versionId });
-      const payload = sanitizeFirebaseData({
+      await setDoc(doc(this.firestore, 'children', id), this.buildChildRecord({
         ...currentChild,
         ...editedChild,
         createdAt: currentChild.createdAt || currentChild.updatedAt || timestamp,
         updatedAt: timestamp,
         latestVersionId: versionId
-      }) as any;
-
-      await set(ref(this.db, 'Children/' + id), payload);
-      console.debug('[ChildrenService.updateChild] profile saved', { id, versionId });
+      }));
 
       this.notiService.setState(false, 'Profile successfully updated', true);
     } catch (error) {
@@ -193,13 +146,13 @@ export class ChildrenService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentChild, timestamp);
-      await set(ref(this.db, 'Children/' + id), sanitizeFirebaseData({
+      await setDoc(doc(this.firestore, 'children', id), this.buildChildRecord({
         ...currentChild,
         img: fileName,
         createdAt: currentChild.createdAt || currentChild.updatedAt || timestamp,
         updatedAt: timestamp,
         latestVersionId: versionId
-      }) as any);
+      }));
 
       this.notiService.setState(false, 'Profile photo successfully updated', true);
       return true;
@@ -219,7 +172,7 @@ export class ChildrenService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentChild, timestamp);
-      await set(ref(this.db, 'Children/' + id), sanitizeFirebaseData({
+      await setDoc(doc(this.firestore, 'children', id), this.buildChildRecord({
         ...currentChild,
         archived: true,
         archivedAt: timestamp,
@@ -228,7 +181,7 @@ export class ChildrenService {
         archivedBy: this.auth.currentUser?.email || null,
         updatedAt: timestamp,
         latestVersionId: versionId
-      }) as any);
+      }));
 
       this.notiService.setState(false, 'Profile successfully archived', true);
     } catch (error) {
@@ -240,7 +193,7 @@ export class ChildrenService {
 
   async deleteChild(id: string) {
     try {
-      await remove(ref(this.db, 'Children/' + id));
+      await deleteDoc(doc(this.firestore, 'children', id));
       this.notiService.setState(false, 'Profile successfully deleted', true);
     } catch (error) {
       console.error('Error deleting child:', error);
@@ -249,19 +202,50 @@ export class ChildrenService {
   }
 
   private async getChildSnapshot(id: string): Promise<Child | null> {
-    const snapshot = await get(ref(this.db, `Children/${id}`));
-    return snapshot.exists() ? (snapshot.val() as Child) : null;
+    const snapshot = await getDoc(doc(this.firestore, 'children', id));
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    return {
+      ...(snapshot.data() as Child),
+      id: snapshot.id
+    };
   }
 
   private async saveHistorySnapshot(id: string, child: Child, timestamp: number): Promise<string> {
-    const historyListRef = ref(this.db, `ChildrenHistory/${id}`);
-    const { id: _, ...profile } = child;
-    const historyRef = push(historyListRef);
-    await set(historyRef, sanitizeFirebaseData({
+    const versionId = `${timestamp}-${Math.random().toString(36).slice(2, 10)}`;
+    await setDoc(doc(this.firestore, 'children', id, 'history', versionId), toFirestorePlainData({
       timestamp,
-      profile
+      profile: this.buildChildRecord(child)
     }));
 
-    return historyRef.key as string;
+    return versionId;
+  }
+
+  private buildChildRecord(child: Partial<Child>) {
+    return toFirestorePlainData({
+      firstName: child.firstName,
+      lastName: child.lastName,
+      residence: child.residence,
+      address: child.address,
+      description: child.description,
+      telephone: child.telephone,
+      img: child.img,
+      class: child.class,
+      school: child.school,
+      parentName: child.parentName,
+      parentTel: child.parentTel,
+      interests: child.interests,
+      programs: child.programs,
+      createdAt: child.createdAt,
+      updatedAt: child.updatedAt,
+      latestVersionId: child.latestVersionId,
+      archived: child.archived,
+      archivedAt: child.archivedAt,
+      archivedReason: child.archivedReason,
+      archivedReasonDetail: child.archivedReasonDetail,
+      archivedBy: child.archivedBy
+    });
   }
 }

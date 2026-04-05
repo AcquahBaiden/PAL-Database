@@ -1,12 +1,21 @@
 import { Injectable, inject } from "@angular/core";
-import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut, GoogleAuthProvider, UserCredential } from "@angular/fire/auth";
-import { Database } from "@angular/fire/database";
-import { ref, update } from 'firebase/database';
+import {
+  Auth,
+  GoogleAuthProvider,
+  UserCredential,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut
+} from "@angular/fire/auth";
+import { Firestore, doc, setDoc } from "@angular/fire/firestore";
+
+import { emptyAccess } from "./access.utils";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
   private auth = inject(Auth);
-  private db = inject(Database);
+  private firestore = inject(Firestore);
 
   loginWithPopUp() {
     return signInWithPopup(this.auth, new GoogleAuthProvider());
@@ -25,13 +34,9 @@ export class AuthService {
   }
 
   setUpAccessData(user: UserCredential) {
-    return update(ref(this.db, "Access/" + user.user.uid), {
-      basic: false,
-      admin: false,
-      email: user.user.email,
-      volunteers: false,
-      children: false,
-      management: false,
+    return setDoc(doc(this.firestore, "access", user.user.uid), {
+      ...emptyAccess,
+      email: user.user.email
     });
   }
 

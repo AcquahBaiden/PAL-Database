@@ -8,7 +8,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
-import { connectDatabaseEmulator, getDatabase, provideDatabase } from '@angular/fire/database';
+import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { connectStorageEmulator, getStorage, provideStorage } from '@angular/fire/storage';
 import { provideAnalytics, getAnalytics } from '@angular/fire/analytics';
 
@@ -34,17 +34,17 @@ bootstrapApplication(AppComponent, {
 
       return auth;
     }),
-    provideDatabase(() => {
-      const database = getDatabase();
+    provideFirestore(() => {
+      const firestore = getFirestore();
       if (useEmulators) {
-        connectDatabaseEmulator(
-          database,
-          environment.emulators.database.host,
-          environment.emulators.database.port
+        connectFirestoreEmulator(
+          firestore,
+          environment.emulators.firestore.host,
+          environment.emulators.firestore.port
         );
       }
 
-      return database;
+      return firestore;
     }),
     provideStorage(() => {
       const storage = getStorage();

@@ -1,46 +1,25 @@
 import { Injectable, inject } from '@angular/core';
-import { Database } from '@angular/fire/database';
-import { ref, get } from 'firebase/database';
-
-import { Child } from './interfaces/child.interface';
+import { Firestore, collection, getCountFromServer, query, where } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PALService {
-  Children: Child | Child[] = {
-    firstName: 'Name',
-    lastName: 'Name'
-  };
-
-  private db = inject(Database);
+  private firestore = inject(Firestore);
 
   async getDBSummaries() {
-    const [childrenSnapshot, volunteersSnapshot, managementSnapshot, usersSnapshot] = await Promise.all([
-      get(ref(this.db, 'Children')),
-      get(ref(this.db, 'Volunteers')),
-      get(ref(this.db, 'Management')),
-      get(ref(this.db, 'Access'))
+    const [childrenCount, volunteersCount, managementCount, usersCount] = await Promise.all([
+      getCountFromServer(query(collection(this.firestore, 'children'), where('archived', '==', false))),
+      getCountFromServer(query(collection(this.firestore, 'volunteers'), where('archived', '==', false))),
+      getCountFromServer(collection(this.firestore, 'management')),
+      getCountFromServer(collection(this.firestore, 'access'))
     ]);
 
-    const children = (childrenSnapshot.val() ?? {}) as Record<string, Child>;
-    const volunteers = (volunteersSnapshot.val() ?? {}) as Record<string, { archived?: boolean }>;
-    const management = (managementSnapshot.val() ?? {}) as Record<string, unknown>;
-    const users = (usersSnapshot.val() ?? {}) as Record<string, unknown>;
-
     return {
-      children: {
-        number: Object.values(children).filter((child) => !child?.archived).length
-      },
-      volunteers: {
-        number: Object.values(volunteers).filter((volunteer) => !volunteer?.archived).length
-      },
-      management: {
-        number: Object.keys(management).length
-      },
-      DatabaseUsers: {
-        number: Object.keys(users).length
-      }
+      children: { number: childrenCount.data().count },
+      volunteers: { number: volunteersCount.data().count },
+      management: { number: managementCount.data().count },
+      DatabaseUsers: { number: usersCount.data().count }
     };
   }
 }
