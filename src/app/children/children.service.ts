@@ -12,15 +12,25 @@ import { Child } from '../interfaces/child.interface';
 import { ProfileVersion } from '../interfaces/profile-history.interface';
 import { NotificationService } from '../notification/notification.service';
 
-function sanitizeFirebaseData<T>(value: T): T {
+function sanitizeFirebaseData<T>(value: T, seen = new WeakSet<object>()): T {
   if (Array.isArray(value)) {
-    return value.map((item) => sanitizeFirebaseData(item)) as T;
+    return value
+      .map((item) => sanitizeFirebaseData(item, seen))
+      .filter((item) => item !== undefined) as T;
   }
 
   if (value && typeof value === 'object') {
+    if (seen.has(value as object)) {
+      return undefined as T;
+    }
+
+    seen.add(value as object);
     return Object.entries(value as Record<string, unknown>).reduce((acc, [key, entryValue]) => {
       if (entryValue !== undefined) {
-        acc[key] = sanitizeFirebaseData(entryValue);
+        const sanitizedEntry = sanitizeFirebaseData(entryValue, seen);
+        if (sanitizedEntry !== undefined) {
+          acc[key] = sanitizedEntry;
+        }
       }
       return acc;
     }, {} as Record<string, unknown>) as T;
@@ -145,19 +155,26 @@ export class ChildrenService {
 
   async updateChild(id: string, editedChild: Partial<Child>) {
     try {
+      console.debug('[ChildrenService.updateChild] start', { id });
       const currentChild = await this.getChildSnapshot(id);
       if (!currentChild) {
         throw new Error('Child profile not found');
       }
 
       const timestamp = Date.now();
+      console.debug('[ChildrenService.updateChild] snapshot loaded', { id, hasImage: !!currentChild.img });
       const versionId = await this.saveHistorySnapshot(id, currentChild, timestamp);
-      await update(ref(this.db, 'Children/' + id), sanitizeFirebaseData({
+      console.debug('[ChildrenService.updateChild] history saved', { id, versionId });
+      const payload = sanitizeFirebaseData({
+        ...currentChild,
         ...editedChild,
         createdAt: currentChild.createdAt || currentChild.updatedAt || timestamp,
         updatedAt: timestamp,
         latestVersionId: versionId
-      }) as any);
+      }) as any;
+
+      await set(ref(this.db, 'Children/' + id), payload);
+      console.debug('[ChildrenService.updateChild] profile saved', { id, versionId });
 
       this.notiService.setState(false, 'Profile successfully updated', true);
     } catch (error) {
@@ -176,12 +193,13 @@ export class ChildrenService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentChild, timestamp);
-      await update(ref(this.db, 'Children/' + id), {
+      await set(ref(this.db, 'Children/' + id), sanitizeFirebaseData({
+        ...currentChild,
         img: fileName,
         createdAt: currentChild.createdAt || currentChild.updatedAt || timestamp,
         updatedAt: timestamp,
         latestVersionId: versionId
-      });
+      }) as any);
 
       this.notiService.setState(false, 'Profile photo successfully updated', true);
       return true;
@@ -201,7 +219,8 @@ export class ChildrenService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentChild, timestamp);
-      await update(ref(this.db, 'Children/' + id), sanitizeFirebaseData({
+      await set(ref(this.db, 'Children/' + id), sanitizeFirebaseData({
+        ...currentChild,
         archived: true,
         archivedAt: timestamp,
         archivedReason: reason,

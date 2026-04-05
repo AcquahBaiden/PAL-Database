@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, Observable } from 'rxjs';
+import { Subscription, Observable, firstValueFrom } from 'rxjs';
 
 import { Child } from 'src/app/interfaces/child.interface';
 import { ChildrenService } from '../children.service';
 
-import { switchMap, tap } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -38,19 +38,20 @@ export class ChildEditComponent implements OnInit, OnDestroy {
   uploadPercent: Observable<number | undefined>;
 
   ngOnInit(): void {
-    this.childSubscription = this.route.params.pipe(
-      tap(params => {
+    this.childSubscription = this.route.params.subscribe(async (params) => {
+      try {
         this.childId = params['id'];
         this.dataLoaded = false;
         this.cdr.detectChanges();
-      }),
-      switchMap(params => this.childrenService.getChild(params['id']))
-    ).subscribe(child => {
-      if (child) {
+        const child = await firstValueFrom(this.childrenService.getChild(this.childId).pipe(take(1)));
+        if (!child) {
+          return;
+        }
+
         this.selectedChild = child;
         this.dataLoaded = true;
         this.cdr.detectChanges();
-        // Small timeout to ensure ViewChild is available if it was hidden by *ngIf
+
         setTimeout(() => {
           if (this.editForm) {
             this.editForm.form.patchValue({
@@ -67,6 +68,8 @@ export class ChildEditComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           }
         });
+      } catch (error) {
+        console.error('Error loading child for edit:', error);
       }
     });
   }

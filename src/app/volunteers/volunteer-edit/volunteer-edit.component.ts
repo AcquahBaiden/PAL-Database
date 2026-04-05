@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, Observable } from 'rxjs';
+import { Subscription, Observable, firstValueFrom } from 'rxjs';
 
 import { Volunteer } from 'src/app/interfaces/volunteer.interface';
 import { VolunteersService } from '../volunteers.service';
 
-import { switchMap, tap } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -38,18 +38,20 @@ export class VolunteerEditComponent implements OnInit, OnDestroy {
   uploadPercent: Observable<number | undefined>;
 
   ngOnInit(): void {
-    this.volSubscription = this.route.params.pipe(
-      tap(params => {
+    this.volSubscription = this.route.params.subscribe(async (params) => {
+      try {
         this.volId = params['id'];
         this.dataLoaded = false;
         this.cdr.detectChanges();
-      }),
-      switchMap(params => this.volunteersService.getVolunteer(params['id']))
-    ).subscribe(volunteer => {
-      if (volunteer) {
+        const volunteer = await firstValueFrom(this.volunteersService.getVolunteer(this.volId).pipe(take(1)));
+        if (!volunteer) {
+          return;
+        }
+
         this.selectedVol = volunteer;
         this.dataLoaded = true;
         this.cdr.detectChanges();
+
         setTimeout(() => {
           if (this.editForm) {
             this.editForm.form.patchValue({
@@ -65,6 +67,8 @@ export class VolunteerEditComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           }
         });
+      } catch (error) {
+        console.error('Error loading volunteer for edit:', error);
       }
     });
   }

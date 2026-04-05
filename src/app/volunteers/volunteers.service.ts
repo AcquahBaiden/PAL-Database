@@ -12,15 +12,25 @@ import { Volunteer } from '../interfaces/volunteer.interface';
 import { ProfileVersion } from '../interfaces/profile-history.interface';
 import { NotificationService } from '../notification/notification.service';
 
-function sanitizeFirebaseData<T>(value: T): T {
+function sanitizeFirebaseData<T>(value: T, seen = new WeakSet<object>()): T {
   if (Array.isArray(value)) {
-    return value.map((item) => sanitizeFirebaseData(item)) as T;
+    return value
+      .map((item) => sanitizeFirebaseData(item, seen))
+      .filter((item) => item !== undefined) as T;
   }
 
   if (value && typeof value === 'object') {
+    if (seen.has(value as object)) {
+      return undefined as T;
+    }
+
+    seen.add(value as object);
     return Object.entries(value as Record<string, unknown>).reduce((acc, [key, entryValue]) => {
       if (entryValue !== undefined) {
-        acc[key] = sanitizeFirebaseData(entryValue);
+        const sanitizedEntry = sanitizeFirebaseData(entryValue, seen);
+        if (sanitizedEntry !== undefined) {
+          acc[key] = sanitizedEntry;
+        }
       }
       return acc;
     }, {} as Record<string, unknown>) as T;
@@ -162,7 +172,8 @@ export class VolunteersService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentVolunteer, timestamp);
-      await update(ref(this.db, 'Volunteers/' + id), sanitizeFirebaseData({
+      await set(ref(this.db, 'Volunteers/' + id), sanitizeFirebaseData({
+        ...currentVolunteer,
         ...editedVolunteer,
         createdAt: currentVolunteer.createdAt || currentVolunteer.updatedAt || timestamp,
         updatedAt: timestamp,
@@ -186,12 +197,13 @@ export class VolunteersService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentVolunteer, timestamp);
-      await update(ref(this.db, 'Volunteers/' + id), {
+      await set(ref(this.db, 'Volunteers/' + id), sanitizeFirebaseData({
+        ...currentVolunteer,
         img: fileName,
         createdAt: currentVolunteer.createdAt || currentVolunteer.updatedAt || timestamp,
         updatedAt: timestamp,
         latestVersionId: versionId
-      });
+      }) as any);
 
       this.notiService.setState(false, 'Profile photo successfully updated', true);
       return true;
@@ -211,7 +223,8 @@ export class VolunteersService {
 
       const timestamp = Date.now();
       const versionId = await this.saveHistorySnapshot(id, currentVolunteer, timestamp);
-      await update(ref(this.db, 'Volunteers/' + id), sanitizeFirebaseData({
+      await set(ref(this.db, 'Volunteers/' + id), sanitizeFirebaseData({
+        ...currentVolunteer,
         archived: true,
         archivedAt: timestamp,
         archivedReason: reason,

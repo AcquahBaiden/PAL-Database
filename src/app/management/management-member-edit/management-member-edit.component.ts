@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
 import { NgForm } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
-import { Subscription, Observable } from "rxjs";
+import { Subscription, Observable, firstValueFrom } from "rxjs";
 
 import { ManagementMember } from "src/app/interfaces/management-member.interface";
 import { ManagementService } from "../management.service";
 
-import { switchMap, tap } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -35,18 +35,20 @@ export class ManagementMemberEditComponent implements OnInit, OnDestroy {
   dataLoaded = false;
 
   ngOnInit(): void {
-    this.memberSubscription = this.route.params.pipe(
-      tap(params => {
+    this.memberSubscription = this.route.params.subscribe(async (params) => {
+      try {
         this.memberId = params['id'];
         this.dataLoaded = false;
         this.cdr.detectChanges();
-      }),
-      switchMap(params => this.managementService.getMember(params['id']))
-    ).subscribe(member => {
-      if (member) {
+        const member = await firstValueFrom(this.managementService.getMember(this.memberId).pipe(take(1)));
+        if (!member) {
+          return;
+        }
+
         this.member = member;
         this.dataLoaded = true;
         this.cdr.detectChanges();
+
         setTimeout(() => {
           if (this.editForm) {
             this.editForm.form.patchValue({
@@ -61,6 +63,8 @@ export class ManagementMemberEditComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           }
         });
+      } catch (error) {
+        console.error('Error loading management member for edit:', error);
       }
     });
   }

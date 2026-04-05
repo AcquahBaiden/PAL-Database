@@ -26,6 +26,15 @@ export class ProfileHistoryComponent {
   selectedVersion: ProfileVersion<unknown> | null = null;
 
   private modal = inject(NgbModal);
+  private readonly dateFormatter = new Intl.DateTimeFormat(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit'
+  });
 
   openVersion(version: ProfileVersion<unknown>): void {
     this.selectedVersion = version;
@@ -47,7 +56,7 @@ export class ProfileHistoryComponent {
       }
 
       if (value.every((entry) => this.isPrimitive(entry))) {
-        return prefix ? [{ label: prefix, value: value.map((entry) => this.formatPrimitive(entry)).join(', ') }] : [];
+        return prefix ? [{ label: prefix, value: value.map((entry) => this.formatPrimitive(entry, prefix)).join(', ') }] : [];
       }
 
       return value.flatMap((entry, index) => this.flattenValue(entry, `${prefix} ${index + 1}`.trim()));
@@ -57,7 +66,7 @@ export class ProfileHistoryComponent {
       return Object.entries(value as Record<string, unknown>).flatMap(([key, entryValue]) => {
         const label = prefix ? `${prefix} / ${this.formatLabel(key)}` : this.formatLabel(key);
         if (this.isPrimitive(entryValue)) {
-          return [{ label, value: this.formatPrimitive(entryValue) }];
+          return [{ label, value: this.formatPrimitive(entryValue, label) }];
         }
 
         return this.flattenValue(entryValue, label);
@@ -68,7 +77,7 @@ export class ProfileHistoryComponent {
       return [];
     }
 
-    return [{ label: prefix, value: this.formatPrimitive(value) }];
+    return [{ label: prefix, value: this.formatPrimitive(value, prefix) }];
   }
 
   private formatLabel(key: string): string {
@@ -80,12 +89,28 @@ export class ProfileHistoryComponent {
       .replace(/^./, (value) => value.toUpperCase());
   }
 
-  private formatPrimitive(value: unknown): string {
+  private formatPrimitive(value: unknown, label = ''): string {
     if (value === null || value === undefined || value === '') {
       return 'Not provided';
     }
 
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+
+    if (this.isTimestampField(label) && typeof value === 'number' && Number.isFinite(value)) {
+      return this.dateFormatter.format(new Date(value));
+    }
+
     return String(value);
+  }
+
+  private isTimestampField(label: string): boolean {
+    const normalizedLabel = label.trim().toLowerCase();
+    return normalizedLabel.endsWith('created at')
+      || normalizedLabel.endsWith('updated at')
+      || normalizedLabel.endsWith('archived at')
+      || normalizedLabel.endsWith('timestamp');
   }
 
   private isPrimitive(value: unknown): boolean {
