@@ -23,6 +23,7 @@ export class AppComponent {
   errorMessage = '';
   isLoginError = false;
   isSubmitting = false;
+  isResetSubmitting = false;
   isSidebarCollapsed = false;
 
   constructor(
@@ -63,6 +64,38 @@ export class AppComponent {
         this.isLoginError = true;
         this.isSubmitting = false;
         this.errorMessage = this.mapAuthError(error);
+        this.notiService.setState(true, this.errorMessage, true);
+      });
+    }
+  }
+
+  async onPasswordReset(email: string | undefined | null) {
+    const normalizedEmail = email?.trim();
+    if (!normalizedEmail) {
+      this.zone.run(() => {
+        this.notiService.setState(true, 'Enter your email address first to reset your password.', true);
+      });
+      return;
+    }
+
+    this.isResetSubmitting = true;
+    this.isLoginError = false;
+    this.notiService.setState(false, '', false);
+
+    try {
+      await this.authService.resetPassword(normalizedEmail);
+      this.zone.run(() => {
+        this.isResetSubmitting = false;
+        this.notiService.setState(
+          false,
+          'If an account exists for this email, a password reset link has been sent.',
+          true
+        );
+      });
+    } catch (error: any) {
+      this.zone.run(() => {
+        this.isResetSubmitting = false;
+        this.errorMessage = this.mapPasswordResetError(error);
         this.notiService.setState(true, this.errorMessage, true);
       });
     }
@@ -114,10 +147,25 @@ export class AppComponent {
         return 'Too many failed attempts. Please try again later.';
       case 'auth/email-already-in-use':
         return 'The email is already in use by another account.';
+      case 'auth/invalid-email':
+        return 'Enter a valid email address.';
       case 'auth/weak-password':
         return 'Password should be at least 6 characters.';
       default:
         return error?.message || 'An unexpected error occurred. Please try again later.';
+    }
+  }
+
+  private mapPasswordResetError(error: any): string {
+    switch (error?.code) {
+      case 'auth/invalid-email':
+        return 'Enter a valid email address to receive a reset link.';
+      case 'auth/network-request-failed':
+        return 'A network error occurred. Please check your internet and try again.';
+      case 'auth/too-many-requests':
+        return 'Too many reset attempts were made. Please try again later.';
+      default:
+        return 'Unable to send the password reset email right now. Please try again later.';
     }
   }
 }

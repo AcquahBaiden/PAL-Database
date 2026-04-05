@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   UserCredential,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut
@@ -27,6 +28,10 @@ export class AuthService {
 
   signUp(email: string, password: string) {
     return createUserWithEmailAndPassword(this.auth, email, password);
+  }
+
+  resetPassword(email: string) {
+    return sendPasswordResetEmail(this.auth, email);
   }
 
   logout() {

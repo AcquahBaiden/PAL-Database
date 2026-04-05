@@ -6,7 +6,7 @@ const path = require('path');
 
 const VALID_SCOPES = new Set(['children', 'volunteers', 'management', 'access']);
 const WRITE_BATCH_LIMIT = 400;
-const DEFAULT_PROJECT_ID = 'pal-database-migration';
+const DEFAULT_PROJECT_ID = 'your-project-d';
 const DEFAULT_FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
 let cachedAdmin = null;
 
@@ -33,8 +33,11 @@ Options:
   --firestore-emulator-host=127.0.0.1:8080
       Override the Firestore emulator host.
 
-  --project-id=pal-database
+  --project-id=your-project-id
       Override the Firebase project ID. This is especially useful with emulator imports.
+
+  --service-account=/absolute/or/relative/path/to/service-account.json
+      Load Firebase service account credentials from a JSON file.
 
   --help
       Show this help.
@@ -47,6 +50,7 @@ Env vars for live RTDB source:
 
 Notes:
   - If --input is provided, FIREBASE_DATABASE_URL is not required.
+  - If --service-account is not provided, GOOGLE_APPLICATION_CREDENTIALS will be used when set.
   - If --firestore-emulator is provided, service account credentials are optional.
   - If writing to production Firestore without --firestore-emulator, service account credentials are required.
 `);
@@ -89,6 +93,11 @@ function parseArgs(argv) {
       return acc;
     }
 
+    if (arg.startsWith('--service-account=')) {
+      acc.serviceAccountFile = arg.slice('--service-account='.length);
+      return acc;
+    }
+
     if (arg.startsWith('--emulator-host=')) {
       acc.firestoreEmulatorHost = arg.slice('--emulator-host='.length);
       return acc;
@@ -106,6 +115,7 @@ function parseArgs(argv) {
     help: false,
     inputFile: null,
     projectId: null,
+    serviceAccountFile: null,
     firestoreEmulator: false,
     firestoreEmulatorHost: DEFAULT_FIRESTORE_EMULATOR_HOST
   });
@@ -200,6 +210,45 @@ function hasServiceAccountEnv() {
     process.env.FIREBASE_CLIENT_EMAIL &&
     process.env.FIREBASE_PRIVATE_KEY
   );
+}
+
+function resolveServiceAccountPath(args) {
+  if (args.serviceAccountFile) {
+    return path.resolve(process.cwd(), args.serviceAccountFile);
+  }
+
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    return path.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS);
+  }
+
+  return null;
+}
+
+function loadServiceAccountFromFile(filePath) {
+  if (!filePath) {
+    return null;
+  }
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Service account file not found: ${filePath}`);
+  }
+
+  const raw = fs.readFileSync(filePath, 'utf8');
+  const parsed = JSON.parse(raw);
+
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error(`Invalid service account JSON: ${filePath}`);
+  }
+
+  if (!parsed.project_id || !parsed.client_email || !parsed.private_key) {
+    throw new Error(`Service account JSON is missing required fields (project_id, client_email, private_key): ${filePath}`);
+  }
+
+  return {
+    projectId: parsed.project_id,
+    clientEmail: parsed.client_email,
+    privateKey: parsed.private_key
+  };
 }
 
 function resolveAccessEmail(rawAccess, fallbackEmail = null) {
@@ -410,44 +459,11 @@ function ensureFirestoreEmulatorAvailable(hostValue) {
   });
 }
 
-function createDryRunFirestore() {
-  const createDocumentRef = (segments) => ({
-    path: segments.join('/'),
-    collection(name) {
-      return createCollectionRef([...segments, name]);
-    }
-  });
-
-  const createCollectionRef = (segments) => ({
-    path: segments.join('/'),
-    doc(id) {
-      return createDocumentRef([...segments, id]);
-    }
-  });
-
-  return {
-    settings() {
-      return undefined;
-    },
-    collection(name) {
-      return createCollectionRef([name]);
-    }
-  };
-}
-
 function initializeFirebase(args, needsRealtimeDatabaseSource) {
   const projectId = resolveProjectId(args);
-
-  if (args.dryRun && !needsRealtimeDatabaseSource) {
-    return {
-      projectId,
-      app: null,
-      database: null,
-      firestore: createDryRunFirestore()
-    };
-  }
-
   const admin = loadFirebaseAdmin();
+  const serviceAccountPath = resolveServiceAccountPath(args);
+  const serviceAccount = loadServiceAccountFromFile(serviceAccountPath);
 
   if (args.firestoreEmulator) {
     process.env.FIRESTORE_EMULATOR_HOST = args.firestoreEmulatorHost;
@@ -461,11 +477,21 @@ function initializeFirebase(args, needsRealtimeDatabaseSource) {
 
   const needsServiceAccount = needsRealtimeDatabaseSource || (!args.dryRun && !args.firestoreEmulator);
   if (needsServiceAccount) {
-    appOptions.credential = admin.credential.cert({
-      projectId: requireEnv('FIREBASE_PROJECT_ID'),
-      clientEmail: requireEnv('FIREBASE_CLIENT_EMAIL'),
-      privateKey: requireEnv('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n')
-    });
+    if (serviceAccount) {
+      appOptions.credential = admin.credential.cert(serviceAccount);
+    } else if (hasServiceAccountEnv()) {
+      appOptions.credential = admin.credential.cert({
+        projectId: requireEnv('FIREBASE_PROJECT_ID'),
+        clientEmail: requireEnv('FIREBASE_CLIENT_EMAIL'),
+        privateKey: requireEnv('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n')
+      });
+    } else {
+      throw new Error(
+        'Production Firestore access requires credentials. Provide --service-account=/path/to/service-account.json or set GOOGLE_APPLICATION_CREDENTIALS or FIREBASE_PROJECT_ID/FIREBASE_CLIENT_EMAIL/FIREBASE_PRIVATE_KEY.'
+      );
+    }
+  } else if (serviceAccount) {
+    appOptions.credential = admin.credential.cert(serviceAccount);
   } else if (hasServiceAccountEnv()) {
     appOptions.credential = admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
@@ -482,6 +508,18 @@ function initializeFirebase(args, needsRealtimeDatabaseSource) {
     database: needsRealtimeDatabaseSource ? admin.database(app) : null,
     firestore: admin.firestore(app)
   };
+}
+
+async function verifyFirestoreAccess(firestore, args) {
+  await firestore.collection('migration_probe').limit(1).get();
+
+  if (args.dryRun) {
+    console.log(
+      args.firestoreEmulator
+        ? `Verified Firestore emulator access at ${args.firestoreEmulatorHost}.`
+        : 'Verified production Firestore access.'
+    );
+  }
 }
 
 async function readRtdbRoot(database, path) {
@@ -590,12 +628,13 @@ async function main() {
   }
 
   const inputFile = args.inputFile ? loadInputFile(args.inputFile) : null;
-  if (args.firestoreEmulator && !args.dryRun) {
+  if (args.firestoreEmulator) {
     await ensureFirestoreEmulatorAvailable(args.firestoreEmulatorHost);
   }
 
   const { projectId, app, database, firestore } = initializeFirebase(args, !inputFile);
   firestore.settings({ ignoreUndefinedProperties: true });
+  await verifyFirestoreAccess(firestore, args);
 
   const readRoot = createReadRoot(args, database, inputFile?.data ?? null);
   const writer = new BatchedWriter(firestore, args.dryRun);
