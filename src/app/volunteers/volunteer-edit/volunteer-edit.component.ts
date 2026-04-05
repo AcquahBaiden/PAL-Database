@@ -76,20 +76,25 @@ export class VolunteerEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  onuploadProfileImg(event: any) {
+  async onuploadProfileImg(event: any) {
     const file = event.target.files[0];
     if (!file) return;
 
     this.isUploading = true;
     const fileName = `vol_${this.selectedVol.firstName}_${this.selectedVol.lastName}_${Date.now()}`;
-    
-    this.volunteersService.uploadFile(event, fileName);
-    this.uploadPercent = this.volunteersService.uploadPercent;
+    this.cdr.detectChanges();
 
-    setTimeout(async () => {
-      const success = await this.volunteersService.updateVolunteerProfilePhoto(this.volId, fileName);
+    try {
+      const uploadPromise = this.volunteersService.uploadFile(event, fileName);
+      this.uploadPercent = this.volunteersService.uploadPercent;
+      this.cdr.detectChanges();
+
+      await uploadPromise;
+      await this.volunteersService.updateVolunteerProfilePhoto(this.volId, fileName);
+    } finally {
       this.isUploading = false;
-    }, 4000);
+      this.cdr.detectChanges();
+    }
   }
 
   ngOnDestroy() {

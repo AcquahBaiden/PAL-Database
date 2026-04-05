@@ -1,15 +1,14 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl, NgForm } from '@angular/forms';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { Observable } from 'rxjs';
 
 import { Child } from 'src/app/interfaces/child.interface';
 import { ChildrenService } from '../children.service';
 
-import { finalize, tap } from 'rxjs/operators';
-
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NotificationService } from '../../notification/notification.service';
 import { SharedModule } from '../../shared/shared.module';
 
 @Component({
@@ -29,7 +28,11 @@ export class AddChildComponent implements OnInit {
   interests: string[] = [];
   programs: { program: string, year: string }[] = [];
 
-  constructor(private childrenService: ChildrenService) { }
+  constructor(
+    private childrenService: ChildrenService,
+    private notificationService: NotificationService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
   }
@@ -86,24 +89,32 @@ export class AddChildComponent implements OnInit {
     this.programs.splice(index, 1);
   }
 
-  onuploadProfileImg(event: any) {
+  async onuploadProfileImg(event: any) {
     const file = event.target.files[0];
     if (!file) return;
 
     this.isUploading = true;
-    const fileName = `${this.addChildForm.value.firstName}_${this.addChildForm.value.lastName}_${Date.now()}`;
-    
-    // Using a more robust way to handle the upload completion
-    const fileRef = this.childrenService.uploadFile(event, fileName);
-    this.imgUploadPercent = this.childrenService.uploadPercent;
-    this.imageFileName = fileName;
+    const firstName = this.addChildForm.value.firstName || 'child';
+    const lastName = this.addChildForm.value.lastName || 'profile';
+    const fileName = `${firstName}_${lastName}_${Date.now()}`;
+    this.cdr.detectChanges();
 
-    // We should ideally have the uploadFile return the task or use a more reactive way
-    // For now, I'll keep it simple but fix the timeout logic if possible
-    // Refactoring service to be more reactive would be better
-    setTimeout(() => {
+    try {
+      const uploadPromise = this.childrenService.uploadFile(event, fileName);
+      this.imgUploadPercent = this.childrenService.uploadPercent;
+      this.cdr.detectChanges();
+
+      await uploadPromise;
+      this.imageFileName = fileName;
       this.imgDownloadURL = this.childrenService.downloadURL;
+    } catch (error) {
+      console.error('Error uploading child profile photo:', error);
+      this.imageFileName = '';
+      this.imgDownloadURL = new Observable<string>();
+      this.notificationService.setState(true, 'Profile photo upload failed. The child profile will be saved without a photo unless upload succeeds.', true);
+    } finally {
       this.isUploading = false;
-    }, 5000);
+      this.cdr.detectChanges();
+    }
   }
 }

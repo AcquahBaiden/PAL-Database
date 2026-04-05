@@ -74,20 +74,25 @@ export class ManagementMemberEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  onuploadProfileImg(event: any) {
+  async onuploadProfileImg(event: any) {
     const file = event.target.files[0];
     if (!file) return;
 
     this.isUploading = true;
     const fileName = `mgmt_${this.member.firstName}_${this.member.lastName}_${Date.now()}`;
-    
-    this.managementService.uploadFile(event, fileName);
-    this.uploadPercent = this.managementService.uploadPercent;
+    this.cdr.detectChanges();
 
-    setTimeout(async () => {
+    try {
+      const uploadPromise = this.managementService.uploadFile(event, fileName);
+      this.uploadPercent = this.managementService.uploadPercent;
+      this.cdr.detectChanges();
+
+      await uploadPromise;
       await this.managementService.updateMemberProfilePhoto(this.memberId, fileName);
+    } finally {
       this.isUploading = false;
-    }, 4000);
+      this.cdr.detectChanges();
+    }
   }
 
   ngOnDestroy() {

@@ -78,23 +78,25 @@ export class ChildEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  onuploadProfileImg(event: any) {
+  async onuploadProfileImg(event: any) {
     const file = event.target.files[0];
     if (!file) return;
 
     this.isUploading = true;
     const fileName = `${this.selectedChild.firstName}_${this.selectedChild.lastName}_${Date.now()}`;
-    
-    this.childrenService.uploadFile(event, fileName);
-    this.uploadPercent = this.childrenService.uploadPercent;
+    this.cdr.detectChanges();
 
-    setTimeout(async () => {
-      const success = await this.childrenService.updateChildProfile(this.childId, fileName);
-      if (success) {
-        // The image will update via the main child subscription
-      }
+    try {
+      const uploadPromise = this.childrenService.uploadFile(event, fileName);
+      this.uploadPercent = this.childrenService.uploadPercent;
+      this.cdr.detectChanges();
+
+      await uploadPromise;
+      await this.childrenService.updateChildProfile(this.childId, fileName);
+    } finally {
       this.isUploading = false;
-    }, 4000);
+      this.cdr.detectChanges();
+    }
   }
 
   ngOnDestroy() {

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Auth } from '@angular/fire/auth';
-import { Database, objectVal, push, ref, remove, runTransaction, update } from '@angular/fire/database';
+import { Database, objectVal, push, ref, remove, update } from '@angular/fire/database';
 import { Storage, getDownloadURL, ref as storageRef } from '@angular/fire/storage';
 import { get, set } from 'firebase/database';
 import { uploadBytesResumable } from 'firebase/storage';
@@ -84,8 +84,7 @@ export class ChildrenService {
         archived: false
       }));
 
-      const countRef = ref(this.db, 'Summary/children/number');
-      await runTransaction(countRef, (number) => (number || 0) + 1);
+      await this.adjustSummaryCount('children', 1);
       this.notiService.setState(false, `${data.firstName} successfully saved`, true);
     } catch (error) {
       console.error('Error saving to DB:', error);
@@ -93,8 +92,11 @@ export class ChildrenService {
     }
   }
 
-  uploadFile(event: any, fileName: string) {
+  async uploadFile(event: any, fileName: string): Promise<string> {
     const file = event.target.files[0];
+    if (!file) {
+      throw new Error('No file selected');
+    }
     const fileRef = storageRef(this.storage, 'children/' + fileName);
     const task = uploadBytesResumable(fileRef, file);
 
@@ -107,14 +109,15 @@ export class ChildrenService {
       );
     });
 
-    task.then(() => {
-      this.downloadURL = new Observable((subscriber) => {
-        getDownloadURL(fileRef).then((url) => {
-          subscriber.next(url);
-          subscriber.complete();
-        });
-      });
+    await task;
+
+    const url = await getDownloadURL(fileRef);
+    this.downloadURL = new Observable((subscriber) => {
+      subscriber.next(url);
+      subscriber.complete();
     });
+
+    return url;
   }
 
   getChild(id: string): Observable<Child> {
@@ -207,8 +210,7 @@ export class ChildrenService {
       }) as any);
 
       if (!currentChild.archived) {
-        const countRef = ref(this.db, 'Summary/children/number');
-        await runTransaction(countRef, (number) => Math.max(0, (number || 0) - 1));
+        await this.adjustSummaryCount('children', -1);
       }
 
       this.notiService.setState(false, 'Profile successfully archived', true);
@@ -222,8 +224,7 @@ export class ChildrenService {
   async deleteChild(id: string) {
     try {
       await remove(ref(this.db, 'Children/' + id));
-      const countRef = ref(this.db, 'Summary/children/number');
-      await runTransaction(countRef, (number) => Math.max(0, (number || 0) - 1));
+      await this.adjustSummaryCount('children', -1);
       this.notiService.setState(false, 'Profile successfully deleted', true);
     } catch (error) {
       console.error('Error deleting child:', error);
@@ -237,14 +238,21 @@ export class ChildrenService {
   }
 
   private async saveHistorySnapshot(id: string, child: Child, timestamp: number): Promise<string> {
-    const historyRef = push(ref(this.db, `ChildrenHistory/${id}`));
+    const historyListRef = ref(this.db, `ChildrenHistory/${id}`);
     const { id: _, ...profile } = child;
-
-    await set(historyRef, sanitizeFirebaseData({
+    const historyRef = await push(historyListRef, sanitizeFirebaseData({
       timestamp,
       profile
     }));
 
     return historyRef.key as string;
+  }
+
+  private async adjustSummaryCount(category: string, delta: number): Promise<void> {
+    const countRef = ref(this.db, `Summary/${category}/number`);
+    const snapshot = await get(countRef);
+    const currentValue = Number(snapshot.val());
+    const safeCurrentValue = Number.isFinite(currentValue) ? currentValue : 0;
+    await set(countRef, Math.max(0, safeCurrentValue + delta));
   }
 }

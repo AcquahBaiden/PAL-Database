@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -6,6 +6,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { Observable } from 'rxjs';
 import { Volunteer } from 'src/app/interfaces/volunteer.interface';
 import { VolunteersService } from '../volunteers.service';
+import { NotificationService } from '../../notification/notification.service';
 
 @Component({
   selector: 'app-add-volunteer',
@@ -22,7 +23,11 @@ export class AddVolunteerComponent implements OnInit {
   isUploading = false;
   imageFileName: string = '';
 
-  constructor(private volunteersService: VolunteersService) { }
+  constructor(
+    private volunteersService: VolunteersService,
+    private notificationService: NotificationService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
   }
@@ -57,20 +62,32 @@ export class AddVolunteerComponent implements OnInit {
     this.imgDownloadURL = new Observable<string>();
   }
 
-  onuploadProfileImg(event: any) {
+  async onuploadProfileImg(event: any) {
     const file = event.target.files[0];
     if (!file) return;
 
     this.isUploading = true;
-    const fileName = `vol_${this.addVolunteerForm.value.firstName}_${this.addVolunteerForm.value.lastName}_${Date.now()}`;
-    
-    this.volunteersService.uploadFile(event, fileName);
-    this.imgUploadPercent = this.volunteersService.uploadPercent;
-    this.imageFileName = fileName;
+    const firstName = this.addVolunteerForm.value.firstName || 'volunteer';
+    const lastName = this.addVolunteerForm.value.lastName || 'profile';
+    const fileName = `vol_${firstName}_${lastName}_${Date.now()}`;
+    this.cdr.detectChanges();
 
-    setTimeout(() => {
+    try {
+      const uploadPromise = this.volunteersService.uploadFile(event, fileName);
+      this.imgUploadPercent = this.volunteersService.uploadPercent;
+      this.cdr.detectChanges();
+
+      await uploadPromise;
+      this.imageFileName = fileName;
       this.imgDownloadURL = this.volunteersService.downloadURL;
+    } catch (error) {
+      console.error('Error uploading volunteer profile photo:', error);
+      this.imageFileName = '';
+      this.imgDownloadURL = new Observable<string>();
+      this.notificationService.setState(true, 'Profile photo upload failed. The volunteer profile will be saved without a photo unless upload succeeds.', true);
+    } finally {
       this.isUploading = false;
-    }, 5000);
+      this.cdr.detectChanges();
+    }
   }
 }

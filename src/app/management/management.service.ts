@@ -2,8 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Database, ref, objectVal, push, update, remove, runTransaction } from '@angular/fire/database';
+import { Database, ref, objectVal, push, update, remove } from '@angular/fire/database';
 import { Storage, ref as storageRef, getDownloadURL } from '@angular/fire/storage';
+import { get, set } from 'firebase/database';
 import { uploadBytesResumable } from 'firebase/storage';
 
 import { ManagementMember } from '../interfaces/management-member.interface';
@@ -45,8 +46,7 @@ export class ManagementService {
     try {
       const listRef = ref(this.db, "Management");
       await push(listRef, data);
-      const countRef = ref(this.db, "Summary/management/number");
-      await runTransaction(countRef, (number) => (number || 0) + 1);
+      await this.adjustSummaryCount(1);
       this.notiService.setState(false, `${data.firstName} successfully saved`, true);
     } catch (error) {
       console.error('Error saving management member:', error);
@@ -54,8 +54,11 @@ export class ManagementService {
     }
   }
 
-  uploadFile(event: any, fileName: string) {
+  async uploadFile(event: any, fileName: string): Promise<string> {
     const file = event.target.files[0];
+    if (!file) {
+      throw new Error('No file selected');
+    }
     const fileRef = storageRef(this.storage, "management/" + fileName);
     const task = uploadBytesResumable(fileRef, file);
     this.uploadPercent = new Observable<number | undefined>(subscriber => {
@@ -65,21 +68,21 @@ export class ManagementService {
         () => subscriber.complete()
       );
     });
-    task.then(() => {
-      this.downloadURL = new Observable(subscriber => {
-        getDownloadURL(fileRef).then(url => {
-          subscriber.next(url);
-          subscriber.complete();
-        });
-      });
+    await task;
+
+    const url = await getDownloadURL(fileRef);
+    this.downloadURL = new Observable(subscriber => {
+      subscriber.next(url);
+      subscriber.complete();
     });
+
+    return url;
   }
 
   async deleteMember(id: string) {
     try {
       await remove(ref(this.db, "Management/" + id));
-      const countRef = ref(this.db, "Summary/management/number");
-      await runTransaction(countRef, (number) => Math.max(0, (number || 0) - 1));
+      await this.adjustSummaryCount(-1);
       this.notiService.setState(false, 'Profile successfully deleted', true);
     } catch (error) {
       console.error('Error deleting management member:', error);
@@ -107,5 +110,13 @@ export class ManagementService {
       this.notiService.setState(true, 'Something went wrong when updating profile', true);
       return false;
     }
+  }
+
+  private async adjustSummaryCount(delta: number): Promise<void> {
+    const countRef = ref(this.db, 'Summary/management/number');
+    const snapshot = await get(countRef);
+    const currentValue = Number(snapshot.val());
+    const safeCurrentValue = Number.isFinite(currentValue) ? currentValue : 0;
+    await set(countRef, Math.max(0, safeCurrentValue + delta));
   }
 }
