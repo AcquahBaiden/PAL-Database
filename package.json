@@ -4,10 +4,13 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:prod": "ng serve --configuration production",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "emulators": "firebase emulators:start --config firebase.local.json --only auth,database,storage --import=.firebase/emulator-data --export-on-exit=.firebase/emulator-data",
+    "emulators:ui": "firebase emulators:start --config firebase.local.json --only auth,database,storage --import=.firebase/emulator-data --export-on-exit=.firebase/emulator-data"
   },
   "private": true,
   "dependencies": {
