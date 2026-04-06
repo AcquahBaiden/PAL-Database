@@ -9,8 +9,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "emulators": "firebase emulators:start --config firebase.local.json --only auth,firestore,storage,database --import=.firebase/emulator-data --export-on-exit=.firebase/emulator-data",
-    "emulators:ui": "firebase emulators:start --config firebase.local.json --only auth,firestore,storage,database --import=.firebase/emulator-data --export-on-exit=.firebase/emulator-data",
+    "emulators": "firebase emulators:start --project play-and-learn-65a5b --config firebase.local.json --only auth,firestore,storage --import=.firebase/emulator-data --export-on-exit=.firebase/emulator-data",
+    "emulators:ui": "firebase emulators:start --project play-and-learn-65a5b --config firebase.local.json --only auth,firestore,storage --import=.firebase/emulator-data --export-on-exit=.firebase/emulator-data",
     "migrate:rtdb-to-firestore": "node functions/scripts/migrate-rtdb-to-firestore.js",
     "migrate:rtdb-to-firestore:dry-run": "node functions/scripts/migrate-rtdb-to-firestore.js --dry-run"
   },

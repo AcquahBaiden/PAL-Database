@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AuthService } from './auth/auth.service';
 
@@ -31,7 +31,7 @@ export class AppComponent {
     public sessionStore: SessionStore,
     private notiService: NotificationService,
     private router: Router,
-    private zone: NgZone,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   toggleSidebar() {
@@ -51,30 +51,26 @@ export class AppComponent {
 
     this.isSubmitting = true;
     this.isLoginError = false;
+    this.errorMessage = '';
     this.notiService.setState(false, '', false);
 
     try {
       await this.authService.signIn(loginForm.value.email, loginForm.value.password);
-      this.zone.run(() => {
-        this.isSubmitting = false;
-        this.router.navigate(['/summary']);
-      });
+      await this.router.navigate(['/summary']);
     } catch (error: any) {
-      this.zone.run(() => {
-        this.isLoginError = true;
-        this.isSubmitting = false;
-        this.errorMessage = this.mapAuthError(error);
-        this.notiService.setState(true, this.errorMessage, true);
-      });
+      this.isLoginError = true;
+      this.errorMessage = this.mapAuthError(error);
+      this.notiService.setState(true, this.errorMessage, true);
+    } finally {
+      this.isSubmitting = false;
+      this.cdr.detectChanges();
     }
   }
 
   async onPasswordReset(email: string | undefined | null) {
     const normalizedEmail = email?.trim();
     if (!normalizedEmail) {
-      this.zone.run(() => {
-        this.notiService.setState(true, 'Enter your email address first to reset your password.', true);
-      });
+      this.notiService.setState(true, 'Enter your email address first to reset your password.', true);
       return;
     }
 
@@ -89,14 +85,13 @@ export class AppComponent {
       }
 
       completed = true;
-      this.zone.run(() => {
-        this.isResetSubmitting = false;
-        this.notiService.setState(
-          false,
-          'If an account exists for this email, a password reset link has been sent.',
-          true
-        );
-      });
+      this.isResetSubmitting = false;
+      this.notiService.setState(
+        false,
+        'If an account exists for this email, a password reset link has been sent.',
+        true
+      );
+      this.cdr.detectChanges();
     }, 2000);
 
     try {
@@ -107,14 +102,13 @@ export class AppComponent {
 
       completed = true;
       window.clearTimeout(fallbackTimeout);
-      this.zone.run(() => {
-        this.isResetSubmitting = false;
-        this.notiService.setState(
-          false,
-          'If an account exists for this email, a password reset link has been sent.',
-          true
-        );
-      });
+      this.isResetSubmitting = false;
+      this.notiService.setState(
+        false,
+        'If an account exists for this email, a password reset link has been sent.',
+        true
+      );
+      this.cdr.detectChanges();
     } catch (error: any) {
       if (completed) {
         return;
@@ -122,11 +116,10 @@ export class AppComponent {
 
       completed = true;
       window.clearTimeout(fallbackTimeout);
-      this.zone.run(() => {
-        this.isResetSubmitting = false;
-        this.errorMessage = this.mapPasswordResetError(error);
-        this.notiService.setState(true, this.errorMessage, true);
-      });
+      this.isResetSubmitting = false;
+      this.errorMessage = this.mapPasswordResetError(error);
+      this.notiService.setState(true, this.errorMessage, true);
+      this.cdr.detectChanges();
     }
   }
 
@@ -135,6 +128,7 @@ export class AppComponent {
 
     this.isSubmitting = true;
     this.isLoginError = false;
+    this.errorMessage = '';
     this.notiService.setState(false, '', false);
 
     try {
@@ -144,17 +138,14 @@ export class AppComponent {
       );
       await this.authService.setUpAccessData(user);
       this.authService.addNewUserCount();
-      this.zone.run(() => {
-        this.isSubmitting = false;
-        this.router.navigate(['/summary']);
-      });
+      await this.router.navigate(['/summary']);
     } catch (error: any) {
-      this.zone.run(() => {
-        this.isLoginError = true;
-        this.isSubmitting = false;
-        this.errorMessage = this.mapAuthError(error);
-        this.notiService.setState(true, this.errorMessage, true);
-      });
+      this.isLoginError = true;
+      this.errorMessage = this.mapAuthError(error);
+      this.notiService.setState(true, this.errorMessage, true);
+    } finally {
+      this.isSubmitting = false;
+      this.cdr.detectChanges();
     }
   }
 

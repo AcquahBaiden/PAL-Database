@@ -6,7 +6,7 @@ const path = require('path');
 
 const VALID_SCOPES = new Set(['children', 'volunteers', 'management', 'access']);
 const WRITE_BATCH_LIMIT = 400;
-const DEFAULT_PROJECT_ID = 'your-project-d';
+const DEFAULT_PROJECT_ID = 'play-and-learn-65a5b';
 const DEFAULT_FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
 let cachedAdmin = null;
 
@@ -309,7 +309,7 @@ function buildChildRecord(child) {
     createdAt: child?.createdAt,
     updatedAt: child?.updatedAt,
     latestVersionId: child?.latestVersionId,
-    archived: child?.archived === true,
+    archived: typeof child?.archived === 'boolean' ? child.archived : false,
     archivedAt: child?.archivedAt,
     archivedReason: child?.archivedReason,
     archivedReasonDetail: child?.archivedReasonDetail,
@@ -333,7 +333,7 @@ function buildVolunteerRecord(volunteer) {
     createdAt: volunteer?.createdAt,
     updatedAt: volunteer?.updatedAt,
     latestVersionId: volunteer?.latestVersionId,
-    archived: volunteer?.archived === true,
+    archived: typeof volunteer?.archived === 'boolean' ? volunteer.archived : false,
     archivedAt: volunteer?.archivedAt,
     archivedReason: volunteer?.archivedReason,
     archivedReasonDetail: volunteer?.archivedReasonDetail,
