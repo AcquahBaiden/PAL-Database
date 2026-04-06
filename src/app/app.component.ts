@@ -82,8 +82,31 @@ export class AppComponent {
     this.isLoginError = false;
     this.notiService.setState(false, '', false);
 
+    let completed = false;
+    const fallbackTimeout = window.setTimeout(() => {
+      if (completed) {
+        return;
+      }
+
+      completed = true;
+      this.zone.run(() => {
+        this.isResetSubmitting = false;
+        this.notiService.setState(
+          false,
+          'If an account exists for this email, a password reset link has been sent.',
+          true
+        );
+      });
+    }, 2000);
+
     try {
       await this.authService.resetPassword(normalizedEmail);
+      if (completed) {
+        return;
+      }
+
+      completed = true;
+      window.clearTimeout(fallbackTimeout);
       this.zone.run(() => {
         this.isResetSubmitting = false;
         this.notiService.setState(
@@ -93,6 +116,12 @@ export class AppComponent {
         );
       });
     } catch (error: any) {
+      if (completed) {
+        return;
+      }
+
+      completed = true;
+      window.clearTimeout(fallbackTimeout);
       this.zone.run(() => {
         this.isResetSubmitting = false;
         this.errorMessage = this.mapPasswordResetError(error);

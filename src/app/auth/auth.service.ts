@@ -4,7 +4,6 @@ import {
   GoogleAuthProvider,
   UserCredential,
   createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut
@@ -12,6 +11,7 @@ import {
 import { Firestore, doc, setDoc } from "@angular/fire/firestore";
 
 import { emptyAccess } from "./access.utils";
+import { environment } from "../../environments/environment";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
@@ -30,8 +30,40 @@ export class AuthService {
     return createUserWithEmailAndPassword(this.auth, email, password);
   }
 
-  resetPassword(email: string) {
-    return sendPasswordResetEmail(this.auth, email);
+  async resetPassword(email: string) {
+    const baseUrl = environment.useEmulators
+      ? `http://${environment.emulators.auth.host}:${environment.emulators.auth.port}`
+      : "https://identitytoolkit.googleapis.com";
+    const response = await fetch(
+      `${baseUrl}/identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${environment.firebaseConfig.apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          requestType: "PASSWORD_RESET",
+          email
+        })
+      }
+    );
+
+    if (response.ok) {
+      return;
+    }
+
+    const errorData = await response.json().catch(() => null);
+    const errorCode = errorData?.error?.message;
+
+    if (errorCode === "EMAIL_NOT_FOUND" || errorCode === "USER_NOT_FOUND") {
+      return;
+    }
+
+    if (errorCode === "INVALID_EMAIL") {
+      throw { code: "auth/invalid-email" };
+    }
+
+    throw new Error(errorCode || "PASSWORD_RESET_FAILED");
   }
 
   logout() {
